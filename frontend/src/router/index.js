@@ -69,6 +69,12 @@ const routes = [
     meta: { title: '恋爱数据', requiresAuth: true }
   },
   {
+    path: '/export',
+    name: 'Export',
+    component: () => import('@/views/ExportView.vue'),
+    meta: { title: '导出手账', requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }

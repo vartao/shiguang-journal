@@ -481,3 +481,29 @@ button:focus-visible,
   height: 48px;
   border-radius: 50%;
 }
+
+/* ============ 打印样式 ============ */
+@media print {
+  /* 打印时隐藏应用装饰层、导航与页脚；.no-print 为通用隐藏工具类（屏幕端无效果） */
+  .film-grain-overlay,
+  .vignette-overlay,
+  .app-footer,
+  .navbar,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 导航隐藏后去掉为其预留的顶部留白 */
+  .app-main {
+    padding-top: 0 !important;
+  }
+
+  /* 打印底色用固定白纸色（--photo-paper 不随主题变化） */
+  body {
+    background: var(--photo-paper);
+  }
+}
+
+@page {
+  margin: 15mm;
+}

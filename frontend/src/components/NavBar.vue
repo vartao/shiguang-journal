@@ -20,6 +20,16 @@
           <span class="navbar__link-icon">{{ link.icon }}</span>
           <span class="navbar__link-text">{{ link.label }}</span>
         </router-link>
+        <!-- 导出入口：仅移动端抽屉显示，桌面端走用户下拉菜单 -->
+        <router-link
+          to="/export"
+          class="navbar__link navbar__link--export"
+          :class="{ active: isActive('/export') }"
+          @click="menuOpen = false"
+        >
+          <span class="navbar__link-icon">&#x1F4D6;</span>
+          <span class="navbar__link-text">导出手账</span>
+        </router-link>
       </div>
 
       <!-- 右侧操作 -->
@@ -58,6 +68,9 @@
               <div class="dropdown__divider"></div>
               <router-link to="/space" class="dropdown__item" @click="userMenuOpen = false">
                 <span>&#x1F3E0;</span> 我们的小窝
+              </router-link>
+              <router-link to="/export" class="dropdown__item" @click="userMenuOpen = false">
+                <span>&#x1F4D6;</span> 导出手账
               </router-link>
               <button class="dropdown__item" @click="handleLogout"><span>&#x1F6AA;</span> 退出登录</button>
             </div>
@@ -235,6 +248,11 @@ onUnmounted(() => {
 .navbar__link-icon {
   font-size: 16px;
   filter: sepia(0.2);
+}
+
+/* 导出链接默认隐藏，只在移动端抽屉里出现 */
+.navbar__link--export {
+  display: none;
 }
 
 /* 暗色模式切换按钮 */
@@ -508,6 +526,10 @@ onUnmounted(() => {
     padding: 12px 16px;
     width: 100%;
     justify-content: center;
+  }
+
+  .navbar__link--export {
+    display: flex;
   }
 
   .navbar__hamburger {
