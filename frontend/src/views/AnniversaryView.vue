@@ -619,6 +619,14 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .anniversary-page {
+    padding: 24px 0 60px;
+  }
+
+  .together-section {
+    margin-bottom: 32px;
+  }
+
   .together-card {
     padding: 36px 24px;
   }
@@ -627,13 +635,84 @@ onMounted(() => {
     font-size: 52px;
   }
 
+  .number-unit {
+    font-size: 22px;
+  }
+
+  .together-stats {
+    gap: 16px;
+  }
+
+  .section-header {
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
   .anniversary-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 20px;
   }
 
+  .anniversary-item :deep(.number-value) {
+    font-size: 34px;
+  }
+
+  .anniversary-action {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .setup-card {
+    padding: 20px;
+  }
+
   .setup-form {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .setup-form .input-vintage {
+    width: 100%;
+  }
+
+  .anniversary-form .input-vintage {
+    font-size: 16px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .together-card {
+    padding: 28px 16px;
+  }
+
+  .deco-line {
+    width: 40px;
+  }
+
+  .number-main {
+    font-size: 44px;
+  }
+
+  .together-stats {
+    gap: 12px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .anniversary-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 

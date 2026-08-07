@@ -671,6 +671,14 @@ onMounted(fetchWishes)
 
 /* Responsive */
 @media (max-width: 768px) {
+  .wish-page {
+    padding: 24px 0 48px;
+  }
+
+  .wish-header {
+    margin-bottom: 24px;
+  }
+
   .wish-header__title {
     font-size: 28px;
   }
@@ -679,18 +687,70 @@ onMounted(fetchWishes)
     grid-template-columns: 1fr;
   }
 
-  .form-row {
-    flex-direction: column;
-    gap: 0;
+  .wish-card {
+    padding: 20px;
+  }
+
+  .wish-card__icon {
+    font-size: 28px;
+  }
+
+  .wish-card__title,
+  .wish-card__desc {
+    overflow-wrap: break-word;
+  }
+
+  .wish-card__actions {
+    flex-wrap: wrap;
+  }
+
+  .wish-card__btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-height: 40px;
   }
 
   .wish-tabs {
     gap: 6px;
+    flex-wrap: wrap;
   }
 
   .wish-tab {
     padding: 6px 16px;
     font-size: 13px;
+  }
+
+  .wish-form .input-vintage {
+    font-size: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .category-chip,
+  .priority-chip {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wish-header__title {
+    font-size: 24px;
+  }
+
+  .wish-card {
+    padding: 16px;
+  }
+
+  .wish-tab {
+    padding: 6px 12px;
+  }
+
+  .add-wish-btn {
+    padding: 12px 24px;
   }
 }
 

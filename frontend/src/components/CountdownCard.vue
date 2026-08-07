@@ -212,4 +212,50 @@ const formattedDate = computed(() => {
     100% 0%
   );
 }
+
+/* 平板/手机：内边距与数字字号递减 */
+@media (max-width: 768px) {
+  .countdown-card {
+    padding: 24px 16px 20px;
+  }
+
+  .countdown-card__icon {
+    font-size: 28px;
+  }
+
+  .countdown-card__title {
+    font-size: 18px;
+  }
+
+  .number-value {
+    font-size: 36px;
+  }
+}
+
+/* 小屏手机：进一步收敛 */
+@media (max-width: 480px) {
+  .countdown-card {
+    padding: 20px 12px 18px;
+  }
+
+  .countdown-card__icon {
+    font-size: 26px;
+  }
+
+  .countdown-card__title {
+    font-size: 16px;
+  }
+
+  .countdown-card__date {
+    margin-bottom: 10px;
+  }
+
+  .number-value {
+    font-size: 32px;
+  }
+
+  .number-unit {
+    font-size: 13px;
+  }
+}
 </style>

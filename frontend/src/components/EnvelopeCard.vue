@@ -99,6 +99,7 @@ function handleClick() {
 .envelope-card__body {
   position: relative;
   width: 200px;
+  max-width: 100%;
   height: 140px;
   perspective: 600px;
 }
@@ -271,5 +272,70 @@ function handleClick() {
 
 .from-text {
   color: var(--faded-red);
+}
+
+/* 小屏手机：信封整体等比缩小（约 0.85 倍），border 三角同步收窄 */
+@media (max-width: 480px) {
+  .envelope-card {
+    gap: 10px;
+  }
+
+  .envelope-card__body {
+    width: 170px;
+    height: 120px;
+  }
+
+  .envelope-card__letter {
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    bottom: 18px;
+    padding: 12px;
+  }
+
+  .letter-preview {
+    font-size: 12px;
+  }
+
+  .envelope-card__front-left {
+    border-left-width: 85px;
+    border-top-width: 60px;
+    border-bottom-width: 60px;
+  }
+
+  .envelope-card__front-right {
+    border-right-width: 85px;
+    border-top-width: 60px;
+    border-bottom-width: 60px;
+  }
+
+  .envelope-card__front-bottom {
+    border-bottom-width: 68px;
+    border-left-width: 85px;
+    border-right-width: 85px;
+  }
+
+  .envelope-card__flap {
+    height: 60px;
+  }
+
+  .flap-inner {
+    border-left-width: 85px;
+    border-right-width: 85px;
+    border-top-width: 60px;
+  }
+
+  .envelope-card__seal {
+    width: 32px;
+    height: 32px;
+  }
+
+  .seal-icon {
+    font-size: 14px;
+  }
+
+  .envelope-card__title {
+    font-size: 16px;
+  }
 }
 </style>

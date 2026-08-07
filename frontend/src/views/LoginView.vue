@@ -1010,6 +1010,83 @@ async function handleSubmit() {
   }
 }
 
+/* 平板 / 手机（展板已在 960px 断点隐藏，此处收敛表单卡片） */
+@media (max-width: 768px) {
+  .login-panel {
+    padding: 24px 16px 32px;
+  }
+
+  .login-card {
+    padding: 24px 18px 22px;
+  }
+
+  .card-title {
+    font-size: 26px;
+  }
+
+  /* 避免 iOS 聚焦输入框时自动放大页面 */
+  .input-field {
+    font-size: 16px;
+  }
+
+  .role-btn {
+    min-height: 44px;
+  }
+
+  .login-submit {
+    min-height: 48px;
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  .login-panel {
+    padding: 16px 12px 28px;
+  }
+
+  .login-card {
+    padding: 20px 14px 18px;
+    border-radius: 12px;
+  }
+
+  .login-card::after {
+    left: 8px;
+  }
+
+  .header-mobile-brand {
+    margin-bottom: 14px;
+  }
+
+  .header-mobile-brand .brand-name {
+    font-size: 22px;
+  }
+
+  .card-title {
+    font-size: 24px;
+  }
+
+  .card-sub {
+    margin-bottom: 18px;
+  }
+
+  .login-tabs {
+    margin-bottom: 18px;
+  }
+
+  .login-form {
+    gap: 14px;
+  }
+
+  /* 角色选择按钮纵向排列，保证触控目标宽度 */
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .login-submit {
+    letter-spacing: 2px;
+  }
+}
+
 @media (min-width: 1400px) {
   .login-card {
     max-width: 440px;

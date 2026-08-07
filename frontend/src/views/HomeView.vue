@@ -847,6 +847,57 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .home-page {
+    padding: 24px 0 48px;
+  }
+
+  .home-header {
+    margin-bottom: 24px;
+  }
+
+  .home-header__title {
+    font-size: 28px;
+  }
+
+  .home-film-strip {
+    max-width: 320px;
+  }
+
+  .quick-write__link {
+    padding: 14px 18px;
+  }
+
+  .search-bar__inner {
+    padding: 12px 16px;
+  }
+
+  .search-bar__input {
+    font-size: 16px;
+  }
+
+  .search-bar__clear {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-result-hint {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mood-filter {
+    margin-bottom: 24px;
+  }
+
+  .mood-chip {
+    padding: 8px 14px;
+    min-height: 36px;
+  }
+
   .timeline__axis {
     left: 20px;
   }
@@ -864,8 +915,128 @@ onMounted(() => {
     right: auto;
   }
 
+  .note-card__image-main img {
+    height: 180px;
+  }
+
+  .note-card__content {
+    padding: 16px 16px 10px;
+  }
+
+  .note-card__title {
+    font-size: 18px;
+  }
+
+  .note-card__text {
+    overflow-wrap: break-word;
+  }
+
+  .note-card__meta {
+    flex-wrap: wrap;
+  }
+
+  .note-card__actions {
+    padding: 6px 16px 12px;
+    gap: 8px;
+  }
+
+  .action-btn {
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    padding: 16px 0 40px;
+  }
+
+  .home-header__deco {
+    display: none;
+  }
+
   .home-header__title {
-    font-size: 28px;
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  .home-header__subtitle {
+    font-size: 13px;
+  }
+
+  .quick-write__link {
+    padding: 12px 16px;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .mood-filter {
+    gap: 6px;
+  }
+
+  .mood-chip {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .timeline {
+    padding: 12px 0;
+  }
+
+  .timeline__axis {
+    left: 16px;
+  }
+
+  .timeline__item,
+  .timeline__item--right {
+    padding: 0 0 28px 44px;
+  }
+
+  .timeline__dot,
+  .timeline__item--right .timeline__dot {
+    left: 0;
+    width: 32px;
+    height: 32px;
+  }
+
+  .dot-inner {
+    font-size: 14px;
+  }
+
+  .note-card__date {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+  }
+
+  .date-day {
+    font-size: 17px;
+  }
+
+  .note-card__image-main img {
+    height: 150px;
+  }
+
+  .note-card__content {
+    padding: 14px 14px 8px;
+  }
+
+  .note-card__title {
+    font-size: 17px;
+  }
+
+  .note-card__text {
+    font-size: 13px;
+  }
+
+  .note-card__actions {
+    padding: 4px 12px 10px;
+    gap: 4px;
+  }
+
+  .action-btn {
+    padding: 8px 10px;
+    font-size: 13px;
   }
 }
 </style>

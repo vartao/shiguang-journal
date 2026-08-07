@@ -120,7 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 .modal-fade-leave-to {
   opacity: 0;
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .base-modal__overlay {
     align-items: end;
     padding: 10px;
@@ -135,6 +135,23 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   }
   .base-modal__body {
     padding: 20px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .base-modal__overlay {
+    padding: 8px;
+  }
+  .base-modal__header,
+  .base-modal__footer {
+    padding: 16px;
+    gap: 12px;
+  }
+  .base-modal__header h2 {
+    font-size: 20px;
+  }
+  .base-modal__body {
+    padding: 18px 16px;
   }
 }
 </style>

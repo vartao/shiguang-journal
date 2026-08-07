@@ -316,24 +316,49 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .lightbox__nav {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    background: rgba(var(--cream-static-rgb), 0.12);
   }
 
   .lightbox__nav--prev {
-    left: 10px;
+    left: 8px;
   }
   .lightbox__nav--next {
-    right: 10px;
+    right: 8px;
+  }
+
+  .lightbox__close {
+    top: 16px;
+    right: 16px;
+  }
+
+  .lightbox__content {
+    max-width: 94vw;
   }
 
   .lightbox__image {
-    max-width: 92vw;
+    max-width: 94vw;
+  }
+
+  .lightbox__caption {
+    max-width: 90vw;
+    font-size: 15px;
   }
 
   .lightbox__thumbs {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox__image {
+    max-height: 66vh;
+  }
+
+  .lightbox__counter {
+    bottom: 16px;
   }
 }
 </style>

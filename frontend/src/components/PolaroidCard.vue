@@ -180,4 +180,44 @@ const formattedDate = computed(() => {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* 平板/手机：收窄两侧胶带的悬空偏移，避免贴边时造成横向溢出 */
+@media (max-width: 768px) {
+  .tape-left {
+    left: -12px;
+  }
+
+  .tape-right {
+    right: -12px;
+  }
+}
+
+/* 小屏手机：内边距与文字收敛 */
+@media (max-width: 480px) {
+  .polaroid-card {
+    padding: 10px 10px 14px;
+  }
+
+  .polaroid-card__tape {
+    width: 56px;
+    height: 20px;
+  }
+
+  .tape-top {
+    margin-left: -28px;
+  }
+
+  .polaroid-card__placeholder {
+    min-height: 120px;
+    font-size: 32px;
+  }
+
+  .polaroid-card__caption {
+    padding: 10px 2px 2px;
+  }
+
+  .polaroid-card__text {
+    font-size: 15px;
+  }
+}
 </style>

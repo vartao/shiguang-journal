@@ -98,4 +98,65 @@ defineProps({
   opacity: 0.4;
   pointer-events: none;
 }
+
+/* 平板/手机：格子与齿孔缩小，减少整体占用宽度 */
+@media (max-width: 768px) {
+  .film-strip__frame {
+    padding: 0 5px;
+  }
+
+  .film-strip.vertical .film-strip__frame {
+    padding: 5px 0;
+  }
+
+  .film-strip__cell {
+    width: 52px;
+    height: 36px;
+  }
+
+  .film-strip.vertical .film-strip__cell {
+    width: 36px;
+    height: 52px;
+  }
+}
+
+/* 小屏手机：进一步缩小 */
+@media (max-width: 480px) {
+  .film-strip__track {
+    padding: 6px 0;
+  }
+
+  .film-strip.vertical .film-strip__track {
+    padding: 0 6px;
+  }
+
+  .film-strip__frame {
+    padding: 0 4px;
+    gap: 3px;
+  }
+
+  .film-strip.vertical .film-strip__frame {
+    padding: 4px 0;
+  }
+
+  .film-strip__sprocket {
+    width: 8px;
+    height: 6px;
+  }
+
+  .film-strip.vertical .film-strip__sprocket {
+    width: 6px;
+    height: 8px;
+  }
+
+  .film-strip__cell {
+    width: 44px;
+    height: 32px;
+  }
+
+  .film-strip.vertical .film-strip__cell {
+    width: 32px;
+    height: 44px;
+  }
+}
 </style>

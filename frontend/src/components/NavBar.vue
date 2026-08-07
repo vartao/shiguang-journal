@@ -512,6 +512,13 @@ onUnmounted(() => {
 
   .navbar__hamburger {
     display: flex;
+    width: 40px;
+    height: 40px;
+  }
+
+  .navbar__theme-btn {
+    width: 40px;
+    height: 40px;
   }
 
   .navbar__username {
@@ -524,6 +531,40 @@ onUnmounted(() => {
 
   .navbar__write-btn {
     padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar__logo-icon {
+    font-size: 20px;
+  }
+
+  .navbar__logo-text {
+    font-size: 20px;
+  }
+
+  .navbar__actions {
+    gap: 8px;
+  }
+
+  .navbar__write-btn {
+    padding: 8px 10px;
+  }
+
+  .navbar__dropdown {
+    max-width: calc(100vw - 24px);
+  }
+
+  .dropdown__item {
+    padding: 12px 8px;
+  }
+
+  .navbar__links {
+    padding: 12px;
+  }
+
+  .navbar__link {
+    padding: 12px;
   }
 }
 </style>

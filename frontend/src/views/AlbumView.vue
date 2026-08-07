@@ -225,6 +225,7 @@ onMounted(() => {
 
 .album-wall__item {
   width: 220px;
+  max-width: 100%;
   position: relative;
 }
 
@@ -329,12 +330,83 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .album-page {
+    padding: 28px 0 64px;
+  }
+
+  .album-header {
+    margin-bottom: 20px;
+  }
+
+  .album-header__title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  .album-toolbar {
+    margin-bottom: 28px;
+  }
+
   .album-wall {
     gap: 24px;
   }
 
   .album-wall__item {
     width: 160px;
+  }
+
+  /* 弹窗全宽 + 内边距收敛 */
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-card__header {
+    padding: 16px 20px 12px;
+  }
+
+  .modal-card__header h3 {
+    font-size: 20px;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+
+  .modal-card__body {
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  .modal-card__body .input-vintage {
+    font-size: 16px;
+  }
+
+  .modal-card__footer {
+    padding: 14px 20px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .album-page {
+    padding: 20px 0 56px;
+  }
+
+  .album-header__title {
+    font-size: 26px;
+  }
+
+  .album-header__subtitle {
+    font-size: 13px;
+  }
+
+  .album-wall {
+    gap: 16px;
+  }
+
+  .album-wall__item {
+    width: 150px;
   }
 }
 </style>

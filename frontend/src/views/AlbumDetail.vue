@@ -501,9 +501,95 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .album-detail-page {
+    padding: 28px 0 64px;
+  }
+
+  .detail-header {
+    margin-bottom: 24px;
+  }
+
+  .detail-back {
+    padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+
+  .detail-title {
+    font-size: 26px;
+    letter-spacing: 1px;
+    overflow-wrap: break-word;
+  }
+
+  .detail-actions {
+    flex-wrap: wrap;
+  }
+
+  .upload-section {
+    margin: 0 auto 28px;
+  }
+
   .photo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
+  }
+
+  /* 触屏无 hover，删除按钮常驻显示并放大到触控尺寸 */
+  .photo-delete {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    opacity: 1;
+  }
+
+  /* 弹窗全宽 + 内边距收敛 */
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-card__header {
+    padding: 14px 20px 12px;
+  }
+
+  .modal-card__header h3 {
+    font-size: 20px;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+
+  .modal-card__body {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .modal-card__body .input-vintage {
+    font-size: 16px;
+  }
+
+  .modal-card__footer {
+    padding: 12px 20px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .album-detail-page {
+    padding: 20px 0 56px;
+  }
+
+  .detail-title {
+    font-size: 24px;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .photo-caption {
+    font-size: 13px;
   }
 }
 </style>

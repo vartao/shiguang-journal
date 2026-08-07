@@ -561,8 +561,35 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .space-page {
+    padding: 28px 0 64px;
+  }
+
+  .space-header {
+    margin-bottom: 24px;
+  }
+
+  .space-header__title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  .space-card__banner {
+    padding: 28px 16px 24px;
+  }
+
+  .space-card__name,
+  .space-card__announce {
+    overflow-wrap: break-word;
+  }
+
   .panel {
     padding: 20px 16px 24px;
+  }
+
+  /* iOS 聚焦输入框时避免页面自动放大 */
+  .panel .input-vintage {
+    font-size: 16px;
   }
 
   .invite-box__code {
@@ -573,10 +600,65 @@ onMounted(() => {
   .invite-box__code span {
     font-size: 24px;
     letter-spacing: 4px;
+    overflow-wrap: break-word;
   }
 
   .bind-row {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .space-page {
+    padding: 20px 0 56px;
+  }
+
+  .space-header__title {
+    font-size: 24px;
+  }
+
+  .space-header__subtitle {
+    font-size: 13px;
+  }
+
+  .avatar-ring {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .space-card__pair {
+    gap: 12px;
+  }
+
+  .space-card__name {
+    font-size: 22px;
+  }
+
+  .panel {
+    padding: 16px 14px 20px;
+    border-radius: var(--radius-md);
+  }
+
+  .panel__title {
+    font-size: 20px;
+  }
+
+  .invite-box__code span {
+    font-size: 20px;
+    letter-spacing: 3px;
+  }
+
+  .invite-box__code .btn-vintage {
+    align-self: stretch;
+  }
+
+  .bind-row .btn-vintage {
+    width: 100%;
+  }
+
+  .panel__actions .btn-vintage {
+    width: 100%;
   }
 }
 </style>

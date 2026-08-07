@@ -492,12 +492,74 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .surprise-page {
+    padding: 28px 0 60px;
+  }
+
+  .surprise-header__title {
+    font-size: 28px;
+  }
+
+  .surprise-toolbar {
+    margin-bottom: 32px;
+  }
+
   .surprise-grid {
     gap: 28px;
   }
 
+  /* EnvelopeCard 信封主体固定 200px 宽，item 保持不小于 200px 避免信封溢出 */
   .surprise-item {
-    width: 180px;
+    width: 200px;
+  }
+
+  .surprise-delete {
+    padding: 10px 6px;
+  }
+
+  .modal-card__header {
+    padding: 16px 20px 12px;
+  }
+
+  .modal-card__body {
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  .modal-card__footer {
+    padding: 12px 20px 16px;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
+  }
+
+  .input-vintage {
+    font-size: 16px;
+  }
+
+  .type-btn {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .surprise-header__title {
+    font-size: 24px;
+  }
+
+  .surprise-grid {
+    gap: 20px;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-card {
+    border-radius: var(--radius-md);
   }
 }
 </style>

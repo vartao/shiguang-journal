@@ -429,17 +429,34 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .stats-page {
+    padding: 24px 0 48px;
+  }
+
+  .stats-header {
+    margin-bottom: 28px;
+  }
+
   .stats-header__title {
     font-size: 28px;
+  }
+
+  .hero-card {
+    padding: 32px 20px;
   }
 
   .hero-card__number {
     font-size: 56px;
   }
 
+  .hero-card__label {
+    font-size: 16px;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    margin-bottom: 32px;
   }
 
   .stat-card {
@@ -450,15 +467,81 @@ onMounted(async () => {
     font-size: 28px;
   }
 
+  .section-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .stats-fun,
+  .stats-mood {
+    margin-bottom: 32px;
+  }
+
+  .fun-card {
+    padding: 20px;
+  }
+
+  .fun-card__value {
+    font-size: 28px;
+  }
+
+  .mood-chart {
+    padding: 16px;
+  }
+
+  .mood-bar-row {
+    gap: 8px;
+  }
+
+  .mood-bar__emoji {
+    font-size: 18px;
+    width: 24px;
+  }
+
   .mood-bar__label {
     width: 36px;
     font-size: 12px;
   }
+
+  .mood-bar__count {
+    font-size: 16px;
+    width: 28px;
+  }
 }
 
 @media (max-width: 480px) {
+  .stats-header__title {
+    font-size: 24px;
+  }
+
+  .hero-card {
+    padding: 24px 16px;
+  }
+
+  .hero-card__number {
+    font-size: 44px;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 16px 8px;
+  }
+
+  .stat-card__icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .stat-card__number {
+    font-size: 24px;
+  }
+
+  .fun-card {
+    padding: 16px;
   }
 }
 </style>

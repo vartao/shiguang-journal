@@ -247,4 +247,42 @@ function removeImage(index) {
 .uploader__input {
   display: none;
 }
+
+/* 平板/手机：移除按钮常驻显示并放大（触屏无 hover），拖拽区高度收敛 */
+@media (max-width: 768px) {
+  .uploader__preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+
+  .uploader__remove-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    opacity: 1;
+  }
+
+  .uploader__dropzone {
+    padding: 24px 16px;
+  }
+}
+
+/* 小屏手机：进一步收敛 */
+@media (max-width: 480px) {
+  .uploader__dropzone {
+    padding: 20px 12px;
+  }
+
+  .uploader__dropzone-content {
+    gap: 6px;
+  }
+
+  .uploader__icon {
+    font-size: 28px;
+  }
+
+  .uploader__text {
+    font-size: 13px;
+  }
+}
 </style>

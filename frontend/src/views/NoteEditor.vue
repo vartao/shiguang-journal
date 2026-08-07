@@ -551,6 +551,10 @@ onMounted(() => {
 
 /* 响应式 */
 @media (max-width: 768px) {
+  .editor-page {
+    padding: 28px 0 64px;
+  }
+
   .editor-wrapper {
     padding: 24px 20px 32px;
   }
@@ -561,11 +565,108 @@ onMounted(() => {
 
   .editor-header {
     flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .editor-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .editor-title {
+    font-size: 22px;
   }
 
   .editor-date {
     width: 100%;
     order: 3;
+  }
+
+  .editor-title-input {
+    font-size: 20px;
+  }
+
+  /* iOS 聚焦输入框时避免页面自动放大 */
+  .form-row .input-vintage,
+  .editor-textarea {
+    font-size: 16px;
+  }
+
+  .mood-btn,
+  .weather-btn {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+
+  /* 图片上传：触屏无 hover，移除按钮常显并加大触控目标 */
+  :deep(.uploader__remove-btn) {
+    opacity: 1;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-page {
+    padding: 20px 0 56px;
+  }
+
+  .editor-wrapper {
+    padding: 20px 16px 28px;
+    border-radius: var(--radius-md);
+  }
+
+  .editor-title {
+    font-size: 20px;
+  }
+
+  .editor-title-input {
+    font-size: 18px;
+  }
+
+  .form-section {
+    margin-bottom: 22px;
+  }
+
+  .mood-selector,
+  .weather-selector {
+    gap: 4px;
+  }
+
+  .mood-btn,
+  .weather-btn {
+    padding: 6px 8px;
+  }
+
+  .editor-textarea {
+    min-height: 160px;
+    padding: 12px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-actions .btn-vintage {
+    width: 100%;
+  }
+
+  :deep(.uploader__preview-grid) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  :deep(.uploader__dropzone) {
+    padding: 24px 16px;
   }
 }
 </style>

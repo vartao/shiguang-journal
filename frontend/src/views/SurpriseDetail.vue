@@ -755,16 +755,103 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .surprise-detail-page {
+    padding: 40px 0 60px;
+  }
+
+  .locked-state {
+    padding-top: 24px;
+  }
+
+  .locked-title {
+    font-size: 24px;
+    overflow-wrap: break-word;
+  }
+
+  .password-input {
+    font-size: 16px;
+  }
+
+  .unlocking-text {
+    font-size: 20px;
+  }
+
   .revealed-card {
     padding: 32px 20px;
   }
 
   .revealed-title {
     font-size: 26px;
+    overflow-wrap: break-word;
+  }
+
+  .letter-paper {
+    padding: 20px 16px;
   }
 
   .letter-text {
     font-size: 15px;
+    line-height: 2;
+    overflow-wrap: break-word;
+  }
+
+  .revealed-actions .btn-vintage {
+    min-height: 40px;
+  }
+
+  .creator-delete {
+    min-height: 40px;
+    padding: 10px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .surprise-detail-page {
+    padding: 32px 0 48px;
+  }
+
+  .locked-title {
+    font-size: 22px;
+  }
+
+  .locked-hint {
+    font-size: 14px;
+  }
+
+  .password-input {
+    max-width: 100%;
+  }
+
+  .unlock-btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 13px 20px;
+    letter-spacing: 1px;
+  }
+
+  .unlocking-text {
+    font-size: 18px;
+  }
+
+  .revealed-card {
+    padding: 24px 16px;
+  }
+
+  .revealed-title {
+    font-size: 22px;
+  }
+
+  .letter-paper {
+    padding: 16px 14px;
+  }
+
+  .revealed-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .revealed-actions .btn-vintage {
+    width: 100%;
   }
 }
 </style>

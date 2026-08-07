@@ -142,7 +142,7 @@ const descriptionId = 'global-confirm-description'
   opacity: 0;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .confirm-dialog {
     padding: 32px 22px 24px;
   }
