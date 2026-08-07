@@ -1,0 +1,110 @@
+/* 本地字体回退方案：优先使用用户系统已安装的字体，完全离线可用，不请求外部 CDN */
+
+@font-face {
+  font-family: 'Ma Shan Zheng';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Ma Shan Zheng'),
+    local('马善政楷书'),
+    local('STXingkai'),
+    local('KaiTi'),
+    local('楷体'),
+    local('cursive');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local('Noto Serif SC Light'),
+    local('NotoSerifSC-Light'),
+    local('Source Han Serif SC Light'),
+    local('SourceHanSerifSC-Light'),
+    local('Songti SC'),
+    local('SimSun'),
+    local('宋体'),
+    local('serif');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Noto Serif SC'),
+    local('NotoSerifSC-Regular'),
+    local('Source Han Serif SC'),
+    local('SourceHanSerifSC-Regular'),
+    local('Songti SC'),
+    local('SimSun'),
+    local('宋体'),
+    local('serif');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Noto Serif SC Medium'),
+    local('NotoSerifSC-Medium'),
+    local('Source Han Serif SC Medium'),
+    local('SourceHanSerifSC-Medium'),
+    local('Songti SC'),
+    local('SimSun'),
+    local('宋体'),
+    local('serif');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Noto Serif SC SemiBold'),
+    local('NotoSerifSC-SemiBold'),
+    local('Source Han Serif SC SemiBold'),
+    local('SourceHanSerifSC-SemiBold'),
+    local('Songti SC'),
+    local('SimSun'),
+    local('宋体'),
+    local('serif');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Noto Serif SC Bold'),
+    local('NotoSerifSC-Bold'),
+    local('Source Han Serif SC Bold'),
+    local('SourceHanSerifSC-Bold'),
+    local('Songti SC'),
+    local('SimSun'),
+    local('宋体'),
+    local('serif');
+}
+
+@font-face {
+  font-family: 'ZCOOL XiaoWei';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('ZCOOL XiaoWei'),
+    local('ZCOOLXiaoWei-Regular'),
+    local('站酷小薇体'),
+    local('STKaiti'),
+    local('KaiTi'),
+    local('楷体'),
+    local('serif');
+}
