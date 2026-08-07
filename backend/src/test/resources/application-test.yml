@@ -1,0 +1,21 @@
+spring:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+jwt:
+  # 测试用固定密钥，长度满足 JJWT 要求
+  secret: "test-secret-need-to-be-at-least-32-characters-long-for-jjwt"
+
+file:
+  upload-path: ./uploads-test/
+  max-size: 20971520
+
+logging:
+  level:
+    com.qinglv.mapper: debug

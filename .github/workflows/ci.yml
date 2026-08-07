@@ -46,3 +46,5 @@ jobs:
           cache: maven
       - name: 单元/契约测试
         run: mvn -B test
+      - name: 真实数据库集成测试
+        run: mvn -B test -P integration
