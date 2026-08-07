@@ -44,6 +44,14 @@ jwt:
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:8090}
+  # 阿里云 OSS（可选）。配置完整时上传走 OSS，否则回退本地磁盘
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT:}
+    bucket: ${ALIYUN_OSS_BUCKET:}
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:}
+    public-base-url: ${ALIYUN_OSS_PUBLIC_BASE_URL:}
+    key-prefix: ${ALIYUN_OSS_KEY_PREFIX:qinglv/}
 
 # 文件上传配置
 file:

@@ -36,6 +36,13 @@ services:
       FILE_UPLOAD_PATH: /app/uploads
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8090}
+      # 阿里云 OSS（可选；不配置则上传保存在本地 upload_data 卷）
+      ALIYUN_OSS_ENDPOINT: ${ALIYUN_OSS_ENDPOINT:-}
+      ALIYUN_OSS_BUCKET: ${ALIYUN_OSS_BUCKET:-}
+      ALIYUN_OSS_ACCESS_KEY_ID: ${ALIYUN_OSS_ACCESS_KEY_ID:-}
+      ALIYUN_OSS_ACCESS_KEY_SECRET: ${ALIYUN_OSS_ACCESS_KEY_SECRET:-}
+      ALIYUN_OSS_PUBLIC_BASE_URL: ${ALIYUN_OSS_PUBLIC_BASE_URL:-}
+      ALIYUN_OSS_KEY_PREFIX: ${ALIYUN_OSS_KEY_PREFIX:-qinglv/}
     volumes:
       - upload_data:/app/uploads
     depends_on:

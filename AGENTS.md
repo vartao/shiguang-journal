@@ -121,9 +121,9 @@ mvn test              # 需要 JDK 17+
 
 - 生产必须改 `.env` 中的 `MYSQL_ROOT_PASSWORD` 与 `JWT_SECRET`（≥32 字符）；`.env` 不入库，`.env.example` 仅占位。
 - CORS 通过环境变量 `CORS_ORIGINS` 配置（逗号分隔，本地默认允许 5173/8090）。
-- 上传限制：扩展名白名单（jpg/jpeg/png/gif/webp/bmp/mp4/mp3/pdf/txt）+ Content-Type 校验，单文件 20MB（请求 50MB）；上传经 `/uploads/**` 公开读取，无鉴权下载。
+- 上传限制：扩展名白名单（jpg/jpeg/png/gif/webp/bmp/mp4/mp3/pdf/txt）+ Content-Type 校验，单文件 20MB（请求 50MB）。存储二选一：默认本地磁盘经 `/uploads/**` 公开读取；配置 `ALIYUN_OSS_*` 后走阿里云 OSS（对象 key 前缀 `qinglv/`，返回 `public-base-url` 拼接的 URL，静态图片同时生成 `_thumb.jpg` 缩略图）。
 - Actuator 只暴露 `health`、`info`，health 不显示细节。
-- 已知局限（改动相关代码时注意）：固定两人模型（`user_id1/user_id2`）、限流为进程内存（多实例不共享）、上传存本地磁盘卷 `upload_data`。
+- 已知局限（改动相关代码时注意）：固定两人模型（`user_id1/user_id2`）、限流为进程内存（多实例不共享）、上传默认存本地磁盘卷 `upload_data`（可通过 `ALIYUN_OSS_*` 切换到 OSS，本地与 OSS 的历史文件不互通）。
 
 ## 7. 常用参考
 

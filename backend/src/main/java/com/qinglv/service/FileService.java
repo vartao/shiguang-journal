@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FileService {
     private final QlFileMapper fileMapper;
+    private final OssStorageService ossStorageService;
     @Value("${file.upload-path}") private String uploadPath;
     @Value("${file.access-prefix}") private String accessPrefix;
     @Value("${file.allowed-types}") private String allowedTypes;
@@ -40,6 +43,26 @@ public class FileService {
         String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String storedName = IdUtil.fastSimpleUUID() + "." + extension;
         String relativePath = datePath + "/" + storedName;
+
+        boolean useOss = ossStorageService.isEnabled();
+        String fileUrl = useOss
+                ? uploadToOss(file, extension, relativePath)
+                : uploadToLocal(file, extension, relativePath);
+
+        QlFile record = new QlFile();
+        record.setUserId(userId); record.setOriginalName(originalFilename); record.setStoredName(storedName);
+        record.setFilePath(relativePath); record.setFileUrl(fileUrl); record.setFileType(extension);
+        record.setFileSize(file.getSize()); record.setContentType(file.getContentType());
+        try { fileMapper.insert(record); }
+        catch (RuntimeException e) {
+            cleanupAfterFailure(useOss, relativePath);
+            throw e;
+        }
+        log.info("文件上传成功: {} -> {}", originalFilename, fileUrl);
+        return fileUrl;
+    }
+
+    private String uploadToLocal(MultipartFile file, String extension, String relativePath) {
         Path root = Paths.get(uploadPath).toAbsolutePath().normalize();
         Path destination = root.resolve(relativePath).normalize();
         if (!destination.startsWith(root)) throw new BusinessException("非法的上传路径");
@@ -52,21 +75,69 @@ public class FileService {
         }
         generateThumbnail(destination, extension);
         String prefix = accessPrefix.endsWith("/") ? accessPrefix : accessPrefix + "/";
-        String fileUrl = prefix + relativePath;
-        QlFile record = new QlFile();
-        record.setUserId(userId); record.setOriginalName(originalFilename); record.setStoredName(storedName);
-        record.setFilePath(relativePath); record.setFileUrl(fileUrl); record.setFileType(extension);
-        record.setFileSize(file.getSize()); record.setContentType(file.getContentType());
-        try { fileMapper.insert(record); }
-        catch (RuntimeException e) {
-            try {
-                Files.deleteIfExists(destination);
-                Files.deleteIfExists(thumbnailPath(destination));
-            } catch (IOException cleanupError) { log.error("上传记录失败后的文件清理也失败: {}", destination, cleanupError); }
-            throw e;
+        return prefix + relativePath;
+    }
+
+    private String uploadToOss(MultipartFile file, String extension, String relativePath) {
+        try {
+            byte[] bytes = file.getBytes();
+            String fileUrl = ossStorageService.put(
+                    ossStorageService.objectKey(relativePath),
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    file.getContentType());
+            byte[] thumbnail = buildThumbnailBytes(bytes, extension);
+            if (thumbnail != null) {
+                ossStorageService.put(
+                        ossStorageService.objectKey(thumbnailRelativePath(relativePath)),
+                        new ByteArrayInputStream(thumbnail),
+                        thumbnail.length,
+                        "image/jpeg");
+            }
+            return fileUrl;
+        } catch (IOException e) {
+            log.error("文件读取失败", e);
+            throw new BusinessException("文件读取失败");
         }
-        log.info("文件上传成功: {} -> {}", originalFilename, fileUrl);
-        return fileUrl;
+    }
+
+    private void cleanupAfterFailure(boolean useOss, String relativePath) {
+        if (useOss) {
+            ossStorageService.deleteQuietly(ossStorageService.objectKey(relativePath));
+            ossStorageService.deleteQuietly(ossStorageService.objectKey(thumbnailRelativePath(relativePath)));
+            return;
+        }
+        Path root = Paths.get(uploadPath).toAbsolutePath().normalize();
+        Path destination = root.resolve(relativePath).normalize();
+        try {
+            Files.deleteIfExists(destination);
+            Files.deleteIfExists(thumbnailPath(destination));
+        } catch (IOException cleanupError) {
+            log.error("上传记录失败后的文件清理也失败: {}", destination, cleanupError);
+        }
+    }
+
+    private String thumbnailRelativePath(String relativePath) {
+        int dotIndex = relativePath.lastIndexOf('.');
+        String base = dotIndex > 0 ? relativePath.substring(0, dotIndex) : relativePath;
+        return base + "_thumb.jpg";
+    }
+
+    private byte[] buildThumbnailBytes(byte[] sourceBytes, String extension) {
+        if (!List.of("jpg", "jpeg", "png", "webp", "bmp").contains(extension)) {
+            return null;
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Thumbnails.of(new ByteArrayInputStream(sourceBytes))
+                    .size(thumbnailSize, thumbnailSize)
+                    .outputFormat("jpg")
+                    .outputQuality(0.8)
+                    .toOutputStream(out);
+            return out.toByteArray();
+        } catch (IOException | RuntimeException e) {
+            log.warn("生成缩略图失败", e);
+            return null;
+        }
     }
 
     public List<String> uploadFiles(MultipartFile[] files, Long userId) {

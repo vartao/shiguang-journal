@@ -18,9 +18,12 @@ import static org.mockito.Mockito.*;
 class FileServiceTest {
     @TempDir Path tempDir;
     QlFileMapper mapper;
+    OssStorageService ossStorageService;
     FileService service;
     @BeforeEach void setUp() {
-        mapper = mock(QlFileMapper.class); service = new FileService(mapper);
+        mapper = mock(QlFileMapper.class);
+        ossStorageService = mock(OssStorageService.class);
+        service = new FileService(mapper, ossStorageService);
         ReflectionTestUtils.setField(service, "uploadPath", tempDir.toString());
         ReflectionTestUtils.setField(service, "accessPrefix", "/uploads/");
         ReflectionTestUtils.setField(service, "allowedTypes", "jpg,jpeg,png");
@@ -54,5 +57,20 @@ class FileServiceTest {
             assertEquals(2, written.size());
             assertTrue(written.stream().anyMatch(p -> p.getFileName().toString().endsWith("_thumb.jpg")));
         }
+    }
+
+    @Test void uploadsToOssWhenEnabled() throws Exception {
+        when(ossStorageService.isEnabled()).thenReturn(true);
+        when(ossStorageService.objectKey(anyString())).thenAnswer(inv -> "qinglv/" + inv.getArgument(0));
+        when(ossStorageService.put(anyString(), any(), anyLong(), any()))
+                .thenAnswer(inv -> "https://cdn.example.com/" + inv.getArgument(0));
+        when(mapper.insert(any())).thenReturn(1);
+        byte[] png = Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+        String url = service.uploadFile(new MockMultipartFile("file", "x.png", "image/png", png), 1L);
+        assertTrue(url.startsWith("https://cdn.example.com/qinglv/"));
+        // 原图 + 缩略图都走 OSS，不落本地磁盘
+        verify(ossStorageService, times(2)).put(anyString(), any(), anyLong(), any());
+        try (var files = Files.walk(tempDir)) { assertEquals(0, files.filter(Files::isRegularFile).count()); }
     }
 }
