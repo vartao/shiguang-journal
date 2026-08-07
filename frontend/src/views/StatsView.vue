@@ -7,6 +7,12 @@
         <p class="stats-header__subtitle">用数字记录我们的故事</p>
       </header>
 
+      <div v-if="!loading && stats" class="stats-toolbar no-print">
+        <button type="button" class="btn-vintage btn-vintage--small" @click="showReport = true">
+          &#128221; 生成年度回顾
+        </button>
+      </div>
+
       <!-- 加载状态 -->
       <div v-if="loading" class="loading-reel">
         <div class="loading-reel__icon"></div>
@@ -129,6 +135,13 @@
           </div>
         </div>
       </template>
+
+      <BaseModal v-model="showReport" title="年度回顾" class="report-modal">
+        <AnnualReport :stats="stats" />
+        <template #footer>
+          <button type="button" class="btn-vintage" @click="printReport">打印 / 保存 PDF</button>
+        </template>
+      </BaseModal>
     </div>
   </div>
 </template>
@@ -137,10 +150,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { getStats } from '@/api/stats'
 import { useCoupleStore } from '@/stores/couple'
+import BaseModal from '@/components/BaseModal.vue'
+import AnnualReport from '@/components/AnnualReport.vue'
 
 const coupleStore = useCoupleStore()
 const loading = ref(false)
 const stats = ref(null)
+const showReport = ref(false)
 
 const moods = {
   happy: { emoji: '&#128522;', label: '开心' },
@@ -167,6 +183,10 @@ function getMoodPercent(count) {
   return Math.max(4, (count / maxMoodCount.value) * 100)
 }
 
+function printReport() {
+  window.print()
+}
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -188,6 +208,12 @@ onMounted(async () => {
 .stats-header {
   text-align: center;
   margin-bottom: 36px;
+}
+
+.stats-toolbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
 }
 
 .stats-header__title {
