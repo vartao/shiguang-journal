@@ -82,6 +82,39 @@ public class NoteService {
     }
 
     /**
+     * 导出笔记：按时间范围查询当前空间全部笔记（升序）
+     */
+    public List<NoteVO> exportNotes(Long userId, Long coupleId, String range) {
+        if (coupleId == null) {
+            throw new BusinessException("尚未加入情侣空间");
+        }
+
+        LambdaQueryWrapper<Note> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Note::getCoupleId, coupleId)
+               .orderByAsc(Note::getNoteDate)
+               .orderByAsc(Note::getCreateTime);
+
+        LocalDate start = resolveRangeStart(range);
+        if (start != null) {
+            wrapper.ge(Note::getNoteDate, start);
+        }
+
+        List<Note> records = noteMapper.selectList(wrapper);
+        Set<Long> likedNoteIds = loadLikedNoteIds(userId, records);
+        return convertToVOs(records, likedNoteIds);
+    }
+
+    private LocalDate resolveRangeStart(String range) {
+        LocalDate today = LocalDate.now();
+        return switch (range) {
+            case "30d" -> today.minusDays(30);
+            case "90d" -> today.minusDays(90);
+            case "year" -> today.withDayOfYear(1);
+            default -> null;
+        };
+    }
+
+    /**
      * 搜索笔记（标题+内容全文搜索）
      */
     public PageResult<NoteVO> searchNotes(Long userId, Long coupleId, String keyword, Integer pageNum, Integer pageSize) {

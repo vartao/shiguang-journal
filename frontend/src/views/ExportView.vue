@@ -50,10 +50,16 @@
       <template v-else-if="generated">
         <div class="export-toolbar anim-fade-in-up no-print">
           <span class="export-toolbar__info">共 {{ notes.length }} 篇 · {{ rangeLabel }}</span>
-          <button class="btn-vintage btn-vintage--red" @click="handlePrint">
-            <span>&#x1F5A8;</span>
-            <span>打印 / 导出 PDF</span>
-          </button>
+          <div class="export-toolbar__actions">
+            <button class="btn-vintage btn-vintage--outline" @click="downloadPdf">
+              <span>&#x1F4E5;</span>
+              <span>下载 PDF</span>
+            </button>
+            <button class="btn-vintage btn-vintage--red" @click="handlePrint">
+              <span>&#x1F5A8;</span>
+              <span>打印 / 导出 PDF</span>
+            </button>
+          </div>
         </div>
 
         <div class="export-sheet-wrap">
@@ -208,6 +214,31 @@ async function generatePreview() {
 function handlePrint() {
   window.print()
 }
+
+async function downloadPdf() {
+  const token = localStorage.getItem('ql_token')
+  try {
+    const res = await fetch(`/api/export/pdf?range=${encodeURIComponent(range.value)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      throw new Error(text || 'PDF 导出失败')
+    }
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `拾光手账-${rangeLabel.value}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    // 错误提示由请求拦截器统一处理，fetch 失败时这里兜底
+    alert(err?.message || 'PDF 下载失败，请稍后重试')
+  }
+}
 </script>
 
 <style scoped>
@@ -320,6 +351,12 @@ function handlePrint() {
   font-size: 13px;
   letter-spacing: 1px;
   color: var(--text-muted);
+}
+
+.export-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 /* 纸张预览 */
