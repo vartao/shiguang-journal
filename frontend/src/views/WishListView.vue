@@ -532,56 +532,6 @@ onMounted(fetchWishes)
   font-style: italic;
 }
 
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(30, 20, 10, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 20px;
-}
-
-.wish-modal {
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 28px;
-}
-
-.modal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.modal-card__header h2 {
-  font-family: var(--font-handwrite);
-  font-size: 26px;
-  color: var(--brown-deep);
-}
-
-.modal-card__close {
-  font-size: 24px;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.modal-card__close:hover {
-  color: var(--faded-red);
-  background: rgba(var(--red-rgb), 0.1);
-}
-
 /* Form */
 .wish-form .form-group {
   margin-bottom: 20px;
@@ -636,13 +586,6 @@ onMounted(fetchWishes)
   color: var(--cream);
   background: var(--brown-deep);
   border-color: var(--brown-deep);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 28px;
 }
 
 /* Animations */

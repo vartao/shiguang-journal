@@ -54,54 +54,46 @@
     </div>
 
     <!-- 创建相册模态框 -->
-    <teleport to="body">
-      <transition name="modal">
-        <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-          <div class="modal-card modal-content-enter">
-            <div class="modal-card__header">
-              <h3>新建相册</h3>
-              <button class="modal-close" @click="showCreateModal = false">&times;</button>
-            </div>
-            <div class="modal-card__body">
-              <div class="form-group">
-                <label class="field-label">相册名称</label>
-                <input
-                  v-model="newAlbum.name"
-                  type="text"
-                  class="input-vintage"
-                  placeholder="例如：第一次旅行、日常碎片..."
-                />
-              </div>
-              <div class="form-group">
-                <label class="field-label">相册描述</label>
-                <textarea
-                  v-model="newAlbum.description"
-                  class="input-vintage"
-                  rows="3"
-                  placeholder="这个相册里装着什么回忆？"
-                ></textarea>
-              </div>
-              <div class="form-group">
-                <label class="field-label">封面照片</label>
-                <ImageUploader v-model="newAlbum.coverImages" :max-count="1" category="album" />
-              </div>
-            </div>
-            <div class="modal-card__footer">
-              <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showCreateModal = false">
-                取消
-              </button>
-              <button
-                class="btn-vintage btn-vintage--red btn-vintage--small"
-                :disabled="!newAlbum.name.trim() || creating"
-                @click="handleCreate"
-              >
-                {{ creating ? '创建中...' : '创建相册' }}
-              </button>
-            </div>
-          </div>
+    <BaseModal v-model="showCreateModal" title="新建相册" :busy="creating">
+      <div class="album-form">
+        <div class="form-group">
+          <label class="field-label">相册名称</label>
+          <input
+            v-model="newAlbum.name"
+            type="text"
+            class="input-vintage"
+            placeholder="例如：第一次旅行、日常碎片..."
+          />
         </div>
-      </transition>
-    </teleport>
+        <div class="form-group">
+          <label class="field-label">相册描述</label>
+          <textarea
+            v-model="newAlbum.description"
+            class="input-vintage"
+            rows="3"
+            placeholder="这个相册里装着什么回忆？"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="field-label">封面照片</label>
+          <ImageUploader v-model="newAlbum.coverImages" :max-count="1" category="album" />
+        </div>
+      </div>
+      <template #footer>
+        <div class="album-form__actions">
+          <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showCreateModal = false">
+            取消
+          </button>
+          <button
+            class="btn-vintage btn-vintage--red btn-vintage--small"
+            :disabled="!newAlbum.name.trim() || creating"
+            @click="handleCreate"
+          >
+            {{ creating ? '创建中...' : '创建相册' }}
+          </button>
+        </div>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
@@ -111,6 +103,7 @@ import { useRouter } from 'vue-router'
 import { getAlbums, createAlbum } from '@/api/album'
 import PolaroidCard from '@/components/PolaroidCard.vue'
 import ImageUploader from '@/components/ImageUploader.vue'
+import BaseModal from '@/components/BaseModal.vue'
 
 const router = useRouter()
 
@@ -238,62 +231,8 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-/* 模态框 */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 14, 10, 0.6);
-  backdrop-filter: blur(4px);
-  padding: 20px;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 440px;
-  background: var(--gradient-card);
-  border: var(--border-vintage);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lifted);
-  overflow: hidden;
-}
-
-.modal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(var(--brown-rgb), 0.1);
-}
-
-.modal-card__header h3 {
-  font-family: var(--font-handwrite);
-  font-size: 22px;
-  color: var(--brown-deep);
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--text-muted);
-  border-radius: 50%;
-  transition: all var(--transition-fast);
-}
-
-.modal-close:hover {
-  background: rgba(var(--brown-rgb), 0.08);
-  color: var(--text-primary);
-}
-
-.modal-card__body {
-  padding: 20px 24px;
+/* 新建相册表单 */
+.album-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -312,21 +251,11 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-.modal-card__footer {
+.album-form__actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 24px 20px;
-  border-top: 1px solid rgba(var(--brown-rgb), 0.08);
-}
-
-/* 模态框动画 */
-.modal-enter-active {
-  animation: modal-backdrop-in 0.3s ease both;
-}
-
-.modal-leave-active {
-  animation: modal-backdrop-in 0.2s ease reverse both;
+  margin-left: auto;
 }
 
 @media (max-width: 768px) {
@@ -355,36 +284,8 @@ onMounted(() => {
     width: 160px;
   }
 
-  /* 弹窗全宽 + 内边距收敛 */
-  .modal-overlay {
-    padding: 12px;
-  }
-
-  .modal-card__header {
-    padding: 16px 20px 12px;
-  }
-
-  .modal-card__header h3 {
-    font-size: 20px;
-  }
-
-  .modal-close {
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-  }
-
-  .modal-card__body {
-    padding: 16px 20px;
-    gap: 14px;
-  }
-
-  .modal-card__body .input-vintage {
+  .album-form .input-vintage {
     font-size: 16px;
-  }
-
-  .modal-card__footer {
-    padding: 14px 20px 16px;
   }
 }
 

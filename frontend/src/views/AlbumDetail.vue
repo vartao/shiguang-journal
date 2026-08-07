@@ -68,40 +68,28 @@
     </div>
 
     <!-- 编辑相册 -->
-    <teleport to="body">
-      <transition name="modal">
-        <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
-          <div class="modal-card">
-            <div class="modal-card__header">
-              <h3>编辑相册</h3>
-              <button class="modal-close" @click="showEditModal = false">&times;</button>
-            </div>
-            <div class="modal-card__body">
-              <div class="form-group">
-                <label class="field-label">相册名称</label>
-                <input v-model="editForm.name" type="text" class="input-vintage" maxlength="50" />
-              </div>
-              <div class="form-group">
-                <label class="field-label">相册描述</label>
-                <textarea v-model="editForm.description" class="input-vintage" rows="3"></textarea>
-              </div>
-            </div>
-            <div class="modal-card__footer">
-              <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showEditModal = false">
-                取消
-              </button>
-              <button
-                class="btn-vintage btn-vintage--red btn-vintage--small"
-                :disabled="!editForm.name.trim() || saving"
-                @click="handleSaveEdit"
-              >
-                {{ saving ? '保存中...' : '保存' }}
-              </button>
-            </div>
-          </div>
+    <BaseModal v-model="showEditModal" title="编辑相册">
+      <div class="album-edit-form">
+        <div class="form-group">
+          <label class="field-label">相册名称</label>
+          <input v-model="editForm.name" type="text" class="input-vintage" maxlength="50" />
         </div>
-      </transition>
-    </teleport>
+        <div class="form-group">
+          <label class="field-label">相册描述</label>
+          <textarea v-model="editForm.description" class="input-vintage" rows="3"></textarea>
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showEditModal = false">取消</button>
+        <button
+          class="btn-vintage btn-vintage--red btn-vintage--small"
+          :disabled="!editForm.name.trim() || saving"
+          @click="handleSaveEdit"
+        >
+          {{ saving ? '保存中...' : '保存' }}
+        </button>
+      </template>
+    </BaseModal>
 
     <!-- 灯箱 -->
     <LightBox
@@ -120,6 +108,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getAlbumDetail, addPhoto, deletePhoto, updateAlbum, deleteAlbum } from '@/api/album'
 import ImageUploader from '@/components/ImageUploader.vue'
 import LightBox from '@/components/LightBox.vue'
+import BaseModal from '@/components/BaseModal.vue'
 import { parseLocalDate } from '@/utils/date'
 
 const route = useRoute()
@@ -324,59 +313,8 @@ onMounted(() => {
   margin: 0 auto 40px;
 }
 
-/* 编辑模态框 */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 14, 10, 0.6);
-  backdrop-filter: blur(4px);
-  padding: 20px;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--gradient-card);
-  border: var(--border-vintage);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lifted);
-}
-
-.modal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px 14px;
-  border-bottom: 1px solid rgba(var(--brown-rgb), 0.1);
-}
-
-.modal-card__header h3 {
-  font-family: var(--font-handwrite);
-  font-size: 22px;
-  color: var(--brown-deep);
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--text-muted);
-  border-radius: 50%;
-}
-
-.modal-close:hover {
-  background: rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-card__body {
-  padding: 18px 22px;
+/* 编辑相册弹窗表单 */
+.album-edit-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -392,22 +330,6 @@ onMounted(() => {
   font-family: var(--font-display);
   font-size: 13px;
   color: var(--text-secondary);
-}
-
-.modal-card__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 14px 22px 18px;
-  border-top: 1px solid rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-enter-active {
-  animation: modal-backdrop-in 0.3s ease both;
-}
-
-.modal-leave-active {
-  animation: modal-backdrop-in 0.2s ease reverse both;
 }
 
 /* 照片网格 */
@@ -541,36 +463,9 @@ onMounted(() => {
     opacity: 1;
   }
 
-  /* 弹窗全宽 + 内边距收敛 */
-  .modal-overlay {
-    padding: 12px;
-  }
-
-  .modal-card__header {
-    padding: 14px 20px 12px;
-  }
-
-  .modal-card__header h3 {
-    font-size: 20px;
-  }
-
-  .modal-close {
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-  }
-
-  .modal-card__body {
-    padding: 16px 20px;
-    gap: 12px;
-  }
-
-  .modal-card__body .input-vintage {
+  /* 弹窗内输入框字号放大，避免 iOS 聚焦自动缩放 */
+  .album-edit-form .input-vintage {
     font-size: 16px;
-  }
-
-  .modal-card__footer {
-    padding: 12px 20px 14px;
   }
 }
 

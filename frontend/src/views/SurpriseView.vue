@@ -61,106 +61,91 @@
     </div>
 
     <!-- 创建惊喜模态框 -->
-    <teleport to="body">
-      <transition name="modal">
-        <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-          <div class="modal-card modal-content-enter">
-            <div class="modal-card__header">
-              <h3>&#x1F381; 准备惊喜</h3>
-              <button class="modal-close" @click="showCreateModal = false">&times;</button>
-            </div>
-            <div class="modal-card__body">
-              <div class="form-group">
-                <label class="field-label">惊喜标题</label>
-                <input
-                  v-model="newSurprise.title"
-                  type="text"
-                  class="input-vintage"
-                  placeholder="例如：给你的一封情书、100天纪念..."
-                />
-              </div>
-              <div class="form-group">
-                <label class="field-label">惊喜内容</label>
-                <textarea
-                  v-model="newSurprise.content"
-                  class="input-vintage surprise-textarea"
-                  rows="6"
-                  placeholder="写下你想对TA说的话...&#10;这封信会在解锁那天被TA看到"
-                ></textarea>
-              </div>
-              <div class="form-group">
-                <label class="field-label">解锁方式</label>
-                <div class="type-selector">
-                  <button
-                    type="button"
-                    class="type-btn"
-                    :class="{ active: newSurprise.unlockCondition === 'date' }"
-                    @click="newSurprise.unlockCondition = 'date'"
-                  >
-                    到期解锁
-                  </button>
-                  <button
-                    type="button"
-                    class="type-btn"
-                    :class="{ active: newSurprise.unlockCondition === 'password' }"
-                    @click="newSurprise.unlockCondition = 'password'"
-                  >
-                    密码解锁
-                  </button>
-                  <button
-                    type="button"
-                    class="type-btn"
-                    :class="{ active: newSurprise.unlockCondition === 'click' }"
-                    @click="newSurprise.unlockCondition = 'click'"
-                  >
-                    点击解锁
-                  </button>
-                </div>
-              </div>
-              <div v-if="newSurprise.unlockCondition === 'date'" class="form-group">
-                <label class="field-label">解锁日期</label>
-                <input v-model="newSurprise.unlockDate" type="date" class="input-vintage" :min="todayStr" />
-                <span class="field-hint">到了这一天，TA就能拆开这个惊喜啦</span>
-              </div>
-              <div v-if="newSurprise.unlockCondition === 'password'" class="form-group">
-                <label class="field-label">解锁密码</label>
-                <input
-                  v-model="newSurprise.unlockPassword"
-                  type="text"
-                  class="input-vintage"
-                  placeholder="设一个只有你们知道的暗号"
-                />
-              </div>
-              <div class="form-group">
-                <label class="field-label">提示语（选填）</label>
-                <input
-                  v-model="newSurprise.hint"
-                  type="text"
-                  class="input-vintage"
-                  placeholder="未解锁时展示的小提示"
-                />
-              </div>
-              <div class="form-group">
-                <label class="field-label">封面图片（选填）</label>
-                <ImageUploader v-model="newSurprise.coverImages" :max-count="1" category="surprise" />
-              </div>
-            </div>
-            <div class="modal-card__footer">
-              <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showCreateModal = false">
-                取消
-              </button>
-              <button
-                class="btn-vintage btn-vintage--red btn-vintage--small"
-                :disabled="!canCreate || creating"
-                @click="handleCreate"
-              >
-                {{ creating ? '包装中...' : '封好这个惊喜' }}
-              </button>
-            </div>
+    <BaseModal v-model="showCreateModal" title="&#x1F381; 准备惊喜">
+      <div class="surprise-form">
+        <div class="form-group">
+          <label class="field-label">惊喜标题</label>
+          <input
+            v-model="newSurprise.title"
+            type="text"
+            class="input-vintage"
+            placeholder="例如：给你的一封情书、100天纪念..."
+          />
+        </div>
+        <div class="form-group">
+          <label class="field-label">惊喜内容</label>
+          <textarea
+            v-model="newSurprise.content"
+            class="input-vintage surprise-textarea"
+            rows="6"
+            placeholder="写下你想对TA说的话...&#10;这封信会在解锁那天被TA看到"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="field-label">解锁方式</label>
+          <div class="type-selector">
+            <button
+              type="button"
+              class="type-btn"
+              :class="{ active: newSurprise.unlockCondition === 'date' }"
+              @click="newSurprise.unlockCondition = 'date'"
+            >
+              到期解锁
+            </button>
+            <button
+              type="button"
+              class="type-btn"
+              :class="{ active: newSurprise.unlockCondition === 'password' }"
+              @click="newSurprise.unlockCondition = 'password'"
+            >
+              密码解锁
+            </button>
+            <button
+              type="button"
+              class="type-btn"
+              :class="{ active: newSurprise.unlockCondition === 'click' }"
+              @click="newSurprise.unlockCondition = 'click'"
+            >
+              点击解锁
+            </button>
           </div>
         </div>
-      </transition>
-    </teleport>
+        <div v-if="newSurprise.unlockCondition === 'date'" class="form-group">
+          <label class="field-label">解锁日期</label>
+          <input v-model="newSurprise.unlockDate" type="date" class="input-vintage" :min="todayStr" />
+          <span class="field-hint">到了这一天，TA就能拆开这个惊喜啦</span>
+        </div>
+        <div v-if="newSurprise.unlockCondition === 'password'" class="form-group">
+          <label class="field-label">解锁密码</label>
+          <input
+            v-model="newSurprise.unlockPassword"
+            type="text"
+            class="input-vintage"
+            placeholder="设一个只有你们知道的暗号"
+          />
+        </div>
+        <div class="form-group">
+          <label class="field-label">提示语（选填）</label>
+          <input v-model="newSurprise.hint" type="text" class="input-vintage" placeholder="未解锁时展示的小提示" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">封面图片（选填）</label>
+          <ImageUploader v-model="newSurprise.coverImages" :max-count="1" category="surprise" />
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn-vintage btn-vintage--outline btn-vintage--small" @click="showCreateModal = false">
+          取消
+        </button>
+        <button
+          class="btn-vintage btn-vintage--red btn-vintage--small"
+          :disabled="!canCreate || creating"
+          @click="handleCreate"
+        >
+          {{ creating ? '包装中...' : '封好这个惊喜' }}
+        </button>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
@@ -171,6 +156,7 @@ import { useRouter } from 'vue-router'
 import { getSurprises, createSurprise, deleteSurprise } from '@/api/surprise'
 import { useUserStore } from '@/stores/user'
 import EnvelopeCard from '@/components/EnvelopeCard.vue'
+import BaseModal from '@/components/BaseModal.vue'
 import ImageUploader from '@/components/ImageUploader.vue'
 import { differenceInCalendarDays, toLocalDateInputValue } from '@/utils/date'
 
@@ -367,62 +353,8 @@ onMounted(() => {
   background: rgba(var(--red-rgb), 0.06);
 }
 
-/* 模态框 */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 14, 10, 0.6);
-  backdrop-filter: blur(4px);
-  padding: 20px;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 460px;
-  max-height: 85vh;
-  overflow-y: auto;
-  background: var(--gradient-card);
-  border: var(--border-vintage);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lifted);
-}
-
-.modal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(var(--brown-rgb), 0.1);
-}
-
-.modal-card__header h3 {
-  font-family: var(--font-handwrite);
-  font-size: 22px;
-  color: var(--brown-deep);
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--text-muted);
-  border-radius: 50%;
-  transition: all var(--transition-fast);
-}
-
-.modal-close:hover {
-  background: rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-card__body {
-  padding: 20px 24px;
+/* 创建惊喜弹窗 */
+.surprise-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -475,22 +407,6 @@ onMounted(() => {
   line-height: 1.8;
 }
 
-.modal-card__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px 20px;
-  border-top: 1px solid rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-enter-active {
-  animation: modal-backdrop-in 0.3s ease both;
-}
-
-.modal-leave-active {
-  animation: modal-backdrop-in 0.2s ease reverse both;
-}
-
 @media (max-width: 768px) {
   .surprise-page {
     padding: 28px 0 60px;
@@ -517,22 +433,8 @@ onMounted(() => {
     padding: 10px 6px;
   }
 
-  .modal-card__header {
-    padding: 16px 20px 12px;
-  }
-
-  .modal-card__body {
-    padding: 16px 20px;
+  .surprise-form {
     gap: 14px;
-  }
-
-  .modal-card__footer {
-    padding: 12px 20px 16px;
-  }
-
-  .modal-close {
-    width: 40px;
-    height: 40px;
   }
 
   .input-vintage {
@@ -552,14 +454,6 @@ onMounted(() => {
 
   .surprise-grid {
     gap: 20px;
-  }
-
-  .modal-overlay {
-    padding: 12px;
-  }
-
-  .modal-card {
-    border-radius: var(--radius-md);
   }
 }
 </style>

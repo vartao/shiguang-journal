@@ -479,65 +479,6 @@ onMounted(() => {
   gap: 28px;
 }
 
-/* 模态框 */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(20, 14, 10, 0.6);
-  backdrop-filter: blur(4px);
-  padding: 20px;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--gradient-card);
-  border: var(--border-vintage);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lifted);
-}
-
-.modal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(var(--brown-rgb), 0.1);
-}
-
-.modal-card__header h3 {
-  font-family: var(--font-handwrite);
-  font-size: 22px;
-  color: var(--brown-deep);
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--text-muted);
-  border-radius: 50%;
-  transition: all var(--transition-fast);
-}
-
-.modal-close:hover {
-  background: rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-card__body {
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .form-group {
   display: flex;
   flex-direction: column;
@@ -600,22 +541,6 @@ onMounted(() => {
   border-color: var(--faded-red);
   background: rgba(var(--red-rgb), 0.08);
   transform: scale(1.1);
-}
-
-.modal-card__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px 20px;
-  border-top: 1px solid rgba(var(--brown-rgb), 0.08);
-}
-
-.modal-enter-active {
-  animation: modal-backdrop-in 0.3s ease both;
-}
-
-.modal-leave-active {
-  animation: modal-backdrop-in 0.2s ease reverse both;
 }
 
 @media (max-width: 768px) {
