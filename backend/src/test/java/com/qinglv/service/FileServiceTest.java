@@ -9,6 +9,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -38,5 +40,19 @@ class FileServiceTest {
         String url = service.uploadFile(new MockMultipartFile("file", "x.PNG", "image/png", new byte[]{1}), 1L);
         assertTrue(url.startsWith("/uploads/"));
         try (var files = Files.walk(tempDir)) { assertEquals(1, files.filter(Files::isRegularFile).count()); }
+    }
+
+    @Test void generatesJpegThumbnailForValidImage() throws Exception {
+        when(mapper.insert(any())).thenReturn(1);
+        // 1x1 透明 PNG
+        byte[] png = Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+        String url = service.uploadFile(new MockMultipartFile("file", "x.png", "image/png", png), 1L);
+        assertTrue(url.startsWith("/uploads/"));
+        try (var files = Files.walk(tempDir)) {
+            List<Path> written = files.filter(Files::isRegularFile).toList();
+            assertEquals(2, written.size());
+            assertTrue(written.stream().anyMatch(p -> p.getFileName().toString().endsWith("_thumb.jpg")));
+        }
     }
 }

@@ -34,7 +34,7 @@ qinglv/
 │       ├── mapper/        # MyBatis-Plus
 │       ├── entity/ dto/   # 表实体 / 入参 DTO / 出参 VO
 │       └── common/        # JwtUtil、JwtInterceptor、RateLimiter、全局异常、统一 Result、WebConfig
-├── sql/               # schema.sql（以这份为准）+ 增量迁移脚本（migration_*.sql）
+├── sql/               # schema.sql（以这份为准）+ 旧环境手动迁移脚本（migration_*.sql）
 ├── deploy/            # nginx.conf、deploy.sh / deploy-windows.ps1、validate-env.sh、docker-compose.e2e.yml、ssl/
 ├── scripts/           # 验收脚本（acceptance.sh / .ps1 / acceptance-full.mjs）、check-env.sh、verify.sh
 ├── docs/              # ARCHITECTURE.md、OPERATIONS.md、REFACTORING_REVIEW.md、superpowers/（plans+specs）
@@ -108,7 +108,7 @@ mvn test              # 需要 JDK 17+
 - 几乎所有业务资源带 **`couple_id` 隔离**，跨空间访问返回 403——新增资源时必须沿用此模式。
 - 表前缀 `ql_`；逻辑删除字段 `deleted`（MyBatis-Plus 全局配置，删除值 1/未删 0）；实体/字段用驼峰，DB 用下划线（已开启 map-underscore-to-camel-case）；主键自增。
 - 使用 Lombok（打包时已 exclude）。依赖版本集中在 `backend/pom.xml` 的 `<properties>`。
-- **schema 单一事实来源是 `sql/schema.sql`**；`backend/src/main/resources/schema.sql` 是副本，`scripts/verify.sh` 会用 `cmp` 校验两者一致——改表结构必须两份同步更新，并在 `sql/` 增加迁移脚本。
+- **schema 单一事实来源是 `sql/schema.sql`**；`backend/src/main/resources/schema.sql` 是副本，`scripts/verify.sh` 会用 `cmp` 校验两者一致——改表结构必须两份同步更新。线上环境由 Flyway 管理增量迁移：在 `backend/src/main/resources/db/migration/` 新增 `V<版本>__<描述>.sql`（当前基线版本为 1，启动时自动 baseline）。`sql/` 下的 `migration_*.sql` 保留给未接入 Flyway 的旧环境手动执行。
 
 ### 前端
 

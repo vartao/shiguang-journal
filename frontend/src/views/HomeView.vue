@@ -102,7 +102,13 @@
 
             <div v-if="note.images && note.images.length > 0" class="note-card__images">
               <div class="note-card__image-main" @click="openLightbox(note.images, 0)">
-                <img :src="note.images[0]" :alt="note.title" class="photo-vintage" loading="lazy" />
+                <img
+                  :src="getThumbUrl(note.images[0])"
+                  :alt="note.title"
+                  class="photo-vintage"
+                  loading="lazy"
+                  @error="onThumbError($event, note.images[0])"
+                />
                 <div v-if="note.images.length > 1" class="image-count">+{{ note.images.length - 1 }}</div>
               </div>
             </div>
@@ -181,6 +187,7 @@ import FilmStrip from '@/components/FilmStrip.vue'
 import LightBox from '@/components/LightBox.vue'
 import NoteCommentDrawer from '@/components/NoteCommentDrawer.vue'
 import { parseLocalDate } from '@/utils/date'
+import { getThumbUrl } from '@/utils/image'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -335,6 +342,13 @@ function openLightbox(images, index) {
   lightboxImages.value = images.map((url) => (typeof url === 'string' ? { url } : url))
   lightboxIndex.value = index
   lightboxVisible.value = true
+}
+
+function onThumbError(event, originalUrl) {
+  const img = event?.target
+  if (!img || img.dataset.fallback === '1') return
+  img.dataset.fallback = '1'
+  img.src = originalUrl
 }
 
 function extractList(data) {
