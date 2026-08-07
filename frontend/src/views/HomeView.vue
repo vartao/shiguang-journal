@@ -127,6 +127,11 @@
                 <span>{{ note.liked ? '&#x2764;' : '&#x2661;' }}</span>
                 <span v-if="(note.likes || note.likeCount || 0) > 0">{{ note.likes ?? note.likeCount }}</span>
               </button>
+              <button class="action-btn" @click="openComments(note)">
+                <span>&#x1F4AC;</span>
+                <span v-if="(note.commentCount || 0) > 0">{{ note.commentCount }}</span>
+                <span v-else>评论</span>
+              </button>
               <template v-if="isMyNote(note)">
                 <button class="action-btn" title="编辑" @click="editNote(note)">
                   <span>&#x270E;</span>
@@ -156,6 +161,13 @@
       :start-index="lightboxIndex"
       @close="lightboxVisible = false"
     />
+
+    <NoteCommentDrawer
+      :visible="commentDrawerVisible"
+      :note="currentCommentNote"
+      @close="commentDrawerVisible = false"
+      @update-count="onCommentCountUpdate"
+    />
   </div>
 </template>
 
@@ -167,6 +179,7 @@ import { getNotes, likeNote, deleteNote, searchNotes } from '@/api/note'
 import { useUserStore } from '@/stores/user'
 import FilmStrip from '@/components/FilmStrip.vue'
 import LightBox from '@/components/LightBox.vue'
+import NoteCommentDrawer from '@/components/NoteCommentDrawer.vue'
 import { parseLocalDate } from '@/utils/date'
 
 const router = useRouter()
@@ -180,7 +193,21 @@ const page = ref(1)
 const activeMood = ref('')
 const searchKeyword = ref('')
 const isSearchMode = ref(false)
+const commentDrawerVisible = ref(false)
+const currentCommentNote = ref(null)
 let searchTimer = null
+
+function openComments(note) {
+  currentCommentNote.value = note
+  commentDrawerVisible.value = true
+}
+
+function onCommentCountUpdate(noteId, count) {
+  const note = notes.value.find((n) => n.id === noteId)
+  if (note) {
+    note.commentCount = count
+  }
+}
 
 function handleSearch() {
   if (!searchKeyword.value.trim()) {

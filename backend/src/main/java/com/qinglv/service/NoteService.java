@@ -10,10 +10,12 @@ import com.qinglv.entity.Note;
 import com.qinglv.entity.NoteImage;
 import com.qinglv.entity.NoteLike;
 import com.qinglv.entity.User;
+import com.qinglv.mapper.NoteCommentMapper;
 import com.qinglv.mapper.NoteImageMapper;
 import com.qinglv.mapper.NoteLikeMapper;
 import com.qinglv.mapper.NoteMapper;
 import com.qinglv.mapper.UserMapper;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class NoteService {
     private final NoteImageMapper noteImageMapper;
     private final NoteLikeMapper noteLikeMapper;
     private final UserMapper userMapper;
+    private final NoteCommentMapper commentMapper;
 
     /**
      * 分页查询笔记时间线
@@ -353,16 +356,26 @@ public class NoteService {
             }
         }
 
+        Map<Long, Integer> commentCountMap = new HashMap<>();
+        if (!noteIds.isEmpty()) {
+            for (Map<String, Object> row : commentMapper.selectCountByNoteIds(noteIds)) {
+                Long noteId = ((Number) row.get("noteId")).longValue();
+                Integer cnt = ((Number) row.get("cnt")).intValue();
+                commentCountMap.put(noteId, cnt);
+            }
+        }
+
         return notes.stream()
                 .map(note -> buildNoteVO(
                         note,
                         likedNoteIds.contains(note.getId()),
                         authorsById.get(note.getUserId()),
-                        imageUrlsByNoteId.getOrDefault(note.getId(), Collections.emptyList())))
+                        imageUrlsByNoteId.getOrDefault(note.getId(), Collections.emptyList()),
+                        commentCountMap.getOrDefault(note.getId(), 0)))
                 .collect(Collectors.toList());
     }
 
-    private NoteVO buildNoteVO(Note note, boolean liked, User author, List<String> imageUrls) {
+    private NoteVO buildNoteVO(Note note, boolean liked, User author, List<String> imageUrls, Integer commentCount) {
         NoteVO vo = new NoteVO();
         vo.setId(note.getId());
         vo.setCoupleId(note.getCoupleId());
@@ -376,6 +389,7 @@ public class NoteService {
         vo.setLikeCount(note.getLikeCount());
         vo.setLikes(note.getLikeCount());
         vo.setLiked(liked);
+        vo.setCommentCount(commentCount);
         vo.setCreateTime(note.getCreateTime());
         vo.setUpdateTime(note.getUpdateTime());
         vo.setCreatedAt(note.getCreateTime());

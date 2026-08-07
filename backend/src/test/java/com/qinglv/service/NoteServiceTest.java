@@ -9,6 +9,7 @@ import com.qinglv.entity.Note;
 import com.qinglv.entity.NoteImage;
 import com.qinglv.entity.NoteLike;
 import com.qinglv.entity.User;
+import com.qinglv.mapper.NoteCommentMapper;
 import com.qinglv.mapper.NoteImageMapper;
 import com.qinglv.mapper.NoteLikeMapper;
 import com.qinglv.mapper.NoteMapper;
@@ -42,6 +43,8 @@ class NoteServiceTest {
     private NoteImageMapper noteImageMapper;
     @Mock
     private NoteLikeMapper noteLikeMapper;
+    @Mock
+    private NoteCommentMapper commentMapper;
     @Mock
     private UserMapper userMapper;
 
@@ -89,6 +92,7 @@ class NoteServiceTest {
             return 1;
         });
         when(noteImageMapper.selectList(any())).thenReturn(Collections.emptyList());
+        when(commentMapper.selectCountByNoteIds(any())).thenReturn(Collections.emptyList());
 
         NoteVO vo = noteService.createNote(1L, 100L, dto);
 
@@ -116,6 +120,7 @@ class NoteServiceTest {
         page.setTotal(2);
         when(noteMapper.selectPage(any(Page.class), any())).thenReturn(page);
         when(noteLikeMapper.selectList(any())).thenReturn(Collections.emptyList());
+        when(commentMapper.selectCountByNoteIds(any())).thenReturn(Collections.emptyList());
 
         User firstAuthor = new User();
         firstAuthor.setId(1L);

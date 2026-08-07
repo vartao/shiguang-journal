@@ -3,15 +3,19 @@ package com.qinglv.controller;
 import com.qinglv.common.JwtInterceptor;
 import com.qinglv.common.PageResult;
 import com.qinglv.common.Result;
+import com.qinglv.dto.NoteCommentDTO;
+import com.qinglv.dto.NoteCommentVO;
 import com.qinglv.dto.NoteDTO;
 import com.qinglv.dto.NoteVO;
 import com.qinglv.entity.User;
 import com.qinglv.mapper.UserMapper;
+import com.qinglv.service.NoteCommentService;
 import com.qinglv.service.NoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +27,7 @@ import java.util.Map;
 public class NoteController {
 
     private final NoteService noteService;
+    private final NoteCommentService noteCommentService;
     private final UserMapper userMapper;
 
     /**
@@ -134,6 +139,48 @@ public class NoteController {
         Map<String, Object> result = noteService.likeNote(id, userId, coupleId);
         String message = Boolean.TRUE.equals(result.get("liked")) ? "点赞成功" : "已取消点赞";
         return Result.success(message, result);
+    }
+
+    /**
+     * 查询笔记评论列表
+     * GET /api/notes/{id}/comments
+     */
+    @GetMapping("/{id}/comments")
+    public Result<List<NoteCommentVO>> listComments(@PathVariable Long id) {
+        Long userId = JwtInterceptor.getCurrentUserId();
+        User user = userMapper.selectById(userId);
+        Long coupleId = user != null ? user.getCoupleId() : null;
+
+        List<NoteCommentVO> comments = noteCommentService.listByNote(id, userId, coupleId);
+        return Result.success(comments);
+    }
+
+    /**
+     * 发表评论
+     * POST /api/notes/{id}/comments
+     */
+    @PostMapping("/{id}/comments")
+    public Result<NoteCommentVO> addComment(@PathVariable Long id, @Valid @RequestBody NoteCommentDTO dto) {
+        Long userId = JwtInterceptor.getCurrentUserId();
+        User user = userMapper.selectById(userId);
+        Long coupleId = user != null ? user.getCoupleId() : null;
+
+        NoteCommentVO commentVO = noteCommentService.addComment(id, userId, coupleId, dto);
+        return Result.success("评论成功", commentVO);
+    }
+
+    /**
+     * 删除评论（仅评论作者）
+     * DELETE /api/notes/comments/{commentId}
+     */
+    @DeleteMapping("/comments/{commentId}")
+    public Result<Void> deleteComment(@PathVariable Long commentId) {
+        Long userId = JwtInterceptor.getCurrentUserId();
+        User user = userMapper.selectById(userId);
+        Long coupleId = user != null ? user.getCoupleId() : null;
+
+        noteCommentService.deleteComment(commentId, userId, coupleId);
+        return Result.success("删除成功", null);
     }
 
     private int firstNonNull(Integer a, Integer b, int defaultValue) {

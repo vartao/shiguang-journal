@@ -34,6 +34,8 @@ public class NoteVO {
     private Integer likes;
     /** 当前用户是否已点赞 */
     private Boolean liked;
+    /** 评论数量 */
+    private Integer commentCount;
 
     private List<String> images;
 
