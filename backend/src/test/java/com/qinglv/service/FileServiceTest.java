@@ -1,0 +1,42 @@
+package com.qinglv.service;
+
+import com.qinglv.common.BusinessException;
+import com.qinglv.mapper.QlFileMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+class FileServiceTest {
+    @TempDir Path tempDir;
+    QlFileMapper mapper;
+    FileService service;
+    @BeforeEach void setUp() {
+        mapper = mock(QlFileMapper.class); service = new FileService(mapper);
+        ReflectionTestUtils.setField(service, "uploadPath", tempDir.toString());
+        ReflectionTestUtils.setField(service, "accessPrefix", "/uploads/");
+        ReflectionTestUtils.setField(service, "allowedTypes", "jpg,jpeg,png");
+        ReflectionTestUtils.setField(service, "maxSize", 1024L);
+    }
+    @Test void rejectsBlankFilenameAndMismatchedMime() {
+        assertThrows(BusinessException.class, () -> service.uploadFile(new MockMultipartFile("file", "", "image/jpeg", new byte[]{1}), 1L));
+        assertThrows(BusinessException.class, () -> service.uploadFile(new MockMultipartFile("file", "x.jpg", "text/plain", new byte[]{1}), 1L));
+    }
+    @Test void databaseFailureRemovesWrittenFile() throws Exception {
+        when(mapper.insert(any())).thenThrow(new RuntimeException("db down"));
+        assertThrows(RuntimeException.class, () -> service.uploadFile(new MockMultipartFile("file", "x.jpg", "image/jpeg", new byte[]{1,2}), 1L));
+        try (var files = Files.walk(tempDir)) { assertEquals(0, files.filter(Files::isRegularFile).count()); }
+    }
+    @Test void writesInsideNormalizedRootAndReturnsUrl() throws Exception {
+        when(mapper.insert(any())).thenReturn(1);
+        String url = service.uploadFile(new MockMultipartFile("file", "x.PNG", "image/png", new byte[]{1}), 1L);
+        assertTrue(url.startsWith("/uploads/"));
+        try (var files = Files.walk(tempDir)) { assertEquals(1, files.filter(Files::isRegularFile).count()); }
+    }
+}

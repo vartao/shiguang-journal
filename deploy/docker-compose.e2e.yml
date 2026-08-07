@@ -1,0 +1,13 @@
+services:
+  mysql:
+    container_name: qinglv-e2e-mysql
+
+  backend:
+    container_name: qinglv-e2e-backend
+    environment:
+      CORS_ORIGINS: http://127.0.0.1:18090
+
+  frontend:
+    container_name: qinglv-e2e-frontend
+    ports: !override
+      - "18090:80"

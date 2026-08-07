@@ -1,0 +1,24 @@
+# Local secrets and machine-specific settings
+.env
+.env.e2e
+!.env.example
+.claude/settings.local.json
+
+# Generated dependencies and build output
+frontend/node_modules/
+frontend/dist/
+backend/target/
+
+# Runtime data and temporary acceptance environments
+uploads/
+.tmp-e2e/
+deploy/ssl/*
+
+# Editors, logs and operating-system files
+.idea/
+.vscode/
+*.iml
+*.log
+logs/
+.DS_Store
+Thumbs.db

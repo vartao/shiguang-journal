@@ -1,0 +1,152 @@
+/* ========================================
+   复古胶片风 - CSS 变量
+   ======================================== */
+
+:root {
+  /* 主色调 - 牛皮纸与旧照片 */
+  --kraft-paper: #d4a574;
+  --kraft-light: #e8c9a0;
+  --kraft-dark: #b8875a;
+  --brown-deep: #5c3d2e;
+  --brown-medium: #7a5540;
+  --brown-light: #96705a;
+  --cream: #faf3e0;
+  --cream-warm: #f5ead3;
+  --cream-dark: #efe2c8;
+  --film-black: #1a1a1a;
+  --film-dark: #2d2420;
+  --faded-red: #c1666b;
+  --faded-red-dark: #a34f54;
+  --faded-rose: #d98e8e;
+  --olive: #7d8c5c;
+  --olive-light: #a3b07f;
+  --dusty-blue: #7a9bb5;
+  --mustard: #c9a227;
+  --mustard-light: #e0c566;
+
+  /* RGB 通道（供 rgba() 组合使用，暗色模式会覆盖） */
+  --brown-rgb: 92, 61, 46;
+  --brown-medium-rgb: 122, 85, 64;
+  --shadow-rgb: 60, 35, 15;
+  --kraft-rgb: 212, 165, 116;
+  --kraft-dark-rgb: 184, 135, 90;
+  --red-rgb: 193, 102, 107;
+  --red-dark-rgb: 163, 79, 84;
+  --cream-rgb: 250, 243, 224;
+  --cream-static-rgb: 250, 243, 224; /* 固定浅色：深色底上的文字/描边，不随主题变化 */
+  --white-rgb: 255, 255, 255;
+  --olive-rgb: 125, 140, 92;
+  --blue-rgb: 122, 155, 181;
+  --mustard-rgb: 201, 162, 39;
+  --muted-rgb: 150, 130, 111;
+
+  /* 语义化表面 */
+  --gradient-card: linear-gradient(170deg, #fdf8ec, #f5ead3);
+  --gradient-paper: linear-gradient(175deg, #fdf9f0, #f8f0de);
+  --gradient-nav: linear-gradient(180deg, #f7edd8 0%, #f2e4c9 100%);
+  --photo-paper: #fff;
+  --letter-paper: #fffdf5;
+  --letter-paper-rgb: 255, 253, 245;
+  --envelope-body: #f0e2cc;
+  --envelope-side: #ecdcc2;
+  --envelope-bottom: #f4e8d4;
+  --envelope-flap: #e5d2b5;
+  --envelope-back: linear-gradient(160deg, #e8d5b8, #dcc4a0);
+  --envelope-seal: radial-gradient(circle at 40% 35%, #a08060, #6b4c35);
+
+  /* 文字色 */
+  --text-primary: #3d2b1f;
+  --text-secondary: #6b5344;
+  --text-muted: #96826f;
+  --text-on-dark: #f0e6d3;
+  --text-handwrite: #4a3226;
+
+  /* 阴影 */
+  --shadow-soft: 0 2px 12px rgba(92, 61, 46, 0.12);
+  --shadow-card: 0 4px 20px rgba(92, 61, 46, 0.15);
+  --shadow-polaroid: 0 6px 24px rgba(60, 35, 15, 0.22);
+  --shadow-lifted: 0 12px 36px rgba(60, 35, 15, 0.3);
+  --shadow-inset: inset 0 2px 6px rgba(92, 61, 46, 0.1);
+
+  /* 边框 */
+  --border-vintage: 1px solid rgba(92, 61, 46, 0.2);
+  --border-dashed: 2px dashed rgba(92, 61, 46, 0.3);
+
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* 字体 */
+  --font-handwrite: 'Ma Shan Zheng', cursive;
+  --font-serif: 'Noto Serif SC', 'Songti SC', serif;
+  --font-display: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+
+  /* 间距 */
+  --nav-height: 76px;
+  --content-max-width: 1100px;
+
+  /* 过渡 */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* 做旧质感 */
+  --paper-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' result='noise'/%3E%3CfeDiffuseLighting in='noise' lighting-color='%23faf3e0' surfaceScale='1.5' result='light'%3E%3CfeDistantLight azimuth='45' elevation='55'/%3E%3C/feDiffuseLighting%3E%3CfeComposite in='light' in2='SourceGraphic' operator='arithmetic' k1='1' k2='0' k3='0' k4='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23paper)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+/* 暗色模式 */
+[data-theme='dark'] {
+  --kraft-paper: #8b6b4a;
+  --kraft-light: #6b5238;
+  --kraft-dark: #5a4530;
+  --brown-deep: #d4c4a8;
+  --brown-medium: #b8a68a;
+  --brown-light: #a09078;
+  --cream: #1e1a16;
+  --cream-warm: #252018;
+  --cream-dark: #2a241e;
+  --film-black: #0e0c0a;
+  --film-dark: #1a1612;
+  --faded-red: #d4838a;
+  --faded-red-dark: #c06b72;
+  --faded-rose: #c88080;
+  --olive: #8fa06a;
+  --olive-light: #7a8c5c;
+  --dusty-blue: #7090a8;
+  --mustard: #c9a227;
+  --mustard-light: #b89020;
+
+  --brown-rgb: 180, 160, 130;
+  --brown-medium-rgb: 184, 166, 138;
+  --shadow-rgb: 0, 0, 0;
+  --kraft-rgb: 139, 107, 74;
+  --kraft-dark-rgb: 90, 69, 48;
+  --red-rgb: 212, 131, 138;
+  --red-dark-rgb: 192, 107, 114;
+  --cream-rgb: 37, 32, 24;
+  --olive-rgb: 143, 160, 106;
+  --blue-rgb: 112, 144, 168;
+  --muted-rgb: 136, 120, 104;
+
+  --gradient-card: linear-gradient(170deg, #252018, #1e1a16);
+  --gradient-paper: linear-gradient(175deg, #252018, #1e1a16);
+  --gradient-nav: linear-gradient(180deg, #2a241e 0%, #252018 100%);
+
+  --text-primary: #e0d5c0;
+  --text-secondary: #b8a890;
+  --text-muted: #887868;
+  --text-on-dark: #e0d5c0;
+  --text-handwrite: #d4c4a0;
+
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-polaroid: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lifted: 0 12px 36px rgba(0, 0, 0, 0.4);
+  --shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  --border-vintage: 1px solid rgba(180, 160, 130, 0.15);
+  --border-dashed: 2px dashed rgba(180, 160, 130, 0.2);
+
+  --paper-texture: none;
+}
