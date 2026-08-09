@@ -112,22 +112,27 @@ function pngBlob() {
   return new Blob([Buffer.from(base64, 'base64')], { type: 'image/png' })
 }
 
-function detachUser(username) {
-  assert(mysqlContainer && mysqlPassword, 'unbound-user flows require --mysql-container and --mysql-password')
-  assert(/^[a-zA-Z0-9_]+$/.test(username), 'unsafe generated username')
-  const sql = [
-    `SET @uid=(SELECT id FROM ql_user WHERE username='${username}' AND deleted=0 LIMIT 1)`,
-    'SET @cid=(SELECT couple_id FROM ql_user WHERE id=@uid)',
-    'UPDATE ql_couple SET user_id1=IF(user_id1=@uid,NULL,user_id1), user_id2=IF(user_id2=@uid,NULL,user_id2) WHERE id=@cid',
-    "UPDATE ql_user SET couple_id=NULL, role='member' WHERE id=@uid",
-    'DELETE FROM ql_couple WHERE id=@cid AND user_id1 IS NULL AND user_id2 IS NULL'
-  ].join('; ')
+function execSql(sql) {
+  assert(mysqlContainer && mysqlPassword, 'direct SQL flows require --mysql-container and --mysql-password')
   const result = spawnSync(
     'docker',
     ['exec', '-e', `MYSQL_PWD=${mysqlPassword}`, mysqlContainer, 'mysql', '-uroot', 'qinglv_note', '-e', sql],
     { encoding: 'utf8' }
   )
-  if (result.status !== 0) throw new Error(`failed to detach ${username}: ${result.stderr || result.stdout}`)
+  if (result.status !== 0) throw new Error(`failed to run SQL: ${result.stderr || result.stdout}`)
+}
+
+function detachUser(username) {
+  assert(/^[a-zA-Z0-9_]+$/.test(username), 'unsafe generated username')
+  execSql(
+    [
+      `SET @uid=(SELECT id FROM ql_user WHERE username='${username}' AND deleted=0 LIMIT 1)`,
+      'SET @cid=(SELECT couple_id FROM ql_user WHERE id=@uid)',
+      'UPDATE ql_couple SET user_id1=IF(user_id1=@uid,NULL,user_id1), user_id2=IF(user_id2=@uid,NULL,user_id2) WHERE id=@cid',
+      "UPDATE ql_user SET couple_id=NULL, role='member' WHERE id=@uid",
+      'DELETE FROM ql_couple WHERE id=@cid AND user_id1 IS NULL AND user_id2 IS NULL'
+    ].join('; ')
+  )
 }
 
 async function register(username, nickname, extra = {}) {
@@ -484,7 +489,7 @@ await group('相册、URL 照片、Multipart 照片、封面刷新与权限', as
   const album = expectSuccess(
     await api('POST', '/albums', {
       token: state.tokenA,
-      body: { name: `Full Album ${suffix}`, description: '完整相册流程', coverImage: state.fileUrls[1] }
+      body: { name: `Full Album ${suffix}`, description: '完整相册流程' }
     }),
     'create album'
   )
@@ -580,6 +585,23 @@ await group('相册、URL 照片、Multipart 照片、封面刷新与权限', as
   expectSuccess(await api('DELETE', `/albums/${disposable.id}`, { token: state.tokenB }), 'delete album')
   expectCode(await api('GET', `/albums/${disposable.id}`, { token: state.tokenA }), 400, 'deleted album detail')
   mark('delete album and child records')
+
+  const covered = expectSuccess(
+    await api('POST', '/albums', {
+      token: state.tokenA,
+      body: { name: `Covered Album ${suffix}`, coverImage: state.fileUrls[0] }
+    }),
+    'create album with cover'
+  )
+  equal(covered.photoCount, 1, 'cover album initial photo count')
+  const coveredPhotos = expectSuccess(
+    await api('GET', `/albums/${covered.id}/photos`, { token: state.tokenB }),
+    'cover album photos'
+  )
+  equal(coveredPhotos.length, 1, 'cover album photo list count')
+  equal(coveredPhotos[0].photoUrl, state.fileUrls[0], 'cover synced as first photo')
+  expectSuccess(await api('DELETE', `/albums/${covered.id}`, { token: state.tokenA }), 'delete cover album')
+  mark('create album with cover syncs first photo')
 })
 
 await group('纪念日创建、倒计时、列表、更新、删除与格式校验', async () => {
@@ -882,6 +904,415 @@ await group('心愿创建、列表、筛选、更新、完成、删除与权限'
 
   expectSuccess(await api('DELETE', `/wishes/${disposable.id}`, { token: state.tokenA }), 'delete wish')
   mark('creator deletes wish')
+})
+
+await group('旅行足迹创建、封面同步、筛选、地图聚合、照片与权限', async () => {
+  const visited = expectSuccess(
+    await api('POST', '/travels', {
+      token: state.tokenA,
+      body: {
+        title: `成都之行 ${suffix}`,
+        province: '四川',
+        city: '成都',
+        travelDate: localDate(-30),
+        season: '夏',
+        cover: state.fileUrls[0],
+        status: 1
+      }
+    }),
+    'create visited travel'
+  )
+  state.travelId = visited.id
+  mark('create visited travel')
+
+  const withCover = expectSuccess(
+    await api('GET', `/travels/${state.travelId}`, { token: state.tokenB }),
+    'travel detail with cover photo'
+  )
+  equal(withCover.photoCount, 1, 'cover synced travel photo count')
+  equal(withCover.photos?.[0]?.photoUrl, state.fileUrls[0], 'cover synced as first travel photo')
+  mark('create travel with cover syncs first photo')
+
+  const planned = expectSuccess(
+    await api('POST', '/travels', {
+      token: state.tokenB,
+      body: { title: `武汉计划 ${suffix}`, province: '湖北', city: '武汉', status: 0 }
+    }),
+    'create planned travel'
+  )
+  mark('partner creates planned travel')
+
+  const all = expectSuccess(await api('GET', '/travels', { token: state.tokenB }), 'travel list')
+  assert(containsId(all, state.travelId) && containsId(all, planned.id), 'travel list misses items')
+  mark('partner lists travels')
+
+  const visitedOnly = expectSuccess(await api('GET', '/travels?status=1', { token: state.tokenA }), 'visited travels')
+  assert(containsId(visitedOnly, state.travelId) && !containsId(visitedOnly, planned.id), 'status filter wrong')
+  mark('filter travels by status')
+
+  const map = expectSuccess(await api('GET', '/travels/map', { token: state.tokenA }), 'travel map summary')
+  const sichuan = map.find((item) => item.province === '四川')
+  const hubei = map.find((item) => item.province === '湖北')
+  assert(Number(sichuan?.visited) >= 1, 'map summary misses visited province')
+  assert(Number(hubei?.planned) >= 1, 'map summary misses planned province')
+  mark('travel map summary by province')
+
+  const photo = expectSuccess(
+    await api('POST', `/travels/${state.travelId}/photos`, {
+      token: state.tokenA,
+      body: { photoUrl: state.fileUrls[1] }
+    }),
+    'add travel photo'
+  )
+  const withPhoto = expectSuccess(
+    await api('GET', `/travels/${state.travelId}`, { token: state.tokenB }),
+    'travel detail after photo add'
+  )
+  equal(withPhoto.photoCount, 2, 'travel photo count after add')
+  expectSuccess(
+    await api('DELETE', `/travels/${state.travelId}/photos/${photo.id}`, { token: state.tokenB }),
+    'delete travel photo'
+  )
+  const afterPhotoDelete = expectSuccess(
+    await api('GET', `/travels/${state.travelId}`, { token: state.tokenA }),
+    'travel detail after photo delete'
+  )
+  equal(afterPhotoDelete.photoCount, 1, 'travel photo count after delete')
+  mark('add and delete travel photo')
+
+  const updated = expectSuccess(
+    await api('PUT', `/travels/${state.travelId}`, {
+      token: state.tokenB,
+      body: { title: `成都之行·改 ${suffix}`, province: '四川', city: '成都', status: 1 }
+    }),
+    'update travel'
+  )
+  equal(updated.title, `成都之行·改 ${suffix}`, 'updated travel title')
+  mark('couple member updates travel')
+
+  expectCode(await api('GET', `/travels/${state.travelId}`, { token: state.tokenC }), 403, 'cross-couple travel')
+  mark('reject cross-couple travel read')
+
+  expectSuccess(await api('DELETE', `/travels/${planned.id}`, { token: state.tokenA }), 'delete travel')
+  expectCode(await api('GET', `/travels/${planned.id}`, { token: state.tokenB }), 400, 'deleted travel detail')
+  mark('delete travel and detail is gone')
+})
+
+await group('行程计划创建、每日安排校验、更新、删除与权限', async () => {
+  expectCode(
+    await api('POST', '/plans', { token: state.tokenA, body: { title: `非法行程 ${suffix}`, days: 'not-json' } }),
+    400,
+    'invalid plan days'
+  )
+  mark('reject invalid plan days JSON')
+
+  const plan = expectSuccess(
+    await api('POST', '/plans', {
+      token: state.tokenA,
+      body: {
+        title: `川西自驾 ${suffix}`,
+        destination: '川西',
+        startDate: localDate(10),
+        endDate: localDate(15),
+        budget: 5000,
+        days: JSON.stringify([{ day: 1, items: ['出发'] }]),
+        status: 0
+      }
+    }),
+    'create plan'
+  )
+  state.planId = plan.id
+  mark('create plan')
+
+  const plans = expectSuccess(await api('GET', '/plans', { token: state.tokenB }), 'plan list')
+  assert(containsId(plans, state.planId), 'partner plan list misses item')
+  mark('partner lists plans')
+
+  const updated = expectSuccess(
+    await api('PUT', `/plans/${state.planId}`, {
+      token: state.tokenB,
+      body: { title: `川西自驾·改 ${suffix}`, status: 1 }
+    }),
+    'update plan'
+  )
+  equal(updated.status, 1, 'updated plan status')
+  mark('couple member updates plan')
+
+  expectCode(await api('GET', `/plans/${state.planId}`, { token: state.tokenC }), 403, 'cross-couple plan')
+  mark('reject cross-couple plan read')
+
+  expectSuccess(await api('DELETE', `/plans/${state.planId}`, { token: state.tokenB }), 'delete plan')
+  expectCode(await api('GET', `/plans/${state.planId}`, { token: state.tokenA }), 400, 'deleted plan detail')
+  mark('delete plan and detail is gone')
+})
+
+await group('菜品池、分类筛选、随机选菜与今日菜单', async () => {
+  expectCode(await api('GET', '/dishes/random', { token: state.tokenA }), 400, 'random dish from empty pool')
+  mark('reject random dish from empty pool')
+
+  const dish = expectSuccess(
+    await api('POST', '/dishes', { token: state.tokenA, body: { name: `红烧肉 ${suffix}`, category: 'dinner' } }),
+    'create dish'
+  )
+  state.dishId = dish.id
+  expectSuccess(
+    await api('POST', '/dishes', { token: state.tokenB, body: { name: `蔬菜沙拉 ${suffix}`, category: 'snack' } }),
+    'partner creates dish'
+  )
+  mark('couple members create dishes')
+
+  const fallback = expectSuccess(
+    await api('POST', '/dishes', { token: state.tokenA, body: { name: `未知分类菜 ${suffix}`, category: '荤菜' } }),
+    'create dish with unknown category'
+  )
+  equal(fallback.category, 'lunch', 'unknown dish category fallback')
+  mark('unknown dish category falls back to lunch')
+
+  const dishes = expectSuccess(await api('GET', '/dishes', { token: state.tokenB }), 'dish list')
+  assert(dishes.length >= 3, 'dish list misses items')
+  const meat = expectSuccess(
+    await api('GET', '/dishes?category=dinner', { token: state.tokenA }),
+    'dish category filter'
+  )
+  equal(meat.length, 1, 'category filter count')
+  equal(meat[0].name, `红烧肉 ${suffix}`, 'category filter result')
+  mark('list and filter dishes by category')
+
+  const random = expectSuccess(await api('GET', '/dishes/random', { token: state.tokenA }), 'random dish')
+  assert(random?.name, 'random dish has no name')
+  mark('random dish from pool')
+
+  expectCode(
+    await api('POST', '/menu', {
+      token: state.tokenA,
+      body: { mealDate: localDate(0), mealType: 'brunch', dishName: 'x' }
+    }),
+    400,
+    'invalid meal type'
+  )
+  mark('reject invalid meal type')
+
+  const item = expectSuccess(
+    await api('POST', '/menu', {
+      token: state.tokenA,
+      body: { mealDate: localDate(0), mealType: 'lunch', dishName: `红烧肉 ${suffix}` }
+    }),
+    'add menu item'
+  )
+  const menu = expectSuccess(await api('GET', `/menu?date=${localDate(0)}`, { token: state.tokenB }), 'today menu')
+  assert(containsId(menu, item.id), 'menu misses added item')
+  mark('add menu item and partner reads menu')
+
+  expectCode(await api('DELETE', `/menu/${item.id}`, { token: state.tokenC }), 403, 'cross-couple menu delete')
+  mark('reject cross-couple menu item deletion')
+
+  expectSuccess(await api('DELETE', `/menu/${item.id}`, { token: state.tokenB }), 'delete menu item')
+  expectSuccess(await api('DELETE', `/dishes/${state.dishId}`, { token: state.tokenB }), 'delete dish')
+  expectSuccess(await api('DELETE', `/dishes/${fallback.id}`, { token: state.tokenA }), 'delete fallback dish')
+  mark('couple member deletes menu item and dish')
+})
+
+await group('时间胶囊封存、内容防泄露、到期开启与权限', async () => {
+  expectCode(
+    await api('POST', '/capsules', {
+      token: state.tokenA,
+      body: { title: `今天胶囊 ${suffix}`, message: 'x', openDate: localDate(0) }
+    }),
+    400,
+    'capsule open date must be future'
+  )
+  mark('reject capsule with non-future open date')
+
+  const capsule = expectSuccess(
+    await api('POST', '/capsules', {
+      token: state.tokenA,
+      body: {
+        title: `未来胶囊 ${suffix}`,
+        message: '给未来的我们',
+        openDate: localDate(30),
+        photoUrls: [state.fileUrls[0]]
+      }
+    }),
+    'create capsule'
+  )
+  state.capsuleId = capsule.id
+  mark('create capsule')
+
+  const list = expectSuccess(await api('GET', '/capsules', { token: state.tokenB }), 'capsule list')
+  const locked = list.find((entry) => String(entry.id) === String(state.capsuleId))
+  assert(locked, 'partner capsule list misses item')
+  equal(locked.message ?? null, null, 'locked capsule leaks message')
+  equal(locked.photoUrls ?? null, null, 'locked capsule leaks photos')
+  equal(locked.canOpen, false, 'locked capsule canOpen')
+  assert(Number(locked.daysLeft) >= 29, 'capsule daysLeft is wrong')
+  mark('locked capsule hides content from partner')
+
+  expectCode(
+    await api('POST', `/capsules/${state.capsuleId}/open`, { token: state.tokenB, body: {} }),
+    400,
+    'early capsule open'
+  )
+  mark('reject early capsule open')
+
+  expectCode(
+    await api('POST', `/capsules/${state.capsuleId}/open`, { token: state.tokenC, body: {} }),
+    403,
+    'cross-couple capsule open'
+  )
+  mark('reject cross-couple capsule open')
+
+  // 「到期开启」无法通过 API 到达（开启日期必须是未来），直改测试库把开启日期拨到今天
+  assert(/^\d+$/.test(String(state.capsuleId)), 'unsafe capsule id')
+  execSql(`UPDATE ql_capsule SET open_date=CURDATE() WHERE id=${state.capsuleId}`)
+  const opened = expectSuccess(
+    await api('POST', `/capsules/${state.capsuleId}/open`, { token: state.tokenB, body: {} }),
+    'open due capsule'
+  )
+  equal(opened.isOpened, 1, 'opened capsule status')
+  equal(opened.message, '给未来的我们', 'opened capsule message')
+  equal(String(opened.openedBy), String(state.userBId), 'capsule opener')
+  mark('partner opens due capsule after date adjustment')
+
+  expectCode(
+    await api('DELETE', `/capsules/${state.capsuleId}`, { token: state.tokenB }),
+    403,
+    'non-creator capsule deletion'
+  )
+  mark('reject non-creator capsule deletion')
+
+  expectSuccess(await api('DELETE', `/capsules/${state.capsuleId}`, { token: state.tokenA }), 'delete capsule')
+  mark('creator deletes capsule')
+})
+
+await group('小事记创建、分类与评分校验、筛选、更新与权限', async () => {
+  expectCode(
+    await api('POST', '/logs', {
+      token: state.tokenA,
+      body: { title: `评分越界 ${suffix}`, logDate: localDate(0), rating: 6 }
+    }),
+    400,
+    'log rating out of range'
+  )
+  mark('reject log rating out of range')
+
+  const log = expectSuccess(
+    await api('POST', '/logs', {
+      token: state.tokenA,
+      body: { title: `一起看演唱会 ${suffix}`, category: 'show', logDate: localDate(-7), rating: 5 }
+    }),
+    'create log'
+  )
+  state.logId = log.id
+  mark('create log')
+
+  const weird = expectSuccess(
+    await api('POST', '/logs', {
+      token: state.tokenB,
+      body: { title: `奇怪分类 ${suffix}`, category: 'whatever', logDate: localDate(-1) }
+    }),
+    'create log with unknown category'
+  )
+  equal(weird.category, 'other', 'unknown category fallback')
+  mark('unknown category falls back to other')
+
+  const all = expectSuccess(await api('GET', '/logs', { token: state.tokenB }), 'log list')
+  assert(containsId(all, state.logId), 'partner log list misses item')
+  const shows = expectSuccess(await api('GET', '/logs?category=show', { token: state.tokenA }), 'log category filter')
+  assert(containsId(shows, state.logId) && !containsId(shows, weird.id), 'category filter wrong')
+  const thisYear = expectSuccess(
+    await api('GET', `/logs?year=${new Date().getFullYear()}`, { token: state.tokenA }),
+    'log year filter'
+  )
+  assert(containsId(thisYear, state.logId), 'year filter misses log')
+  mark('list and filter logs')
+
+  const updated = expectSuccess(
+    await api('PUT', `/logs/${state.logId}`, {
+      token: state.tokenB,
+      body: { title: `一起看演唱会·改 ${suffix}`, logDate: localDate(-7), rating: 4 }
+    }),
+    'update log'
+  )
+  equal(updated.rating, 4, 'updated log rating')
+  mark('couple member updates log')
+
+  expectCode(await api('DELETE', `/logs/${weird.id}`, { token: state.tokenC }), 403, 'cross-couple log delete')
+  mark('reject cross-couple log deletion')
+
+  expectSuccess(await api('DELETE', `/logs/${weird.id}`, { token: state.tokenA }), 'delete log')
+  mark('couple member deletes log')
+})
+
+await group('留言板发布、列表、限量与删除权限', async () => {
+  expectCode(await api('POST', '/messages', { token: state.tokenA, body: { content: '' } }), 400, 'blank message')
+  mark('reject blank message')
+
+  const first = expectSuccess(
+    await api('POST', '/messages', { token: state.tokenA, body: { content: `早安 ${suffix}` } }),
+    'create message'
+  )
+  const second = expectSuccess(
+    await api('POST', '/messages', { token: state.tokenB, body: { content: `晚安 ${suffix}` } }),
+    'partner creates message'
+  )
+  mark('couple members post messages')
+
+  const list = expectSuccess(await api('GET', '/messages', { token: state.tokenB }), 'message list')
+  assert(containsId(list, first.id) && containsId(list, second.id), 'message list misses items')
+  assert(list.find((entry) => String(entry.id) === String(first.id))?.nickname, 'message misses nickname')
+  mark('list messages with author nickname')
+
+  const limited = expectSuccess(await api('GET', '/messages?limit=1', { token: state.tokenA }), 'limited messages')
+  equal(limited.length, 1, 'message limit')
+  mark('limit message list')
+
+  expectCode(
+    await api('DELETE', `/messages/${first.id}`, { token: state.tokenC }),
+    403,
+    'cross-couple message delete'
+  )
+  mark('reject cross-couple message deletion')
+
+  expectCode(await api('DELETE', `/messages/${first.id}`, { token: state.tokenB }), 403, 'partner message delete')
+  mark('reject deleting partner message')
+
+  expectSuccess(await api('DELETE', `/messages/${first.id}`, { token: state.tokenA }), 'delete own message')
+  expectSuccess(await api('DELETE', `/messages/${second.id}`, { token: state.tokenB }), 'partner deletes own')
+  mark('authors delete their own messages')
+})
+
+await group('功能开关读取、更新、恢复与非法功能项', async () => {
+  const initial = expectSuccess(await api('GET', '/features', { token: state.tokenA }), 'feature list')
+  equal(Object.keys(initial).length, 12, 'feature key count')
+  equal(initial.notes, true, 'default notes feature')
+  equal(initial.board, true, 'default board feature')
+  mark('default features are all enabled')
+
+  const disabled = expectSuccess(
+    await api('PUT', '/features/board', { token: state.tokenA, body: { enabled: false } }),
+    'disable board feature'
+  )
+  equal(disabled.board, false, 'disabled board feature')
+  mark('disable board feature')
+
+  const reread = expectSuccess(await api('GET', '/features', { token: state.tokenB }), 'partner feature list')
+  equal(reread.board, false, 'partner sees disabled feature')
+  equal(reread.notes, true, 'other features stay enabled')
+  mark('partner reads updated features')
+
+  expectCode(
+    await api('PUT', '/features/unknown', { token: state.tokenA, body: { enabled: false } }),
+    400,
+    'unknown feature'
+  )
+  mark('reject unknown feature key')
+
+  const restored = expectSuccess(
+    await api('PUT', '/features/board', { token: state.tokenB, body: { enabled: true } }),
+    'restore board feature'
+  )
+  equal(restored.board, true, 'restored board feature')
+  mark('restore board feature')
 })
 
 await group('恋爱统计聚合', async () => {
