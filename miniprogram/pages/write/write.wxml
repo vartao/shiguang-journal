@@ -1,0 +1,107 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise d1">
+    <view class="mast__title">{{id ? '编辑这页回忆' : '写一篇笔记'}}</view>
+    <view class="mast__sub">把此刻的心动，写进我们的胶卷</view>
+  </view>
+
+  <view wx:if="{{loadingDetail}}" class="sk write-sk"></view>
+
+  <view wx:else class="card write-form rise d2">
+    <!-- 标题 -->
+    <view class="field">
+      <text class="field__label">标题</text>
+      <input
+        class="input"
+        value="{{title}}"
+        maxlength="100"
+        placeholder="这一页叫什么？"
+        placeholder-class="placeholder"
+        bindinput="onTitleInput"
+      />
+    </view>
+
+    <!-- 内容 -->
+    <view class="field">
+      <text class="field__label">内容</text>
+      <textarea
+        class="textarea"
+        value="{{content}}"
+        auto-height
+        maxlength="-1"
+        placeholder="今天发生了什么心动的小事…"
+        placeholder-class="placeholder"
+        bindinput="onContentInput"
+      />
+    </view>
+
+    <!-- 记录日期 -->
+    <view class="field">
+      <text class="field__label">记录日期</text>
+      <picker mode="date" value="{{noteDate}}" end="{{today}}" bindchange="onDateChange">
+        <view class="input write-date">📅 {{noteDate}}</view>
+      </picker>
+    </view>
+
+    <!-- 心情 -->
+    <view class="field">
+      <text class="field__label">此刻心情</text>
+      <view class="pick-row">
+        <view
+          wx:for="{{moods}}"
+          wx:key="key"
+          class="pick {{mood === item.key ? 'pick--on' : ''}}"
+          hover-class="pressed"
+          bindtap="onMoodTap"
+          data-key="{{item.key}}"
+        >
+          <text class="pick__emoji">{{item.emoji}}</text>
+          <text class="pick__label">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 天气 -->
+    <view class="field">
+      <text class="field__label">天气（可跳过）</text>
+      <view class="pick-row">
+        <view
+          wx:for="{{weathers}}"
+          wx:key="key"
+          class="pick {{weather === item.key ? 'pick--on' : ''}}"
+          hover-class="pressed"
+          bindtap="onWeatherTap"
+          data-key="{{item.key}}"
+        >
+          <text class="pick__emoji">{{item.emoji}}</text>
+          <text class="pick__label">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 图片 -->
+    <view class="field">
+      <text class="field__label">贴点照片（{{images.length}}/9）</text>
+      <view class="img-grid">
+        <view wx:for="{{images}}" wx:key="index" class="img-grid__cell">
+          <image
+            class="img-grid__img"
+            src="{{item}}"
+            mode="aspectFill"
+            bindtap="onPreviewImage"
+            data-index="{{index}}"
+          />
+          <view class="img-grid__del" bindtap="onRemoveImage" data-index="{{index}}">✕</view>
+        </view>
+        <view wx:if="{{images.length < maxImages}}" class="img-grid__add" hover-class="pressed" bindtap="onAddImage">
+          <text class="img-grid__plus">＋</text>
+          <text class="img-grid__hint">贴照片</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交 -->
+    <button class="btn btn-red write-submit" hover-class="pressed" disabled="{{submitting}}" bindtap="onSubmit">
+      {{submitting ? '封存中…' : (id ? '更新这页回忆 ✉️' : '封存这页回忆 ✉️')}}
+    </button>
+  </view>
+</view>

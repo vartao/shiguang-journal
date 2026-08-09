@@ -1,0 +1,251 @@
+/* 我的 / 小窝总览 */
+
+/* ===== 情侣卡 ===== */
+.couple-card {
+  padding: 40rpx 32rpx 36rpx;
+  text-align: center;
+}
+
+.couple-card__avatars {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 36rpx;
+}
+
+.avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140rpx;
+}
+
+.avatar__img,
+.avatar__ph {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid var(--cream-warm);
+  box-shadow: 0 4rpx 14rpx rgba(92, 61, 46, 0.25);
+}
+
+.avatar__ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+  font-size: 52rpx;
+  color: var(--cream);
+  background: linear-gradient(145deg, var(--kraft), var(--kraft-dark));
+}
+
+.avatar__ph--empty {
+  color: var(--muted);
+  background: rgba(92, 61, 46, 0.08);
+  border-style: dashed;
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+.avatar__name {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--text-2);
+  max-width: 140rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.couple-card__heart {
+  margin-top: 40rpx;
+  font-size: 40rpx;
+  color: var(--red);
+  text-shadow: 0 2rpx 8rpx rgba(193, 102, 107, 0.4);
+}
+
+.couple-card__name {
+  margin-top: 28rpx;
+  font-family: 'Ma Shan Zheng', 'KaiTi', cursive;
+  font-size: 38rpx;
+  color: var(--brown-deep);
+  letter-spacing: 3rpx;
+}
+
+.couple-card__days {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
+.couple-card__num {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--red);
+  padding: 0 6rpx;
+}
+
+/* ===== 邀请码卡 ===== */
+.invite-card {
+  margin-top: 28rpx;
+  padding: 28rpx 32rpx;
+}
+
+.invite-card__label {
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+  color: var(--muted);
+}
+
+.invite-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.invite-card__code {
+  font-size: 44rpx;
+  font-weight: 600;
+  letter-spacing: 10rpx;
+  color: var(--brown-deep);
+}
+
+.bind-box {
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx dashed var(--line);
+}
+
+.bind-box__row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.bind-box__input {
+  flex: 1;
+}
+
+/* ===== 功能宫格 ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 0 28rpx;
+  background: linear-gradient(170deg, #fdf8ec, #f5ead3);
+  border: 1rpx solid var(--line);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+}
+
+.grid__icon {
+  font-size: 48rpx;
+}
+
+.grid__label {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--text-2);
+  letter-spacing: 2rpx;
+}
+
+.grid__empty {
+  grid-column: 1 / -1;
+  padding: 60rpx 0;
+}
+
+/* ===== 管理入口 ===== */
+.manage-card {
+  padding: 0 28rpx;
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx 4rpx;
+}
+
+.manage-row--line {
+  border-top: 1rpx solid var(--line-soft);
+}
+
+.manage-row__icon {
+  font-size: 36rpx;
+}
+
+.manage-row__label {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--ink);
+  letter-spacing: 2rpx;
+}
+
+.manage-row__arrow {
+  font-size: 36rpx;
+  color: var(--muted);
+}
+
+.logout-btn {
+  width: 100%;
+  margin-top: 48rpx;
+  color: var(--red-dark);
+  border-color: rgba(193, 102, 107, 0.4);
+}
+
+/* ===== 弹层 ===== */
+.feat-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 22rpx 4rpx;
+  border-bottom: 1rpx solid var(--line-soft);
+}
+
+.feat-row__icon {
+  font-size: 36rpx;
+}
+
+.feat-row__label {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--ink);
+}
+
+.sheet__hint {
+  padding: 20rpx 0 8rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.profile-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+
+.profile-avatar .avatar__img,
+.profile-avatar .avatar__ph {
+  width: 140rpx;
+  height: 140rpx;
+}
+
+.profile-avatar__tip {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.profile-save {
+  width: 100%;
+  margin-top: 8rpx;
+}

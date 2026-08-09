@@ -1,0 +1,66 @@
+<view class="board">
+  <!-- 小页头 -->
+  <view class="board__mast">留言板 · 悄悄话只说给你听</view>
+
+  <!-- 消息区（独立滚动） -->
+  <scroll-view
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    class="msgs"
+    scroll-into-view="{{scrollTo}}"
+    scroll-with-animation="{{false}}"
+  >
+    <view wx:if="{{loading}}" class="loading-text">加载中…</view>
+
+    <view wx:elif="{{!items.length}}" class="empty">
+      <view class="empty__icon">💌</view>
+      <view class="empty__title">还没有悄悄话</view>
+      <view class="empty__desc">说第一句吧</view>
+    </view>
+
+    <block wx:else>
+      <view wx:for="{{items}}" wx:key="id" class="mrow {{item.mine ? 'mrow--mine' : ''}}">
+        <!-- 时间分隔条（间隔 >10 分钟） -->
+        <view wx:if="{{item.showTime}}" class="mtime">
+          <text>{{item.timeText}}</text>
+        </view>
+        <view class="mbody">
+          <!-- 对方消息：左侧头像（相邻同人合并，仅首条显示） -->
+          <block wx:if="{{!item.mine}}">
+            <image wx:if="{{item.showAvatar && item.avatarUrl}}" src="{{item.avatarUrl}}" class="avatar" mode="aspectFill" />
+            <view wx:elif="{{item.showAvatar}}" class="avatar avatar--ph">{{item.initial}}</view>
+            <view wx:else class="avatar avatar--blank"></view>
+          </block>
+          <view class="mcol">
+            <text wx:if="{{!item.mine && item.showAvatar}}" class="mname">{{item.nickname}}</text>
+            <view
+              class="bubble {{item.mine ? 'bubble--mine' : 'bubble--other'}}"
+              bindlongpress="onBubbleLong"
+              data-id="{{item.id}}"
+              data-mine="{{item.mine}}"
+            >{{item.content}}</view>
+          </view>
+        </view>
+      </view>
+      <view id="msg-bottom" class="msgs__bottom"></view>
+    </block>
+  </scroll-view>
+
+  <!-- 底部固定输入条 -->
+  <view class="ibar">
+    <textarea
+      class="ibar__input"
+      value="{{draft}}"
+      auto-height
+      maxlength="500"
+      cursor-spacing="24"
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      placeholder="说点悄悄话…"
+      placeholder-class="placeholder"
+    />
+    <button class="btn btn-red ibar__send {{!draft.trim() || sending ? 'btn-busy' : ''}}" bindtap="onSend">➤</button>
+  </view>
+</view>

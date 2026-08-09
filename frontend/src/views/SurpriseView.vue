@@ -309,7 +309,7 @@ onMounted(() => {
 .surprise-header__subtitle {
   font-family: var(--font-display);
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 1px;
 }
 

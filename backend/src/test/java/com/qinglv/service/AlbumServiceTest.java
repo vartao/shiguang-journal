@@ -1,6 +1,7 @@
 package com.qinglv.service;
 
 import com.qinglv.common.BusinessException;
+import com.qinglv.dto.AlbumDTO;
 import com.qinglv.entity.Album;
 import com.qinglv.entity.Photo;
 import com.qinglv.mapper.AlbumMapper;
@@ -42,6 +43,32 @@ class AlbumServiceTest {
         album.setCoupleId(100L);
         album.setName("旅行");
         album.setPhotoCount(0);
+    }
+
+    @Test
+    void createAlbumWithCoverAlsoAddsItAsFirstPhoto() {
+        AlbumDTO dto = new AlbumDTO();
+        dto.setName("旅行");
+        dto.setCoverImage("/uploads/cover.jpg");
+
+        Album created = albumService.createAlbum(1L, 100L, dto);
+
+        assertEquals("/uploads/cover.jpg", created.getCoverImage());
+        assertEquals(1, created.getPhotoCount());
+        verify(photoMapper).insert(any(Photo.class));
+        verify(albumMapper).updateById(created);
+    }
+
+    @Test
+    void createAlbumWithoutCoverStaysEmpty() {
+        AlbumDTO dto = new AlbumDTO();
+        dto.setName("日常");
+
+        Album created = albumService.createAlbum(1L, 100L, dto);
+
+        assertEquals(0, created.getPhotoCount());
+        verify(photoMapper, never()).insert(any(Photo.class));
+        verify(albumMapper, never()).updateById(any(Album.class));
     }
 
     @Test

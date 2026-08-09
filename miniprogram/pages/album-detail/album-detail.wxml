@@ -1,0 +1,65 @@
+<view class="page-wrap page-wrap--no-tab">
+  <!-- 头部 -->
+  <view class="head rise">
+    <view class="head__back pressable" bindtap="goBack">‹ 返回</view>
+    <view class="head__title">{{album.name || '相册'}}</view>
+    <view wx:if="{{album.description}}" class="head__desc">{{album.description}}</view>
+    <view class="head__meta">共 {{photos.length}} 张照片</view>
+    <view class="head__ops">
+      <button class="btn btn-ghost btn-sm" bindtap="openEdit">编辑信息</button>
+      <button class="btn btn-ghost btn-sm head__del" bindtap="removeAlbum">删除相册</button>
+    </view>
+  </view>
+
+  <!-- 上传条 -->
+  <view class="upload-bar card rise d1">
+    <view class="upload-bar__text">
+      <view class="upload-bar__title">往相册里添点新回忆</view>
+      <view class="upload-bar__hint">一次最多选 20 张</view>
+    </view>
+    <button class="btn btn-solid btn-sm" disabled="{{uploading}}" bindtap="uploadPhotos">{{uploading ? '上传中…' : '📷 上传照片'}}</button>
+  </view>
+
+  <!-- 照片网格 -->
+  <view wx:if="{{loading}}" class="photo-grid">
+    <view wx:for="{{6}}" wx:key="index" class="sk photo-sk"></view>
+  </view>
+
+  <view wx:elif="{{photos.length}}" class="photo-grid">
+    <image
+      wx:for="{{photos}}"
+      wx:key="id"
+      class="photo pressable rise {{index < 5 ? 'd' + (index + 1) : ''}}"
+      src="{{item.full}}"
+      mode="aspectFill"
+      lazy-load="{{true}}"
+      data-id="{{item.id}}"
+      data-index="{{index}}"
+      bindtap="preview"
+      bindlongpress="removePhoto"
+    />
+  </view>
+
+  <view wx:else class="empty">
+    <view class="empty__icon">🖼️</view>
+    <view class="empty__title">相册还是空的</view>
+    <view class="empty__desc">上传第一张照片，让回忆住进来</view>
+  </view>
+
+  <view wx:if="{{photos.length}}" class="tip">长按可删除照片</view>
+
+  <!-- 编辑弹层 -->
+  <view wx:if="{{showEdit}}" class="mask" bindtap="closeEdit"></view>
+  <view wx:if="{{showEdit}}" class="sheet">
+    <view class="sheet__title">编辑相册</view>
+    <view class="field">
+      <text class="field__label">相册名称（必填）</text>
+      <input class="input" placeholder="给相册起个名字" placeholder-class="placeholder" value="{{form.name}}" maxlength="50" bindinput="onNameInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">描述</text>
+      <textarea class="textarea" placeholder="这个相册装着什么故事？" placeholder-class="placeholder" value="{{form.description}}" maxlength="200" bindinput="onDescInput" />
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving}}" bindtap="saveEdit">保存</button>
+  </view>
+</view>

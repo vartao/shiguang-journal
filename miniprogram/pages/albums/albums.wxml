@@ -1,0 +1,58 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">相册墙</view>
+    <view class="mast__sub">那些被定格的瞬间，散落在时光里</view>
+  </view>
+
+  <view class="actions rise d1">
+    <button class="btn btn-solid" bindtap="openCreate">📷 新建相册</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="grid">
+    <view wx:for="{{4}}" wx:key="index" class="sk sk-card"></view>
+  </view>
+
+  <view wx:elif="{{albums.length}}" class="grid">
+    <view
+      wx:for="{{albums}}"
+      wx:key="id"
+      class="polaroid pressable rise {{index % 2 === 0 ? 'polaroid--l' : 'polaroid--r'}} {{index < 5 ? 'd' + (index + 1) : ''}}"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="polaroid__photo">
+        <image wx:if="{{item.coverFull}}" class="polaroid__img" src="{{item.coverFull}}" mode="aspectFill" lazy-load="{{true}}" />
+        <view wx:else class="polaroid__placeholder">🎞️</view>
+      </view>
+      <view class="polaroid__name">{{item.name}}</view>
+      <view class="polaroid__count">{{item.photoCount || 0}} 张照片</view>
+    </view>
+  </view>
+
+  <view wx:else class="empty">
+    <view class="empty__icon">🖼️</view>
+    <view class="empty__title">还没有相册</view>
+    <view class="empty__desc">把散落的瞬间收进相册里吧</view>
+  </view>
+
+  <view wx:if="{{showCreate}}" class="mask" bindtap="closeCreate"></view>
+  <view wx:if="{{showCreate}}" class="sheet">
+    <view class="sheet__title">新建相册</view>
+    <view class="field">
+      <text class="field__label">相册名称（必填）</text>
+      <input class="input" placeholder="给相册起个名字" placeholder-class="placeholder" value="{{form.name}}" maxlength="50" bindinput="onNameInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">描述</text>
+      <textarea class="textarea" placeholder="这个相册装着什么故事？" placeholder-class="placeholder" value="{{form.description}}" maxlength="200" bindinput="onDescInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">封面</text>
+      <view class="cover-row">
+        <image wx:if="{{coverFull}}" class="cover-preview" src="{{coverFull}}" mode="aspectFill" bindtap="chooseCover" />
+        <button class="btn btn-ghost btn-sm" bindtap="chooseCover">{{coverFull ? '更换封面' : '选择封面'}}</button>
+      </view>
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{submitting}}" bindtap="submit">创建</button>
+  </view>
+</view>

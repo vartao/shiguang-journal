@@ -251,3 +251,183 @@ CREATE TABLE ql_note_comment (
     KEY idx_note_id (note_id),
     KEY idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='笔记评论表';
+
+-- ----------------------------
+-- 旅行足迹表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_travel;
+CREATE TABLE ql_travel (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '足迹ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '创建者用户ID',
+    province VARCHAR(30) NOT NULL COMMENT '省份（用于地图点亮）',
+    city VARCHAR(50) NOT NULL COMMENT '城市',
+    latitude DECIMAL(10,6) DEFAULT NULL COMMENT '纬度（可选）',
+    longitude DECIMAL(10,6) DEFAULT NULL COMMENT '经度（可选）',
+    travel_date DATE DEFAULT NULL COMMENT '出行日期',
+    season VARCHAR(10) DEFAULT NULL COMMENT '季节：春/夏/秋/冬',
+    weather VARCHAR(20) DEFAULT NULL COMMENT '天气',
+    title VARCHAR(200) NOT NULL COMMENT '标题',
+    note VARCHAR(2000) DEFAULT NULL COMMENT '旅行手记',
+    cover VARCHAR(500) DEFAULT NULL COMMENT '封面图URL',
+    status TINYINT DEFAULT 1 COMMENT '状态：0-想去 1-已去过',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id),
+    KEY idx_province (province),
+    KEY idx_travel_date (travel_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='旅行足迹表';
+
+-- ----------------------------
+-- 旅行照片表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_travel_photo;
+CREATE TABLE ql_travel_photo (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '照片ID',
+    travel_id BIGINT NOT NULL COMMENT '所属足迹ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    photo_url VARCHAR(500) NOT NULL COMMENT '照片URL',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_travel_id (travel_id),
+    KEY idx_couple_id (couple_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='旅行照片表';
+
+-- ----------------------------
+-- 行程计划表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_plan;
+CREATE TABLE ql_plan (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '行程ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '创建者用户ID',
+    title VARCHAR(200) NOT NULL COMMENT '行程标题',
+    destination VARCHAR(200) DEFAULT NULL COMMENT '目的地',
+    cover VARCHAR(500) DEFAULT NULL COMMENT '封面图URL',
+    start_date DATE DEFAULT NULL COMMENT '开始日期',
+    end_date DATE DEFAULT NULL COMMENT '结束日期',
+    budget DECIMAL(10,2) DEFAULT NULL COMMENT '预算（元）',
+    days TEXT COMMENT '每日安排JSON：[{date,items:[text]}]',
+    note VARCHAR(1000) DEFAULT NULL COMMENT '备注',
+    status TINYINT DEFAULT 0 COMMENT '状态：0-计划中 1-已出发 2-已完成',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='行程计划表';
+
+-- ----------------------------
+-- 菜品池表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_dish;
+CREATE TABLE ql_dish (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '菜品ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '创建者用户ID',
+    name VARCHAR(100) NOT NULL COMMENT '菜名',
+    category VARCHAR(20) DEFAULT 'lunch' COMMENT '分类：breakfast-早餐 lunch-午餐 dinner-晚餐 night-宵夜 snack-甜点 drink-饮品',
+    note VARCHAR(500) DEFAULT NULL COMMENT '备注（做法/店名等）',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜品池表';
+
+-- ----------------------------
+-- 今日菜单表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_menu_meal;
+CREATE TABLE ql_menu_meal (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '点菜者用户ID',
+    meal_date DATE NOT NULL COMMENT '日期',
+    meal_type VARCHAR(10) NOT NULL COMMENT '餐次：breakfast-早餐 lunch-午餐 dinner-晚餐',
+    dish_name VARCHAR(100) NOT NULL COMMENT '菜名',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_couple_date_meal_dish (couple_id, meal_date, meal_type, dish_name),
+    KEY idx_couple_date (couple_id, meal_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='今日菜单表';
+
+-- ----------------------------
+-- 功能开关表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_couple_feature;
+CREATE TABLE ql_couple_feature (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    feature_key VARCHAR(30) NOT NULL COMMENT '功能key：notes/albums/anniversary/surprise/wishes/stats/travels/plans/menu',
+    enabled TINYINT DEFAULT 1 COMMENT '是否开启：0-关闭 1-开启',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_couple_feature (couple_id, feature_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='功能开关表';
+
+-- ----------------------------
+-- 时间胶囊表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_capsule;
+CREATE TABLE ql_capsule (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '胶囊ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '创建者用户ID',
+    title VARCHAR(200) NOT NULL COMMENT '胶囊标题',
+    message TEXT COMMENT '信件内容',
+    photo_urls VARCHAR(2000) DEFAULT NULL COMMENT '照片URL JSON数组',
+    open_date DATE NOT NULL COMMENT '开启日期',
+    is_opened TINYINT DEFAULT 0 COMMENT '是否已开启：0-未开启 1-已开启',
+    opened_by BIGINT DEFAULT NULL COMMENT '开启者用户ID',
+    opened_time DATETIME DEFAULT NULL COMMENT '开启时间',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id),
+    KEY idx_open_date (open_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='时间胶囊表';
+
+-- ----------------------------
+-- 情侣日志表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_couple_log;
+CREATE TABLE ql_couple_log (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '创建者用户ID',
+    category VARCHAR(32) DEFAULT 'other' COMMENT '分类：movie-电影 food-美食 show-演出 travel-旅行 date-约会 sport-运动 other-其他',
+    title VARCHAR(200) NOT NULL COMMENT '标题',
+    log_date DATE NOT NULL COMMENT '发生日期',
+    note VARCHAR(2000) DEFAULT NULL COMMENT '手记',
+    cover VARCHAR(500) DEFAULT NULL COMMENT '封面图URL',
+    rating TINYINT DEFAULT 0 COMMENT '评分：0-5',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id),
+    KEY idx_log_date (log_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='情侣日志表';
+
+-- ----------------------------
+-- 留言板表
+-- ----------------------------
+DROP TABLE IF EXISTS ql_message;
+CREATE TABLE ql_message (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '留言ID',
+    couple_id BIGINT NOT NULL COMMENT '所属情侣空间ID',
+    user_id BIGINT NOT NULL COMMENT '留言者用户ID',
+    content VARCHAR(500) NOT NULL COMMENT '留言内容',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
+    PRIMARY KEY (id),
+    KEY idx_couple_id (couple_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='留言板表';

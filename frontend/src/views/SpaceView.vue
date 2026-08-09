@@ -148,6 +148,31 @@
             </button>
           </div>
         </section>
+
+        <!-- 功能管理 -->
+        <section class="panel anim-fade-in-up stagger-5">
+          <h3 class="panel__title">功能管理</h3>
+          <p class="panel__hint">关闭后，对应入口会从导航中隐藏（数据不会删除），随时可以再开回来。</p>
+          <div class="feature-list">
+            <div v-for="f in FEATURE_META" :key="f.key" class="feature-row">
+              <span class="feature-row__icon">{{ f.icon }}</span>
+              <div class="feature-row__text">
+                <span class="feature-row__label">{{ f.label }}</span>
+                <span class="feature-row__desc">{{ f.desc }}</span>
+              </div>
+              <button
+                class="feature-switch"
+                :class="{ on: featureStore.isOn(f.key) }"
+                :disabled="featureSaving === f.key"
+                role="switch"
+                :aria-checked="featureStore.isOn(f.key)"
+                @click="handleFeatureToggle(f)"
+              >
+                <span class="feature-switch__dot"></span>
+              </button>
+            </div>
+          </div>
+        </section>
       </template>
     </div>
   </div>
@@ -158,11 +183,13 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { updateProfile, updateCouple } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 import { useCoupleStore } from '@/stores/couple'
+import { FEATURE_META, useFeatureStore } from '@/stores/feature'
 import ImageUploader from '@/components/ImageUploader.vue'
 import { showToast } from '@/utils/toast'
 
 const userStore = useUserStore()
 const coupleStore = useCoupleStore()
+const featureStore = useFeatureStore()
 
 const loading = ref(true)
 const copied = ref(false)
@@ -171,6 +198,19 @@ const bindCode = ref('')
 const bindError = ref('')
 const savingProfile = ref(false)
 const savingCouple = ref(false)
+const featureSaving = ref('')
+
+async function handleFeatureToggle(f) {
+  if (featureSaving.value) return
+  featureSaving.value = f.key
+  try {
+    const next = !featureStore.isOn(f.key)
+    await featureStore.toggle(f.key, next)
+    showToast(next ? `已开启「${f.label}」` : `已关闭「${f.label}」，入口已隐藏`)
+  } finally {
+    featureSaving.value = ''
+  }
+}
 
 function friendlyBindMessage(msg) {
   if (!msg) return '绑定失败，请稍后再试'
@@ -479,6 +519,88 @@ onMounted(() => {
 
 .success-hint {
   color: var(--olive);
+}
+
+/* 功能管理开关 */
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+}
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px dashed rgba(var(--brown-rgb), 0.12);
+}
+
+.feature-row:last-child {
+  border-bottom: none;
+}
+
+.feature-row__icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.feature-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.feature-row__label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.feature-row__desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.feature-switch {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(var(--brown-rgb), 0.18);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.feature-switch:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.feature-switch__dot {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--photo-paper);
+  box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.feature-switch.on {
+  background: var(--olive);
+}
+
+.feature-switch.on .feature-switch__dot {
+  transform: translateX(20px);
 }
 
 .invite-box {

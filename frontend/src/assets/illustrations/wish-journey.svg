@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" fill="none">
+  <!-- 手绘风插画：纸飞机载着心愿飞向月亮，复古手账配色 -->
+  <!-- 云朵 -->
+  <g fill="#d4a574" opacity="0.45">
+    <path d="M96 128c-10 0-18-7-18-16 0-8 6-15 14-16 3-9 12-15 22-15 12 0 22 8 24 19 8 1 14 7 14 15 0 8-7 13-15 13H96z"/>
+    <path d="M470 160c-8 0-14-5-14-12 0-6 4-11 10-12 2-7 9-11 17-11 9 0 17 6 18 14 6 1 11 5 11 11 0 6-5 10-11 10h-31z"/>
+  </g>
+  <!-- 弯月 -->
+  <path d="M548 34a30 30 0 1 0 14 56 25 25 0 1 1-14-56z" fill="#e0c566" opacity="0.9"/>
+  <circle cx="552" cy="52" r="2.5" fill="#c9a227" opacity="0.6"/>
+  <circle cx="560" cy="64" r="1.8" fill="#c9a227" opacity="0.6"/>
+  <!-- 星星 -->
+  <g fill="#c9a227">
+    <path d="M150 44l3.5 9 9 3.5-9 3.5-3.5 9-3.5-9-9-3.5 9-3.5z"/>
+    <path d="M330 26l2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5z" opacity="0.8"/>
+    <path d="M448 60l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" opacity="0.7"/>
+    <path d="M250 90l1.8 4.6 4.6 1.8-4.6 1.8-1.8 4.6-1.8-4.6-4.6-1.8 4.6-1.8z" opacity="0.6"/>
+  </g>
+  <g fill="#c1666b" opacity="0.75">
+    <path d="M212 34l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+    <path d="M500 118l1.8 4.6 4.6 1.8-4.6 1.8-1.8 4.6-1.8-4.6-4.6-1.8 4.6-1.8z"/>
+  </g>
+  <!-- 小爱心 -->
+  <path d="M388 128c-2-4-8-4-8 1 0 4 5 7 8 9 3-2 8-5 8-9 0-5-6-5-8-1z" fill="#c1666b" opacity="0.8"/>
+  <!-- 飞行轨迹 -->
+  <path d="M110 158c70-46 140 22 210-18s110-30 140-58" stroke="#96705a" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round" opacity="0.8"/>
+  <!-- 纸飞机 -->
+  <g transform="translate(452 76) rotate(-18)" stroke="#5c3d2e" stroke-width="2" stroke-linejoin="round">
+    <path d="M0 6 L52 0 L14 20 L11 11 Z" fill="#fffdf5"/>
+    <path d="M11 11 L20 30 L26 12" fill="#f5ead3"/>
+  </g>
+  <!-- 邮票小方块 -->
+  <g transform="translate(60 24) rotate(-6)">
+    <rect x="0" y="0" width="34" height="42" rx="2" fill="#faf3e0" stroke="#b8875a" stroke-width="2" stroke-dasharray="4 3"/>
+    <path d="M8 30l7-9 5 6 4-4 6 7z" fill="#7d8c5c" opacity="0.8"/>
+    <circle cx="13" cy="12" r="3.5" fill="#c9a227" opacity="0.8"/>
+  </g>
+</svg>

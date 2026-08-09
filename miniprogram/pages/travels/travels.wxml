@@ -1,0 +1,176 @@
+<view class="page-wrap">
+  <view class="mast rise">
+    <view class="mast__title">我们的足迹</view>
+    <view class="mast__sub">一起走过的地方，都被点亮</view>
+  </view>
+
+  <!-- 中国地图 -->
+  <view class="card map-card rise d1">
+    <canvas type="2d" id="chinaMap" class="map-canvas" bindtap="onMapTap" disable-scroll></canvas>
+    <view class="map-legend">
+      <view class="legend-item"><view class="dot dot--visited"></view><text>已去过</text></view>
+      <view class="legend-item"><view class="dot dot--planned"></view><text>想去</text></view>
+      <view class="legend-item"><view class="dot dot--default"></view><text>未点亮</text></view>
+      <view class="legend-tip">点省份可筛选</view>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar rise d2">
+    <view class="chips">
+      <view class="chip {{tab === 'all' ? 'chip--on' : ''}} pressable" hover-class="pressed" data-tab="all" bindtap="onTab">全部</view>
+      <view class="chip {{tab === 'visited' ? 'chip--on' : ''}} pressable" hover-class="pressed" data-tab="visited" bindtap="onTab">已去过</view>
+      <view class="chip {{tab === 'planned' ? 'chip--on' : ''}} pressable" hover-class="pressed" data-tab="planned" bindtap="onTab">想去</view>
+    </view>
+    <view wx:if="{{filterProvince}}" class="province-filter">
+      <text>📍 {{filterProvince}}</text>
+      <text class="province-filter__clear" bindtap="clearProvince">✕ 取消</text>
+    </view>
+  </view>
+
+  <!-- 骨架 -->
+  <view wx:if="{{loading}}" class="rise d2">
+    <view class="sk sk-card"></view>
+    <view class="sk sk-card"></view>
+  </view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{groups.length === 0}}" class="empty rise d2">
+    <view class="empty__icon">🗺️</view>
+    <view class="empty__title">地图还等着被点亮</view>
+    <view class="empty__desc">记下第一次一起出发的地方吧</view>
+  </view>
+
+  <!-- 年份 → 季节 分组列表 -->
+  <block wx:for="{{groups}}" wx:key="year" wx:for-item="yg">
+    <view class="year-title rise d2">{{yg.year}}</view>
+    <block wx:for="{{yg.seasons}}" wx:key="name" wx:for-item="sg">
+      <view class="season-row">
+        <text class="tag">{{sg.name}}季</text>
+      </view>
+      <view
+        wx:for="{{sg.items}}"
+        wx:key="id"
+        class="card travel-card pressable rise d3"
+        hover-class="pressed"
+        data-id="{{item.id}}"
+        bindtap="openDetail"
+      >
+        <image wx:if="{{item.coverUrl}}" class="travel-card__cover" src="{{item.coverUrl}}" mode="aspectFill" lazy-load></image>
+        <view wx:else class="travel-card__cover travel-card__cover--ph">🧭</view>
+        <view class="travel-card__body">
+          <view class="travel-card__head">
+            <text class="travel-card__title">{{item.title}}</text>
+            <text wx:if="{{item.status === 0}}" class="tag tag--plan">想去</text>
+          </view>
+          <view class="travel-card__meta">{{item.city}}<text wx:if="{{item.dateText}}"> · {{item.dateText}}</text></view>
+          <view wx:if="{{item.note}}" class="travel-card__note">{{item.note}}</view>
+        </view>
+      </view>
+    </block>
+  </block>
+
+  <!-- 新建按钮 -->
+  <view class="fab pressable" hover-class="pressed" bindtap="openCreate">＋</view>
+</view>
+
+<!-- 新建 / 编辑弹层 -->
+<view wx:if="{{showEditor}}" class="mask" bindtap="closeEditor"></view>
+<view wx:if="{{showEditor}}" class="sheet" catchtouchmove="noop">
+  <view class="sheet__title">{{editingId ? '编辑足迹' : '记录足迹'}}</view>
+
+  <view class="field">
+    <text class="field__label">标题 *</text>
+    <input class="input" value="{{form.title}}" data-key="title" bindinput="onFormInput" placeholder="这次旅行的名字" placeholder-class="placeholder" maxlength="200" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">省份 *</text>
+    <picker range="{{provinceNames}}" value="{{form.provinceIndex < 0 ? 0 : form.provinceIndex}}" bindchange="onProvinceChange">
+      <view class="input picker-view {{form.provinceIndex < 0 ? 'placeholder' : ''}}">
+        {{form.provinceIndex < 0 ? '选择省份' : provinceNames[form.provinceIndex]}}
+      </view>
+    </picker>
+  </view>
+
+  <view class="field">
+    <text class="field__label">城市 *</text>
+    <input class="input" value="{{form.city}}" data-key="city" bindinput="onFormInput" placeholder="如：杭州" placeholder-class="placeholder" maxlength="50" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">日期</text>
+    <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+      <view class="input picker-view {{form.date ? '' : 'placeholder'}}">{{form.date || '选择日期'}}</view>
+    </picker>
+  </view>
+
+  <view class="field">
+    <text class="field__label">状态</text>
+    <view class="chips">
+      <view class="chip {{form.status === 1 ? 'chip--on' : ''}} pressable" hover-class="pressed" data-status="1" bindtap="onStatusPick">已去过</view>
+      <view class="chip {{form.status === 0 ? 'chip--on' : ''}} pressable" hover-class="pressed" data-status="0" bindtap="onStatusPick">想去</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="field__label">天气（可选）</text>
+    <input class="input" value="{{form.weather}}" data-key="weather" bindinput="onFormInput" placeholder="如：晴天 ☀️" placeholder-class="placeholder" maxlength="20" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">手记</text>
+    <textarea class="textarea" value="{{form.note}}" data-key="note" bindinput="onFormInput" placeholder="那天的风、味道和心情…" placeholder-class="placeholder" maxlength="2000" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">封面</text>
+    <view class="cover-pick pressable" hover-class="pressed" bindtap="chooseCover">
+      <image wx:if="{{form.coverUrl}}" class="cover-pick__img" src="{{form.coverUrl}}" mode="aspectFill"></image>
+      <view wx:else class="cover-pick__ph">📷 选择封面</view>
+    </view>
+  </view>
+
+  <button class="btn btn-solid" disabled="{{saving}}" loading="{{saving}}" bindtap="submitForm">{{editingId ? '保存修改' : '点亮这里'}}</button>
+</view>
+
+<!-- 详情弹层 -->
+<view wx:if="{{showDetail}}" class="mask" bindtap="closeDetail"></view>
+<view wx:if="{{showDetail && detail}}" class="sheet" catchtouchmove="noop">
+  <view class="sheet__title">{{detail.title}}</view>
+
+  <image wx:if="{{detail.coverUrl}}" class="detail-cover" src="{{detail.coverUrl}}" mode="aspectFill"></image>
+
+  <view class="detail-meta">
+    <text>📍 {{detail.province}} · {{detail.city}}</text>
+    <text wx:if="{{detail.dateText}}"> · {{detail.dateText}}</text>
+    <text wx:if="{{detail.seasonText}}"> · {{detail.seasonText}}季</text>
+    <text wx:if="{{detail.weather}}"> · {{detail.weather}}</text>
+    <text wx:if="{{detail.status === 0}}" class="tag tag--plan detail-tag">想去</text>
+  </view>
+
+  <view wx:if="{{detail.note}}" class="detail-note">{{detail.note}}</view>
+
+  <view class="sec-title">照片</view>
+  <view class="photo-grid">
+    <image
+      wx:for="{{detail.photos}}"
+      wx:key="id"
+      class="photo-grid__img pressable"
+      src="{{item.url}}"
+      mode="aspectFill"
+      lazy-load
+      data-url="{{item.url}}"
+      bindtap="previewPhoto"
+      data-id="{{item.id}}"
+      bindlongpress="delPhoto"
+    ></image>
+    <view class="photo-grid__add pressable" hover-class="pressed" bindtap="addPhotos">＋</view>
+  </view>
+  <view class="photo-tip">长按照片可删除</view>
+
+  <view class="detail-actions">
+    <button class="btn btn-ghost btn-sm" bindtap="openEdit">编辑</button>
+    <button class="btn btn-red btn-sm" bindtap="deleteTravel">删除足迹</button>
+  </view>
+</view>

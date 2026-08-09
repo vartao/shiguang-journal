@@ -12,19 +12,26 @@
 - 数据库：MySQL 8（库名 `qinglv_note`，schema 见 `sql/schema.sql`；Docker 镜像用 `mysql:8.4`）
 - 部署：Docker Compose（`mysql` / `backend` / `frontend` 三服务）+ Nginx
 
-功能模块：注册登录（BCrypt + JWT，7 天有效期）、情侣小窝（邀请码绑定，不填邀请码自动创建空间成为 owner）、笔记时间线（心情/天气/置顶/点赞/搜索）、相册与照片、纪念日倒计时、惊喜盒子（date/password/click 解锁，创建者可撤回/删除）、心愿单（伴侣可标记达成）、恋爱统计、文件上传。
+功能模块：注册登录（BCrypt + JWT，7 天有效期）、情侣小窝（邀请码绑定，不填邀请码自动创建空间成为 owner）、笔记时间线（心情/天气/置顶/点赞/评论/搜索）、那年今天（首页聚合历年同月同日的笔记/足迹/日志）、相册与照片、纪念日倒计时、惊喜盒子（date/password/click 解锁，创建者可撤回/删除）、心愿单（伴侣可标记达成）、恋爱统计（年度回顾 + canvas 回忆海报）、旅行足迹（中国地图点亮 + 年份/季节分组）、行程计划（出发前每日安排）、今天吃什么（菜品池/随机选菜/今日菜单）、时间胶囊（设定开启日期，到期前内容对双方不可见）、小事记（一起做过的事：分类打卡 + 0-5 星评分）、留言板（双人气泡悄悄话）、**功能开关**（按空间启停各功能入口，在"我们的小窝 → 功能管理"配置）、文件上传。
+
+功能开关：功能 key 为 `notes/albums/anniversary/surprise/wishes/stats/travels/plans/menu/capsule/logs/board`，存 `ql_couple_feature`，无记录默认开启；前端由 `stores/feature.js`（FEATURE_META 定义顺序/图标/路径）驱动导航显示与路由守卫（路由 meta.feature）。
 
 ## 2. 目录结构
 
 ```
 qinglv/
+├── miniprogram/       # 微信小程序（原生 WXML/WXSS/JS，导入用根目录 project.config.json）
+│   ├── app.js/app.wxss  # 全局态（token/features）+ 设计变量与全局工具类
+│   ├── utils/           # api.js（wx.request 封装 + 上传）、util.js、chinaMapData.js
+│   ├── custom-tab-bar/  # 自定义底部导航（时间线/足迹/写笔记/留言板/我的）
+│   └── pages/           # 15 个页面，与网页端功能一一对应（无纪念日/惊喜盒/导出）
 ├── frontend/          # Vue 前端（Vite，开发端口 5173）
 │   └── src/
 │       ├── api/           # Axios 封装（request.js，baseURL=/api，自动带 token）+ 各模块 API
 │       ├── views/         # 页面组件（路由 meta 控制登录态）
 │       ├── components/    # 胶片/拍立得/信封/弹窗等视觉组件
-│       ├── stores/        # Pinia：user / couple / theme
-│       ├── features/      # 表单逻辑（anniversary、wish）
+│       ├── stores/        # Pinia：user / couple / theme / feature（功能开关）
+│       ├── features/      # 表单逻辑（anniversary、wish、plan）
 │       ├── composables/、utils/、router/、assets/styles/（手账风 CSS 变量）
 │       └── test/setup.js  # vitest 全局配置
 ├── backend/           # Spring Boot 后端（端口 8080）
@@ -36,12 +43,12 @@ qinglv/
 │       └── common/        # JwtUtil、JwtInterceptor、RateLimiter、全局异常、统一 Result、WebConfig
 ├── sql/               # schema.sql（以这份为准）+ 旧环境手动迁移脚本（migration_*.sql）
 ├── deploy/            # nginx.conf、deploy.sh / deploy-windows.ps1、validate-env.sh、docker-compose.e2e.yml、ssl/
-├── scripts/           # 验收脚本（acceptance.sh / .ps1 / acceptance-full.mjs）、check-env.sh、verify.sh
+├── scripts/           # 验收脚本（acceptance.sh / .ps1 / acceptance-full.mjs）、check-env.sh、verify.sh、build-china-map.mjs（生成中国地图 SVG 数据）
 ├── docs/              # ARCHITECTURE.md、OPERATIONS.md、REFACTORING_REVIEW.md、superpowers/（plans+specs）
 └── docker-compose.yml
 ```
 
-数据表（前缀 `ql_`，共 11 张）：`ql_user`、`ql_couple`、`ql_note`、`ql_note_image`、`ql_note_like`、`ql_album`、`ql_photo`、`ql_anniversary`、`ql_surprise`、`ql_wish`、`ql_file`。
+数据表（前缀 `ql_`，共 21 张）：`ql_user`、`ql_couple`、`ql_note`、`ql_note_image`、`ql_note_like`、`ql_note_comment`、`ql_album`、`ql_photo`、`ql_anniversary`、`ql_surprise`、`ql_wish`、`ql_file`、`ql_travel`、`ql_travel_photo`、`ql_plan`、`ql_dish`、`ql_menu_meal`、`ql_couple_feature`、`ql_capsule`、`ql_couple_log`、`ql_message`。
 
 ## 3. 构建与运行
 
@@ -67,6 +74,10 @@ cp .env.example .env          # 必须替换所有 CHANGE_ME 值
 bash deploy/validate-env.sh   # 校验 .env
 docker compose up -d --build  # 访问 http://服务器IP:8090
 ```
+
+### 微信小程序
+
+微信开发者工具导入仓库根目录（`project.config.json` 已指向 `miniprogram/`），详情见 `miniprogram/README.md`；后端地址在 `miniprogram/app.js` 的 `globalData.apiBase` 一处修改。静态校验：`node scripts/check-miniprogram.mjs`。
 
 - MySQL 首次启动自动执行 `sql/schema.sql`（挂载到 `/docker-entrypoint-initdb.d/`）；改过 schema 需 `docker compose down -v` 后重建。
 - 前端镜像内置 `frontend/nginx.conf`，compose 会用 `deploy/nginx.conf` 挂载覆盖；上传卷 `upload_data` 同时挂到 backend（写）和 frontend nginx（只读）。

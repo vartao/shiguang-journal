@@ -1,0 +1,135 @@
+/* 行程计划列表页 */
+
+.add-row {
+  margin-bottom: 32rpx;
+}
+
+.plan-card {
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.plan-card__cover {
+  width: 100%;
+  height: 260rpx;
+  display: block;
+}
+
+.plan-card__cover--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72rpx;
+  background: linear-gradient(150deg, var(--kraft-light), var(--kraft));
+}
+
+.plan-card__body {
+  padding: 24rpx;
+}
+
+.plan-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.plan-card__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 状态徽标 */
+.st {
+  flex-shrink: 0;
+  padding: 4rpx 18rpx;
+  font-size: 20rpx;
+  border-radius: 999rpx;
+  color: var(--cream);
+}
+
+.st--olive { background: var(--olive); }
+.st--mustard { background: var(--mustard); }
+.st--blue { background: var(--blue); }
+
+.plan-card__meta {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--text-2);
+}
+
+.plan-card__foot {
+  margin-top: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-card__budget {
+  font-size: 24rpx;
+  color: var(--brown);
+  font-weight: 600;
+}
+
+.plan-card__ops {
+  display: flex;
+  gap: 24rpx;
+}
+
+.op {
+  font-size: 24rpx;
+  color: var(--muted);
+  padding: 6rpx 8rpx;
+}
+
+.op--danger {
+  color: var(--red-dark);
+}
+
+/* 表单 */
+.field-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.field--half {
+  flex: 1;
+}
+
+.picker-view {
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+}
+
+.cover-pick {
+  width: 100%;
+  height: 240rpx;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  border: 2rpx dashed rgba(92, 61, 46, 0.25);
+}
+
+.cover-pick__img {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-pick__ph {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 26rpx;
+}
+
+.sk-card {
+  height: 300rpx;
+  margin-bottom: 24rpx;
+  border-radius: var(--radius-m);
+}

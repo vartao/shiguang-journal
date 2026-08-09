@@ -10,16 +10,39 @@
       <!-- 导航链接 - 桌面端 -->
       <div class="navbar__links" :class="{ open: menuOpen }">
         <router-link
-          v-for="link in navLinks"
+          v-for="(link, idx) in enabledLinks"
           :key="link.path"
           :to="link.path"
           class="navbar__link"
-          :class="{ active: isActive(link.path) }"
+          :class="{ active: isActive(link.path), 'navbar__link--overflow': idx >= primaryCount }"
           @click="menuOpen = false"
         >
           <span class="navbar__link-icon">{{ link.icon }}</span>
           <span class="navbar__link-text">{{ link.label }}</span>
         </router-link>
+
+        <!-- 桌面端「更多」下拉：收纳放不下的入口；移动端抽屉隐藏 -->
+        <div v-if="moreLinks.length" class="navbar__more">
+          <button class="navbar__link navbar__more-btn" @click.stop="moreOpen = !moreOpen">
+            <span class="navbar__link-icon">🧩</span>
+            <span class="navbar__link-text">更多</span>
+            <span class="navbar__more-caret" :class="{ open: moreOpen }">▾</span>
+          </button>
+          <transition name="dropdown">
+            <div v-if="moreOpen" class="navbar__dropdown navbar__more-panel">
+              <router-link
+                v-for="link in moreLinks"
+                :key="link.path"
+                :to="link.path"
+                class="dropdown__item"
+                @click="moreOpen = false"
+              >
+                <span>{{ link.icon }}</span> {{ link.label }}
+              </router-link>
+            </div>
+          </transition>
+        </div>
+
         <!-- 导出入口：仅移动端抽屉显示，桌面端走用户下拉菜单 -->
         <router-link
           to="/export"
@@ -90,29 +113,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useCoupleStore } from '@/stores/couple'
 import { useThemeStore } from '@/stores/theme'
+import { FEATURE_META, useFeatureStore } from '@/stores/feature'
 
 const route = useRoute()
 const userStore = useUserStore()
 const coupleStore = useCoupleStore()
 const themeStore = useThemeStore()
+const featureStore = useFeatureStore()
 
 const menuOpen = ref(false)
 const userMenuOpen = ref(false)
+const moreOpen = ref(false)
 
-const navLinks = [
-  { path: '/', label: '时间线', icon: '🎞️' },
-  { path: '/albums', label: '相册墙', icon: '📸' },
-  { path: '/anniversary', label: '纪念日', icon: '💑' },
-  { path: '/surprise', label: '惊喜盒', icon: '🎁' },
-  { path: '/wishes', label: '心愿池', icon: '✨' },
-  { path: '/stats', label: '数据', icon: '📊' },
-  { path: '/space', label: '小窝', icon: '🏠' }
-]
+/** 桌面端平铺的链接数，其余收进「更多」 */
+const primaryCount = 5
+
+/** 已启用功能的导航链接（含顺序） */
+const enabledLinks = computed(() => FEATURE_META.filter((f) => featureStore.isOn(f.key)))
+const moreLinks = computed(() => enabledLinks.value.slice(primaryCount))
 
 function isActive(path) {
   if (path === '/') return route.path === '/'
@@ -132,10 +155,14 @@ function handleClickOutside(e) {
   if (!e.target.closest('.navbar__user')) {
     userMenuOpen.value = false
   }
+  if (!e.target.closest('.navbar__more')) {
+    moreOpen.value = false
+  }
 }
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  featureStore.fetchFeatures()
 })
 
 onUnmounted(() => {
@@ -178,6 +205,8 @@ onUnmounted(() => {
   gap: 8px;
   text-decoration: none;
   transition: transform var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar__logo:hover {
@@ -200,14 +229,14 @@ onUnmounted(() => {
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 
 .navbar__link {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 5px;
+  padding: 8px 12px;
   font-family: var(--font-display);
   font-size: 14px;
   letter-spacing: 1px;
@@ -216,6 +245,8 @@ onUnmounted(() => {
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
   position: relative;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar__link::after {
@@ -253,6 +284,34 @@ onUnmounted(() => {
 /* 导出链接默认隐藏，只在移动端抽屉里出现 */
 .navbar__link--export {
   display: none;
+}
+
+/* 桌面端：超出平铺数量的链接收进「更多」下拉 */
+.navbar__link--overflow {
+  display: none;
+}
+
+.navbar__more {
+  position: relative;
+}
+
+.navbar__more-btn {
+  cursor: pointer;
+}
+
+.navbar__more-caret {
+  font-size: 11px;
+  transition: transform var(--transition-fast);
+}
+
+.navbar__more-caret.open {
+  transform: rotate(180deg);
+}
+
+.navbar__more-panel {
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
 }
 
 /* 暗色模式切换按钮 */
@@ -498,6 +557,25 @@ onUnmounted(() => {
   animation: modal-content-in 0.2s ease reverse both;
 }
 
+/* 中等屏幕：隐藏图标和用户名，给文字腾出空间，避免挤压换行 */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .navbar__link-icon {
+    display: none;
+  }
+
+  .navbar__link {
+    padding: 8px 10px;
+  }
+
+  .navbar__username {
+    display: none;
+  }
+
+  .navbar__actions {
+    gap: 10px;
+  }
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .navbar__links {
@@ -526,6 +604,15 @@ onUnmounted(() => {
     padding: 12px 16px;
     width: 100%;
     justify-content: center;
+  }
+
+  /* 移动端抽屉：全部入口平铺，不收「更多」 */
+  .navbar__link--overflow {
+    display: flex;
+  }
+
+  .navbar__more {
+    display: none;
   }
 
   .navbar__link--export {

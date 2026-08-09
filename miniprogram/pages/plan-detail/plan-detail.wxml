@@ -1,0 +1,133 @@
+<view class="page-wrap page-wrap--no-tab" wx:if="{{plan}}">
+  <!-- 头部 -->
+  <view class="card head-card rise">
+    <image wx:if="{{plan.coverUrl}}" class="head-card__cover" src="{{plan.coverUrl}}" mode="aspectFill"></image>
+    <view class="head-card__body">
+      <view class="head-card__title-row">
+        <text class="head-card__title">{{plan.title}}</text>
+        <text class="st {{plan.statusCls}} pressable" hover-class="pressed" bindtap="cycleStatus">{{plan.statusLabel}}</text>
+      </view>
+      <view class="head-card__meta">
+        <view wx:if="{{plan.destination}}">📍 {{plan.destination}}</view>
+        <view wx:if="{{plan.startText}}">🗓 {{plan.startText}}<text wx:if="{{plan.endText}}"> ~ {{plan.endText}}</text></view>
+        <view wx:if="{{plan.budget != null}}">💰 预算 ¥{{plan.budget}}</view>
+      </view>
+      <view class="status-tip">点状态徽标可切换：计划中 → 已出发 → 已完成</view>
+      <view wx:if="{{plan.note}}" class="head-card__note">{{plan.note}}</view>
+      <view class="head-card__ops">
+        <button class="btn btn-ghost btn-sm" bindtap="openEdit">编辑</button>
+        <button class="btn btn-red btn-sm" bindtap="deletePlan">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日安排 -->
+  <view class="sec-title">每日安排</view>
+
+  <view wx:if="{{days.length === 0}}" class="empty empty--sm">
+    <view class="empty__icon">🗓️</view>
+    <view class="empty__desc">还没有安排，添加第一天吧</view>
+  </view>
+
+  <view wx:for="{{days}}" wx:key="index" wx:for-index="dayIdx" class="card day-card rise d{{dayIdx % 5 + 1}}">
+    <view class="day-card__head">
+      <picker mode="date" value="{{item.date}}" data-index="{{dayIdx}}" bindchange="onDayDateChange">
+        <view class="day-card__title">第 {{dayIdx + 1}} 天 · {{item.date || '选日期'}}</view>
+      </picker>
+      <text class="day-card__del" data-index="{{dayIdx}}" bindtap="delDay">删除</text>
+    </view>
+
+    <view wx:for="{{item.items}}" wx:for-item="it" wx:for-index="itemIdx" wx:key="index" class="day-item">
+      <text class="day-item__dot">·</text>
+      <text class="day-item__text">{{it}}</text>
+      <text class="day-item__del" data-day="{{dayIdx}}" data-item="{{itemIdx}}" bindtap="delItem">✕</text>
+    </view>
+
+    <view class="day-add">
+      <input
+        class="input day-add__input"
+        value="{{dayInputs[dayIdx]}}"
+        data-index="{{dayIdx}}"
+        bindinput="onItemInput"
+        placeholder="如：下午逛古城"
+        placeholder-class="placeholder"
+        confirm-type="done"
+        bindconfirm="addItem"
+      />
+      <button class="btn btn-ghost btn-sm day-add__btn" data-index="{{dayIdx}}" bindtap="addItem">添加</button>
+    </view>
+  </view>
+
+  <button class="btn btn-ghost add-day pressable" hover-class="pressed" bindtap="addDay">＋ 添加一天</button>
+
+  <button class="btn btn-solid save-btn" disabled="{{savingDays}}" loading="{{savingDays}}" bindtap="saveDays">
+    {{dirty ? '保存行程（有改动）' : '保存行程'}}
+  </button>
+</view>
+
+<view wx:if="{{!plan}}" class="loading-text">加载中…</view>
+
+<!-- 编辑行程信息弹层 -->
+<view wx:if="{{showEditor}}" class="mask" bindtap="closeEditor"></view>
+<view wx:if="{{showEditor}}" class="sheet" catchtouchmove="noop">
+  <view class="sheet__title">编辑行程</view>
+
+  <view class="field">
+    <text class="field__label">标题 *</text>
+    <input class="input" value="{{form.title}}" data-key="title" bindinput="onFormInput" placeholder="给这次出发起个名字" placeholder-class="placeholder" maxlength="200" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">目的地</text>
+    <input class="input" value="{{form.destination}}" data-key="destination" bindinput="onFormInput" placeholder="如：云南 · 大理" placeholder-class="placeholder" maxlength="200" />
+  </view>
+
+  <view class="field-row">
+    <view class="field field--half">
+      <text class="field__label">开始日期</text>
+      <picker mode="date" value="{{form.startDate}}" data-key="startDate" bindchange="onDateChange">
+        <view class="input picker-view {{form.startDate ? '' : 'placeholder'}}">{{form.startDate || '选择'}}</view>
+      </picker>
+    </view>
+    <view class="field field--half">
+      <text class="field__label">结束日期</text>
+      <picker mode="date" value="{{form.endDate}}" data-key="endDate" bindchange="onDateChange">
+        <view class="input picker-view {{form.endDate ? '' : 'placeholder'}}">{{form.endDate || '选择'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="field__label">预算（元）</text>
+    <input class="input" type="digit" value="{{form.budget}}" data-key="budget" bindinput="onFormInput" placeholder="如：3000" placeholder-class="placeholder" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">状态</text>
+    <view class="chips">
+      <view
+        wx:for="{{statusMeta}}"
+        wx:key="label"
+        class="chip {{form.status === index ? 'chip--on' : ''}} pressable"
+        hover-class="pressed"
+        data-status="{{index}}"
+        bindtap="onStatusPick"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="field__label">备注</text>
+    <textarea class="textarea" value="{{form.note}}" data-key="note" bindinput="onFormInput" placeholder="证件、清单、想吃的店…" placeholder-class="placeholder" maxlength="1000" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">封面</text>
+    <view class="cover-pick pressable" hover-class="pressed" bindtap="chooseCover">
+      <image wx:if="{{form.coverUrl}}" class="cover-pick__img" src="{{form.coverUrl}}" mode="aspectFill"></image>
+      <view wx:else class="cover-pick__ph">📷 选择封面</view>
+    </view>
+  </view>
+
+  <button class="btn btn-solid" disabled="{{saving}}" loading="{{saving}}" bindtap="submitForm">保存修改</button>
+</view>

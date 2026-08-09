@@ -1,0 +1,100 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">心愿许愿池</view>
+    <view class="mast__sub">把想一起做的事，先许个愿</view>
+  </view>
+
+  <!-- tab + 许愿按钮 -->
+  <view class="bar rise d1">
+    <view class="tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="chip {{tab === item.key ? 'chip--on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="switchTab"
+      >{{item.label}}</view>
+    </view>
+    <button class="btn btn-solid btn-sm" bindtap="openCreate">✨ 许个愿</button>
+  </view>
+
+  <!-- 列表 -->
+  <view wx:if="{{loading}}">
+    <view wx:for="{{3}}" wx:key="index" class="sk wish-sk"></view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{wishes}}"
+      wx:key="id"
+      class="wish card rise {{item.done ? 'wish--done' : ''}} {{index < 5 ? 'd' + (index + 1) : ''}}"
+      wx:if="{{tab === 'all' || (tab === 'pending' && !item.done) || (tab === 'done' && item.done)}}"
+    >
+      <view class="wish__icon">{{item.iconShow}}</view>
+      <view class="wish__body">
+        <view class="wish__head">
+          <view class="wish__title">{{item.title}}</view>
+          <view wx:if="{{item.urgent && !item.done}}" class="wish__urgent">⚡ 紧急</view>
+        </view>
+        <view wx:if="{{item.description}}" class="wish__desc">{{item.description}}</view>
+        <view class="wish__meta">
+          <text class="tag">{{item.catEmoji}} {{item.catLabel}}</text>
+          <text class="wish__pri {{item.urgent ? 'wish__pri--red' : ''}}">{{item.priIcon}} {{item.priLabel}}</text>
+        </view>
+        <view wx:if="{{item.done}}" class="wish__badge">✓ 已达成 · {{item.completerNickname || 'TA'}} 标记</view>
+        <view class="wish__ops">
+          <view wx:if="{{!item.done}}" class="wish__op wish__op--ok pressable" data-id="{{item.id}}" bindtap="complete">✓ 达成</view>
+          <block wx:if="{{item.canManage}}">
+            <view wx:if="{{!item.done}}" class="wish__op pressable" data-id="{{item.id}}" bindtap="openEdit">编辑</view>
+            <view class="wish__op wish__op--del pressable" data-id="{{item.id}}" bindtap="remove">删除</view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!wishes.length}}" class="empty">
+      <view class="empty__icon">🌠</view>
+      <view class="empty__title">还没有心愿</view>
+      <view class="empty__desc">许下第一个想一起完成的心愿吧</view>
+    </view>
+  </block>
+
+  <!-- 新建 / 编辑弹层 -->
+  <view wx:if="{{showEdit}}" class="mask" bindtap="closeEdit"></view>
+  <view wx:if="{{showEdit}}" class="sheet">
+    <view class="sheet__title">{{editingId ? '编辑心愿' : '许个愿'}}</view>
+    <view class="field">
+      <text class="field__label">心愿标题（必填）</text>
+      <input class="input" placeholder="想一起做什么？" placeholder-class="placeholder" value="{{form.title}}" maxlength="200" bindinput="onTitleInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">描述</text>
+      <textarea class="textarea" placeholder="补充一点细节吧" placeholder-class="placeholder" value="{{form.description}}" maxlength="1000" bindinput="onDescInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">分类</text>
+      <view class="chip-row">
+        <view
+          wx:for="{{categories}}"
+          wx:key="key"
+          class="chip {{form.category === item.key ? 'chip--on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="selectCategory"
+        >{{item.emoji}} {{item.label}}</view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field__label">优先级</text>
+      <view class="chip-row">
+        <view
+          wx:for="{{priorities}}"
+          wx:key="value"
+          class="chip {{form.priority === item.value ? 'chip--on' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="selectPriority"
+        >{{item.icon}} {{item.label}}</view>
+      </view>
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving}}" bindtap="submit">{{editingId ? '保存' : '许下心愿'}}</button>
+  </view>
+</view>

@@ -11,6 +11,9 @@
         <button type="button" class="btn-vintage btn-vintage--small" @click="showReport = true">
           &#128221; 生成年度回顾
         </button>
+        <button type="button" class="btn-vintage btn-vintage--red btn-vintage--small" @click="showPoster = true">
+          &#127912; 生成回忆海报
+        </button>
       </div>
 
       <!-- 加载状态 -->
@@ -119,7 +122,7 @@
 
           <div class="mood-chart">
             <div v-for="[key, count] in moodEntries" :key="key" class="mood-bar-row">
-              <span class="mood-bar__emoji">{{ moods[key]?.emoji || '&#128156;' }}</span>
+              <span class="mood-bar__emoji">{{ moods[key]?.emoji || '💜' }}</span>
               <span class="mood-bar__label">{{ moods[key]?.label || key }}</span>
               <div class="mood-bar__track">
                 <div
@@ -142,6 +145,8 @@
           <button type="button" class="btn-vintage" @click="printReport">打印 / 保存 PDF</button>
         </template>
       </BaseModal>
+
+      <RecapPoster :visible="showPoster" :stats="stats" @close="showPoster = false" />
     </div>
   </div>
 </template>
@@ -152,21 +157,23 @@ import { getStats } from '@/api/stats'
 import { useCoupleStore } from '@/stores/couple'
 import BaseModal from '@/components/BaseModal.vue'
 import AnnualReport from '@/components/AnnualReport.vue'
+import RecapPoster from '@/components/RecapPoster.vue'
 
 const coupleStore = useCoupleStore()
 const loading = ref(false)
 const stats = ref(null)
 const showReport = ref(false)
+const showPoster = ref(false)
 
 const moods = {
-  happy: { emoji: '&#128522;', label: '开心' },
-  sad: { emoji: '&#128546;', label: '难过' },
-  angry: { emoji: '&#128548;', label: '生气' },
-  surprised: { emoji: '&#128562;', label: '惊喜' },
-  tired: { emoji: '&#128555;', label: '疲惫' },
-  loved: { emoji: '&#128525;', label: '被爱' },
-  anxious: { emoji: '&#128560;', label: '焦虑' },
-  peaceful: { emoji: '&#128524;', label: '平静' }
+  happy: { emoji: '😊', label: '开心' },
+  love: { emoji: '🥰', label: '甜蜜' },
+  excited: { emoji: '🤩', label: '兴奋' },
+  calm: { emoji: '😌', label: '平静' },
+  miss: { emoji: '🥺', label: '想念' },
+  funny: { emoji: '🤣', label: '搞笑' },
+  sad: { emoji: '😢', label: '难过' },
+  angry: { emoji: '😤', label: '生气' }
 }
 
 const moodEntries = computed(() => {
@@ -213,6 +220,8 @@ onMounted(async () => {
 .stats-toolbar {
   display: flex;
   justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 28px;
 }
 
@@ -226,7 +235,7 @@ onMounted(async () => {
 .stats-header__subtitle {
   font-family: var(--font-display);
   font-size: 15px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 2px;
 }
 

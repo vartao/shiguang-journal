@@ -1,0 +1,154 @@
+<view class="page-wrap">
+  <!-- 页头 -->
+  <view class="mast rise d1">
+    <view class="mast__title">我们的时光胶卷</view>
+    <view class="mast__sub">每一帧都是心动的瞬间 · 已记录 {{total}} 个日子</view>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="search card rise d2">
+    <text class="search__icon">🔍</text>
+    <input
+      class="search__input"
+      value="{{keyword}}"
+      placeholder="搜一搜那些闪光的日子"
+      placeholder-class="placeholder"
+      confirm-type="search"
+      bindinput="onSearchInput"
+    />
+    <text wx:if="{{keyword}}" class="search__clear" bindtap="onSearchClear">✕</text>
+  </view>
+
+  <!-- 心情筛选 -->
+  <scroll-view scroll-x class="chips rise d2" enhanced show-scrollbar="{{false}}">
+    <view class="chips__row">
+      <view class="chip {{mood === '' ? 'chip--on' : ''}}" hover-class="pressed" bindtap="onMoodTap" data-key="">全部</view>
+      <view
+        wx:for="{{moods}}"
+        wx:key="key"
+        class="chip {{mood === item.key ? 'chip--on' : ''}}"
+        hover-class="pressed"
+        bindtap="onMoodTap"
+        data-key="{{item.key}}"
+      >{{item.emoji}} {{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 那年今天 -->
+  <view wx:if="{{onThisDay.length}}" class="otd card rise d3">
+    <view class="otd__title">📮 那年今天</view>
+    <view wx:for="{{onThisDay}}" wx:key="id" class="otd__item">
+      <text class="otd__year">{{item.year}}</text>
+      <text class="otd__icon">{{item.icon}}</text>
+      <text class="otd__text">{{item.title}}</text>
+    </view>
+  </view>
+
+  <!-- 骨架屏 -->
+  <block wx:if="{{initialLoading}}">
+    <view class="sk sk-card"></view>
+    <view class="sk sk-card"></view>
+    <view class="sk sk-card"></view>
+  </block>
+
+  <!-- 空态 -->
+  <view wx:elif="{{!notes.length}}" class="empty">
+    <view class="empty__icon">🎞️</view>
+    <view class="empty__title">胶卷还是空白的</view>
+    <view class="empty__desc">把今天的心动，封存进第一页吧</view>
+    <button class="btn btn-red btn-sm" hover-class="pressed" bindtap="onGoWrite">去写第一篇</button>
+  </view>
+
+  <!-- 笔记列表 -->
+  <block wx:else>
+    <view
+      wx:for="{{notes}}"
+      wx:key="id"
+      class="note card rise {{index < 5 ? 'd' + (index % 5 + 1) : ''}}"
+    >
+      <view class="note__date">
+        <text class="note__day">{{item.day}}</text>
+        <text class="note__month">{{item.month}}</text>
+      </view>
+      <view class="note__body">
+        <view class="note__title-row">
+          <text wx:if="{{item.isTop}}" class="note__top">📌</text>
+          <text class="note__title">{{item.title}}</text>
+        </view>
+        <image
+          wx:if="{{item.cover}}"
+          class="note__cover"
+          src="{{item.cover}}"
+          mode="aspectFill"
+          bindtap="onPreview"
+          data-id="{{item.id}}"
+        />
+        <view wx:if="{{item.extraCount}}" class="note__more">+{{item.extraCount}}</view>
+        <text class="note__content">{{item.content}}</text>
+        <view class="note__meta">
+          <text wx:if="{{item.mood}}" class="tag">{{item.moodEmoji}} {{item.moodLabel}}</text>
+          <text wx:if="{{item.weatherEmoji}}" class="tag">{{item.weatherEmoji}} {{item.weatherLabel}}</text>
+          <text class="note__author">✍️ {{item.authorName}}</text>
+        </view>
+        <view class="note__actions">
+          <view
+            class="note__action {{item.liked ? 'note__action--on' : ''}}"
+            hover-class="pressed"
+            bindtap="onLike"
+            data-id="{{item.id}}"
+          >{{item.liked ? '❤️' : '🤍'}} {{item.likeCount}}</view>
+          <view class="note__action" hover-class="pressed" bindtap="onOpenComments" data-id="{{item.id}}">
+            💬 {{item.commentCount}}
+          </view>
+          <view
+            wx:if="{{item.userId === myUserId}}"
+            class="note__action note__action--del"
+            hover-class="pressed"
+            bindtap="onDelete"
+            data-id="{{item.id}}"
+          >🗑️ 删除</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore}}" class="more">
+      <button class="btn btn-ghost btn-sm" hover-class="pressed" disabled="{{loadingMore}}" bindtap="loadMore">
+        {{loadingMore ? '加载中…' : '再翻一页 📖'}}
+      </button>
+    </view>
+    <view wx:else class="loading-text">— 胶卷到头啦 —</view>
+  </block>
+</view>
+
+<!-- 评论底部弹层 -->
+<view wx:if="{{commentShow}}" class="mask" bindtap="onCloseComments"></view>
+<view wx:if="{{commentShow}}" class="sheet comment-sheet">
+  <view class="sheet__title">悄悄话</view>
+  <scroll-view scroll-y class="comment-sheet__list">
+    <view wx:if="{{commentLoading}}" class="loading-text">加载中…</view>
+    <view wx:elif="{{!comments.length}}" class="comment-sheet__empty">还没有悄悄话，说点什么吧</view>
+    <view wx:for="{{comments}}" wx:key="id" class="comment">
+      <view class="comment__head">
+        <text class="comment__author">{{item.author}}</text>
+        <text class="comment__time">{{item.time}}</text>
+      </view>
+      <view class="comment__row">
+        <text class="comment__content">{{item.content}}</text>
+        <text wx:if="{{item.mine}}" class="comment__del" bindtap="onDeleteComment" data-id="{{item.id}}">删除</text>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="comment-sheet__bar">
+    <input
+      class="input comment-sheet__input"
+      value="{{commentText}}"
+      placeholder="写一句悄悄话…"
+      placeholder-class="placeholder"
+      confirm-type="send"
+      bindinput="onCommentInput"
+      bindconfirm="onSendComment"
+    />
+    <button class="btn btn-solid btn-sm" hover-class="pressed" disabled="{{commentSending}}" bindtap="onSendComment">发送</button>
+  </view>
+</view>

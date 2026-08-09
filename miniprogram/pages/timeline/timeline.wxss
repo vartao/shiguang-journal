@@ -1,0 +1,272 @@
+/* 时间线页 */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.search__icon {
+  font-size: 26rpx;
+}
+
+.search__input {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--ink);
+}
+
+.search__clear {
+  padding: 6rpx 12rpx;
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
+.chips {
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+}
+
+.chips__row {
+  display: inline-flex;
+  gap: 16rpx;
+  padding: 8rpx 2rpx 16rpx;
+}
+
+/* 那年今天 */
+.otd {
+  padding: 24rpx 28rpx;
+  margin-bottom: 28rpx;
+}
+
+.otd__title {
+  font-family: 'Ma Shan Zheng', 'STXingkai', 'KaiTi', '楷体', cursive;
+  font-size: 32rpx;
+  color: var(--brown-deep);
+  letter-spacing: 2rpx;
+  margin-bottom: 14rpx;
+}
+
+.otd__item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+  color: var(--text-2);
+}
+
+.otd__year {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--red);
+  letter-spacing: 1rpx;
+}
+
+.otd__icon {
+  flex-shrink: 0;
+}
+
+.otd__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 骨架 */
+.sk-card {
+  height: 300rpx;
+  margin-bottom: 28rpx;
+  border-radius: var(--radius-m);
+}
+
+/* 笔记卡片 */
+.note {
+  display: flex;
+  margin-bottom: 28rpx;
+  overflow: hidden;
+}
+
+.note__date {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 96rpx;
+  padding-top: 28rpx;
+  background: linear-gradient(180deg, var(--red), var(--red-dark));
+  color: var(--cream);
+}
+
+.note__day {
+  font-family: 'Ma Shan Zheng', 'STXingkai', 'KaiTi', '楷体', cursive;
+  font-size: 48rpx;
+  line-height: 1.1;
+}
+
+.note__month {
+  font-size: 20rpx;
+  letter-spacing: 2rpx;
+  opacity: 0.9;
+}
+
+.note__body {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding: 24rpx 28rpx 20rpx;
+}
+
+.note__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.note__title {
+  font-family: 'Ma Shan Zheng', 'STXingkai', 'KaiTi', '楷体', cursive;
+  font-size: 34rpx;
+  color: var(--brown-deep);
+  letter-spacing: 2rpx;
+}
+
+.note__cover {
+  display: block;
+  width: 100%;
+  height: 320rpx;
+  margin-top: 16rpx;
+  border-radius: var(--radius-s);
+  border: 1rpx solid var(--line-soft);
+}
+
+.note__more {
+  position: absolute;
+  right: 44rpx;
+  top: 268rpx;
+  padding: 4rpx 18rpx;
+  font-size: 22rpx;
+  color: var(--cream);
+  background: rgba(44, 30, 22, 0.55);
+  border-radius: 999rpx;
+}
+
+.note__content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  color: var(--text-2);
+}
+
+.note__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.note__author {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.note__actions {
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed var(--line);
+}
+
+.note__action {
+  font-size: 24rpx;
+  color: var(--text-2);
+}
+
+.note__action--on {
+  color: var(--red);
+}
+
+.note__action--del {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 12rpx 0 24rpx;
+}
+
+/* 评论弹层 */
+.comment-sheet__list {
+  max-height: 50vh;
+}
+
+.comment-sheet__empty {
+  padding: 40rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
+.comment {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--line-soft);
+}
+
+.comment__head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 6rpx;
+}
+
+.comment__author {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.comment__time {
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.comment__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.comment__content {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--ink);
+}
+
+.comment__del {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--red);
+}
+
+.comment-sheet__bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.comment-sheet__input {
+  flex: 1;
+  padding: 14rpx 20rpx;
+}

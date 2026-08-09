@@ -1,0 +1,105 @@
+<view class="page-wrap">
+  <view class="mast rise">
+    <view class="mast__title">我们的小窝</view>
+    <view class="mast__sub">两个人的人间烟火</view>
+  </view>
+
+  <!-- 情侣卡 -->
+  <view class="card couple-card rise d1">
+    <view class="couple-card__avatars">
+      <view class="avatar">
+        <image wx:if="{{me.avatar}}" class="avatar__img" src="{{me.avatar}}" mode="aspectFill" />
+        <view wx:else class="avatar__ph">{{me.initial}}</view>
+        <view class="avatar__name">{{me.name}}</view>
+      </view>
+      <text class="couple-card__heart">❤</text>
+      <view class="avatar">
+        <image wx:if="{{partner.avatar}}" class="avatar__img" src="{{partner.avatar}}" mode="aspectFill" />
+        <view wx:else class="avatar__ph {{hasPartner ? '' : 'avatar__ph--empty'}}">{{partner.initial}}</view>
+        <view class="avatar__name">{{partner.name}}</view>
+      </view>
+    </view>
+    <view class="couple-card__name">{{coupleName}}</view>
+    <view wx:if="{{hasPartner && togetherDays > 0}}" class="couple-card__days">在一起 <text class="couple-card__num">{{togetherDays}}</text> 天</view>
+    <view wx:elif="{{hasPartner}}" class="couple-card__days">小窝已组建，记得补上在一起的日子</view>
+    <view wx:else class="couple-card__days">还缺一个 TA，快用邀请码绑定吧</view>
+  </view>
+
+  <!-- 邀请码卡 -->
+  <view class="card invite-card rise d2">
+    <view class="invite-card__label">你们的邀请码</view>
+    <view class="invite-card__row">
+      <text class="invite-card__code">{{inviteCode || '——'}}</text>
+      <button wx:if="{{inviteCode}}" class="btn btn-ghost btn-sm" bindtap="copyInvite">复制</button>
+    </view>
+    <view wx:if="{{!hasPartner}}" class="bind-box">
+      <view class="bind-box__row">
+        <input class="input bind-box__input" placeholder-class="placeholder" placeholder="输入 TA 的邀请码" maxlength="12" value="{{bindCode}}" bindinput="onBindInput" />
+        <button class="btn btn-red btn-sm {{binding ? 'btn-busy' : ''}}" disabled="{{binding || !bindCode}}" bindtap="bindPartner">{{binding ? '绑定中' : '绑定'}}</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能宫格 -->
+  <view class="sec-title">功能入口</view>
+  <view class="grid rise d3">
+    <view wx:for="{{grid}}" wx:key="key" class="grid__item pressable" hover-class="pressed" data-item="{{item}}" bindtap="openFeature">
+      <view class="grid__icon">{{item.icon}}</view>
+      <view class="grid__label">{{item.label}}</view>
+    </view>
+    <view wx:if="{{!grid.length}}" class="empty grid__empty">
+      <view class="empty__icon">🌙</view>
+      <view class="empty__title">功能都被藏起来啦</view>
+      <view class="empty__desc">去下方「功能管理」里打开几个吧</view>
+    </view>
+  </view>
+
+  <!-- 小窝管理 -->
+  <view class="sec-title">小窝管理</view>
+  <view class="card manage-card rise d4">
+    <view class="manage-row pressable" hover-class="pressed" bindtap="openFeatureSheet">
+      <text class="manage-row__icon">🎛️</text>
+      <text class="manage-row__label">功能管理</text>
+      <text class="manage-row__arrow">›</text>
+    </view>
+    <view class="manage-row manage-row--line pressable" hover-class="pressed" bindtap="openProfile">
+      <text class="manage-row__icon">🖋️</text>
+      <text class="manage-row__label">我的资料</text>
+      <text class="manage-row__arrow">›</text>
+    </view>
+  </view>
+
+  <button class="btn btn-ghost logout-btn rise d5" bindtap="logout">退出登录</button>
+
+  <!-- 功能管理弹层 -->
+  <block wx:if="{{featureSheet}}">
+    <view class="mask" bindtap="closeFeatureSheet"></view>
+    <view class="sheet">
+      <view class="sheet__title">功能管理</view>
+      <view class="feat-row" wx:for="{{featureList}}" wx:key="key">
+        <text class="feat-row__icon">{{item.icon}}</text>
+        <text class="feat-row__label">{{item.label}}</text>
+        <switch checked="{{item.enabled}}" disabled="{{item.saving}}" data-key="{{item.key}}" color="#5c3d2e" bindchange="toggleFeature" />
+      </view>
+      <view class="sheet__hint">关闭后入口会从小窝和导航里隐藏</view>
+    </view>
+  </block>
+
+  <!-- 我的资料弹层 -->
+  <block wx:if="{{profileSheet}}">
+    <view class="mask" bindtap="closeProfile"></view>
+    <view class="sheet">
+      <view class="sheet__title">我的资料</view>
+      <view class="profile-avatar pressable" hover-class="pressed" bindtap="changeAvatar">
+        <image wx:if="{{profileAvatar}}" class="avatar__img" src="{{profileAvatar}}" mode="aspectFill" />
+        <view wx:else class="avatar__ph">{{me.initial}}</view>
+        <view class="profile-avatar__tip">点击更换头像</view>
+      </view>
+      <view class="field">
+        <text class="field__label">昵称</text>
+        <input class="input" placeholder-class="placeholder" placeholder="给自己取个可爱的名字" maxlength="20" value="{{profileNickname}}" bindinput="onNicknameInput" />
+      </view>
+      <button class="btn btn-solid profile-save {{savingProfile ? 'btn-busy' : ''}}" disabled="{{savingProfile}}" bindtap="saveProfile">{{savingProfile ? '保存中…' : '保存'}}</button>
+    </view>
+  </block>
+</view>

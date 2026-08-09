@@ -56,8 +56,9 @@ public class AlbumService {
     }
 
     /**
-     * 创建相册
+     * 创建相册；若上传了封面图，同时把它作为第一张照片放进相册
      */
+    @Transactional(rollbackFor = Exception.class)
     public Album createAlbum(Long userId, Long coupleId, AlbumDTO dto) {
         if (coupleId == null) {
             throw new BusinessException("尚未加入情侣空间");
@@ -77,6 +78,13 @@ public class AlbumService {
         album.setPhotoCount(0);
 
         albumMapper.insert(album);
+
+        // 封面图同步作为相册第一张照片，避免新建相册后打开是空的
+        if (cover != null && !cover.isBlank()) {
+            createPhoto(userId, coupleId, album.getId(), cover, null, null);
+            album.setPhotoCount(1);
+            albumMapper.updateById(album);
+        }
         return album;
     }
 

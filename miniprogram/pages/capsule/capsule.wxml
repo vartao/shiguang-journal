@@ -1,0 +1,111 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">时间胶囊</view>
+    <view class="mast__sub">写一封信，寄给未来的我们</view>
+  </view>
+
+  <view class="actions rise d1">
+    <button class="btn btn-solid" bindtap="openCreate">💌 封存一封信</button>
+  </view>
+
+  <view wx:if="{{loading}}">
+    <view wx:for="{{3}}" wx:key="index" class="sk cap-sk"></view>
+  </view>
+
+  <block wx:else>
+    <!-- 等待开启 -->
+    <view wx:if="{{waiting.length}}" class="sec-title">等待开启</view>
+    <view
+      wx:for="{{waiting}}"
+      wx:key="id"
+      class="cap card rise {{item.canOpen ? 'cap--ready' : ''}} {{index < 5 ? 'd' + (index + 1) : ''}}"
+      data-id="{{item.id}}"
+      bindtap="tapCapsule"
+    >
+      <view class="cap__icon">{{item.canOpen ? '💌' : '✉️'}}</view>
+      <view class="cap__body">
+        <view class="cap__title">{{item.title}}</view>
+        <view class="cap__meta">{{item.openDateCN}} 开启 · {{item.creatorNickname || 'TA'}} 封存</view>
+        <view class="cap__count {{item.canOpen ? 'cap__count--ready' : ''}}">
+          {{item.canOpen ? '可以拆了 ✨' : '⏳ 倒计时 ' + item.daysLeft + ' 天'}}
+        </view>
+      </view>
+      <view wx:if="{{item.canDelete}}" class="cap__del pressable" data-id="{{item.id}}" catchtap="remove">删除</view>
+    </view>
+
+    <!-- 已开启 -->
+    <view wx:if="{{opened.length}}" class="sec-title">已开启</view>
+    <view
+      wx:for="{{opened}}"
+      wx:key="id"
+      class="cap cap--open card rise"
+      data-id="{{item.id}}"
+      bindtap="viewOpened"
+    >
+      <view class="cap__icon">📖</view>
+      <view class="cap__body">
+        <view class="cap__title">{{item.title}}</view>
+        <view class="cap__meta">
+          {{item.openedTimeCN}} 开启<text wx:if="{{item.openerNickname}}"> · {{item.openerNickname}} 拆开</text>
+        </view>
+        <view wx:if="{{item.message}}" class="cap__excerpt">{{item.message}}</view>
+      </view>
+      <view wx:if="{{item.canDelete}}" class="cap__del pressable" data-id="{{item.id}}" catchtap="remove">删除</view>
+    </view>
+
+    <view wx:if="{{!waiting.length && !opened.length}}" class="empty">
+      <view class="empty__icon">⌛</view>
+      <view class="empty__title">还没有时间胶囊</view>
+      <view class="empty__desc">写一封信，约定一个未来的日子开启</view>
+    </view>
+  </block>
+
+  <!-- 新建弹层 -->
+  <view wx:if="{{showCreate}}" class="mask" bindtap="closeCreate"></view>
+  <view wx:if="{{showCreate}}" class="sheet">
+    <view class="sheet__title">封存一封信</view>
+    <view class="field">
+      <text class="field__label">标题（必填）</text>
+      <input class="input" placeholder="给未来的信起个标题" placeholder-class="placeholder" value="{{form.title}}" maxlength="200" bindinput="onTitleInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">信的内容</text>
+      <textarea class="textarea letter-input" placeholder="写给未来的我们…" placeholder-class="placeholder" value="{{form.message}}" maxlength="5000" bindinput="onMessageInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">开启日期（最早明天）</text>
+      <picker mode="date" value="{{form.openDate}}" start="{{minDate}}" bindchange="onDateChange">
+        <view class="input picker-box">{{form.openDate || '选择开启日期'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field__label">随信照片（最多 6 张）</text>
+      <view class="photo-row">
+        <view wx:for="{{photoFulls}}" wx:key="index" class="photo-item">
+          <image class="photo-thumb" src="{{item}}" mode="aspectFill" />
+          <view class="photo-remove" data-index="{{index}}" catchtap="removePhoto">×</view>
+        </view>
+        <view wx:if="{{form.photoUrls.length < 6}}" class="photo-add pressable" bindtap="choosePhotos">＋</view>
+      </view>
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving}}" bindtap="submit">封存</button>
+  </view>
+
+  <!-- 拆信全屏弹层 -->
+  <view wx:if="{{letter}}" class="mask" bindtap="closeLetter"></view>
+  <view wx:if="{{letter}}" class="sheet letter-sheet">
+    <view class="letter">
+      <view class="letter__seal">💌</view>
+      <view class="letter__title">{{letter.title}}</view>
+      <view class="letter__meta">书写于 {{letter.createTimeCN}}</view>
+      <view wx:if="{{letter.message}}" class="letter__body">{{letter.message}}</view>
+      <view wx:if="{{letter.photos.length}}" class="letter__photos">
+        <image wx:for="{{letter.photos}}" wx:key="index" class="letter__photo" src="{{item}}" mode="aspectFill" lazy-load="{{true}}" />
+      </view>
+      <view class="letter__foot">
+        开启日期 {{letter.openDateCN}} · 开启于 {{letter.openedTimeCN}}<text wx:if="{{letter.openerNickname}}"> · {{letter.openerNickname}} 拆开</text>
+      </view>
+      <button class="btn btn-ghost submit-btn" bindtap="closeLetter">收好这封信</button>
+    </view>
+  </view>
+</view>

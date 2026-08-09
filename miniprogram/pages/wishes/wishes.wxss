@@ -1,0 +1,146 @@
+/* 心愿许愿池 */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.tabs {
+  display: flex;
+  gap: 14rpx;
+}
+
+.wish-sk {
+  height: 180rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 心愿卡 */
+.wish {
+  display: flex;
+  gap: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.wish--done {
+  opacity: 0.78;
+}
+
+.wish__icon {
+  flex-shrink: 0;
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  background: rgba(212, 165, 116, 0.18);
+  border: 1rpx solid var(--line-soft);
+  border-radius: 50%;
+}
+
+.wish__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.wish__head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.wish__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 30rpx;
+  color: var(--brown-deep);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wish--done .wish__title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.wish__urgent {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: var(--cream);
+  background: linear-gradient(145deg, var(--red), var(--red-dark));
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.wish__desc {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wish__meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+
+.wish__pri {
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.wish__pri--red {
+  color: var(--red-dark);
+  font-weight: 600;
+}
+
+.wish__badge {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  color: var(--olive);
+  letter-spacing: 1rpx;
+}
+
+.wish__ops {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 16rpx;
+}
+
+.wish__op {
+  font-size: 24rpx;
+  color: var(--brown);
+  padding: 6rpx 8rpx;
+}
+
+.wish__op--ok {
+  color: var(--olive);
+  font-weight: 600;
+}
+
+.wish__op--del {
+  color: var(--red-dark);
+}
+
+/* 表单 */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 8rpx;
+}

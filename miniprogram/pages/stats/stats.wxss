@@ -1,0 +1,166 @@
+/* 恋爱数据页 */
+
+.big-card {
+  padding: 48rpx 32rpx;
+  text-align: center;
+}
+
+.big-card__num {
+  font-size: 96rpx;
+  color: var(--brown-deep);
+  line-height: 1.2;
+}
+
+.big-card__label {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--muted);
+  letter-spacing: 4rpx;
+}
+
+/* 数据格 */
+.grid {
+  margin-top: 28rpx;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.grid__cell {
+  padding: 28rpx 12rpx;
+  text-align: center;
+}
+
+.grid__num {
+  font-size: 44rpx;
+  color: var(--brown-deep);
+}
+
+.grid__label {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+/* 进度条 */
+.fun-card {
+  padding: 28rpx;
+}
+
+.fun-row + .fun-row {
+  margin-top: 28rpx;
+}
+
+.fun-row__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 26rpx;
+  color: var(--ink);
+  margin-bottom: 12rpx;
+}
+
+.fun-row__val {
+  color: var(--brown);
+  font-weight: 600;
+}
+
+.bar {
+  height: 16rpx;
+  background: rgba(92, 61, 46, 0.08);
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.bar__fill {
+  height: 100%;
+  border-radius: 999rpx;
+  transition: width 0.5s ease;
+}
+
+.bar__fill--olive { background: linear-gradient(90deg, #97a876, var(--olive)); }
+.bar__fill--red { background: linear-gradient(90deg, #d18a8e, var(--red)); }
+.bar__fill--kraft { background: linear-gradient(90deg, var(--kraft-light), var(--kraft-dark)); }
+
+/* 心情分布 */
+.mood-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+}
+
+.mood-card__title {
+  font-size: 26rpx;
+  color: var(--brown-deep);
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.mood-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 8rpx 0;
+}
+
+.mood-row__emoji {
+  font-size: 32rpx;
+  width: 44rpx;
+}
+
+.mood-row__label {
+  width: 88rpx;
+  font-size: 24rpx;
+  color: var(--text-2);
+}
+
+.mood-row__bar {
+  flex: 1;
+}
+
+.mood-row__count {
+  width: 56rpx;
+  text-align: right;
+  font-size: 24rpx;
+  color: var(--brown);
+  font-weight: 600;
+}
+
+/* 那年今天 */
+.otd-card {
+  padding: 12rpx 28rpx;
+}
+
+.otd-row {
+  display: flex;
+  gap: 18rpx;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx dashed var(--line-soft);
+}
+
+.otd-row:last-child {
+  border-bottom: none;
+}
+
+.otd-row__emoji {
+  font-size: 40rpx;
+}
+
+.otd-row__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.otd-row__title {
+  font-size: 28rpx;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.otd-row__meta {
+  font-size: 22rpx;
+  color: var(--muted);
+}

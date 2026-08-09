@@ -36,6 +36,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* 全局背景插画：黄昏海边小镇，低透明度叠加在纸面上，不影响可读性 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('../illustrations/sunset-town.jpg') center / cover no-repeat;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* 选中文本样式 */
 ::selection {
   background: rgba(var(--red-rgb), 0.25);
@@ -349,8 +360,14 @@ button:focus-visible,
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80px 20px;
+  padding: 64px 32px;
   text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--gradient-card);
+  border: var(--border-vintage);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 
 .empty-state__icon {
@@ -426,6 +443,10 @@ button:focus-visible,
   background-image:
     radial-gradient(ellipse at 20% 50%, rgba(var(--kraft-rgb), 0.06) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 20%, rgba(var(--red-rgb), 0.03) 0%, transparent 40%);
+}
+
+[data-theme='dark'] body::before {
+  opacity: 0.05;
 }
 
 /* ============ 骨架屏 ============ */

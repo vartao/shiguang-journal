@@ -1,0 +1,147 @@
+/* 留言板页：整页 flex 布局，消息区独立滚动，输入条贴底（压在 tabBar 之上留白） */
+.board {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.board__mast {
+  padding: 16rpx 0 12rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-2);
+  letter-spacing: 2rpx;
+  font-family: 'ZCOOL XiaoWei', 'STKaiti', 'KaiTi', serif;
+}
+
+/* 消息区 */
+.msgs {
+  flex: 1;
+  min-height: 0;
+  padding: 0 var(--page-x);
+}
+
+.msgs__bottom {
+  height: 24rpx;
+}
+
+.mrow {
+  margin-bottom: 16rpx;
+}
+
+.mtime {
+  margin: 28rpx 0 20rpx;
+  text-align: center;
+}
+
+.mtime text {
+  padding: 4rpx 24rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+  background: rgba(92, 61, 46, 0.08);
+  border-radius: 999rpx;
+}
+
+.mbody {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.mrow--mine .mbody {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2rpx solid var(--line);
+  background: var(--cream-dark);
+}
+
+.avatar--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: var(--brown);
+}
+
+.avatar--blank {
+  visibility: hidden;
+  border: none;
+  background: transparent;
+}
+
+.mcol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 540rpx;
+}
+
+.mrow--mine .mcol {
+  align-items: flex-end;
+}
+
+.mname {
+  margin-bottom: 6rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.bubble {
+  padding: 16rpx 24rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  word-break: break-all;
+  border-radius: var(--radius-m);
+}
+
+.bubble--other {
+  color: var(--ink);
+  background: linear-gradient(170deg, #fdf8ec, #f5ead3);
+  border: 1rpx solid var(--line);
+  box-shadow: var(--shadow-card);
+  border-top-left-radius: 6rpx;
+}
+
+.bubble--mine {
+  color: var(--ink);
+  background: rgba(125, 140, 92, 0.15);
+  border: 1rpx solid rgba(125, 140, 92, 0.35);
+  border-top-right-radius: 6rpx;
+}
+
+/* 底部输入条 */
+.ibar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16rpx;
+  padding: 16rpx var(--page-x) calc(16rpx + var(--tabbar-h));
+  background: var(--cream-warm);
+  border-top: 1rpx solid var(--line-soft);
+}
+
+.ibar__input {
+  flex: 1;
+  min-height: 72rpx;
+  max-height: 200rpx;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+  color: var(--ink);
+  background: rgba(250, 243, 224, 0.9);
+  border: 2rpx solid rgba(92, 61, 46, 0.25);
+  border-radius: var(--radius-m);
+}
+
+.ibar__send {
+  width: 72rpx;
+  height: 72rpx;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 26rpx;
+}

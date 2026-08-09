@@ -18,9 +18,15 @@ defineEmits(['retry'])
   display: grid;
   justify-items: center;
   gap: 10px;
-  padding: 48px 20px;
-  color: var(--text-muted);
+  padding: 48px 32px;
+  color: var(--text-secondary);
   text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--gradient-card);
+  border: var(--border-vintage);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 .feedback-state__icon {
   display: grid;

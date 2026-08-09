@@ -1,0 +1,76 @@
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 800;
+  display: flex;
+  align-items: stretch;
+  background: linear-gradient(180deg, #f7edd8 0%, #f2e4c9 100%);
+  border-top: 1rpx solid rgba(92, 61, 46, 0.15);
+  box-shadow: 0 -4rpx 20rpx rgba(92, 61, 46, 0.08);
+}
+
+.tab {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  height: 104rpx;
+}
+
+.tab__ico {
+  font-size: 38rpx;
+  line-height: 1.1;
+  filter: sepia(0.2);
+  transition: transform 0.2s ease;
+}
+
+.tab__label {
+  font-size: 20rpx;
+  color: #7d6a56;
+  letter-spacing: 1rpx;
+}
+
+.tab.on .tab__ico {
+  transform: translateY(-4rpx) scale(1.1);
+}
+
+.tab.on .tab__label {
+  color: #5c3d2e;
+  font-weight: 600;
+}
+
+.tab__dot {
+  position: absolute;
+  bottom: 8rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #c1666b;
+}
+
+/* 中心写笔记按钮 */
+.tab--write {
+  flex: 1.1;
+}
+
+.write-btn {
+  width: 88rpx;
+  height: 88rpx;
+  margin-top: -36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #c1666b, #a34f54);
+  border-radius: 50%;
+  border: 6rpx solid #faf3e0;
+  box-shadow: 0 6rpx 18rpx rgba(193, 102, 107, 0.4);
+}
+
+.write-btn__ico {
+  font-size: 36rpx;
+}

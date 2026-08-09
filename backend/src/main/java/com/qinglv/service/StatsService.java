@@ -20,6 +20,8 @@ public class StatsService {
     private final AnniversaryMapper anniversaryMapper;
     private final SurpriseMapper surpriseMapper;
     private final NoteLikeMapper noteLikeMapper;
+    private final TravelMapper travelMapper;
+    private final CoupleLogMapper coupleLogMapper;
 
     public Map<String, Object> getCoupleStats(Long coupleId, Long userId) {
         if (coupleId == null) {
@@ -106,6 +108,62 @@ public class StatsService {
         stats.put("moodDistribution", moodDistribution);
 
         return stats;
+    }
+
+    /**
+     * 那年今天：历年同月同日的笔记/足迹/小事记（只取往年，不含今年）
+     */
+    public List<Map<String, Object>> getOnThisDay(Long coupleId) {
+        if (coupleId == null) {
+            throw new BusinessException("尚未加入情侣空间");
+        }
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int day = today.getDayOfMonth();
+        int year = today.getYear();
+
+        List<Map<String, Object>> items = new ArrayList<>();
+
+        noteMapper.selectList(
+                new LambdaQueryWrapper<Note>()
+                    .eq(Note::getCoupleId, coupleId)
+                    .apply("MONTH(note_date) = {0} AND DAY(note_date) = {1}", month, day)
+                    .apply("YEAR(note_date) < {0}", year)
+                    .orderByDesc(Note::getNoteDate)
+        ).forEach(n -> items.add(onThisDayItem("note", n.getId(), n.getTitle(), n.getNoteDate(), null)));
+
+        travelMapper.selectList(
+                new LambdaQueryWrapper<Travel>()
+                    .eq(Travel::getCoupleId, coupleId)
+                    .isNotNull(Travel::getTravelDate)
+                    .apply("MONTH(travel_date) = {0} AND DAY(travel_date) = {1}", month, day)
+                    .apply("YEAR(travel_date) < {0}", year)
+                    .orderByDesc(Travel::getTravelDate)
+        ).forEach(t -> items.add(onThisDayItem("travel", t.getId(), t.getTitle(), t.getTravelDate(), t.getCity())));
+
+        coupleLogMapper.selectList(
+                new LambdaQueryWrapper<CoupleLog>()
+                    .eq(CoupleLog::getCoupleId, coupleId)
+                    .apply("MONTH(log_date) = {0} AND DAY(log_date) = {1}", month, day)
+                    .apply("YEAR(log_date) < {0}", year)
+                    .orderByDesc(CoupleLog::getLogDate)
+        ).forEach(l -> items.add(onThisDayItem("log", l.getId(), l.getTitle(), l.getLogDate(), l.getCategory())));
+
+        items.sort((a, b) -> ((LocalDate) b.get("date")).compareTo((LocalDate) a.get("date")));
+        return items;
+    }
+
+    private Map<String, Object> onThisDayItem(String type, Long id, String title, LocalDate date, String extra) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("type", type);
+        item.put("id", id);
+        item.put("title", title);
+        item.put("date", date);
+        item.put("year", date.getYear());
+        if (extra != null && !extra.isBlank()) {
+            item.put("extra", extra);
+        }
+        return item;
     }
 
     private long calculateLongestStreak(List<Note> notes) {

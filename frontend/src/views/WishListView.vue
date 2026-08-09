@@ -25,7 +25,10 @@
       </button>
 
       <LoadingState v-if="loading" message="正在翻阅心愿…" />
-      <ErrorState v-else-if="loadError" message="心愿列表暂时没有加载成功。" @retry="fetchWishes" />
+      <template v-else-if="loadError">
+        <div class="wish-illustration" aria-hidden="true"></div>
+        <ErrorState message="心愿列表暂时没有加载成功。" @retry="fetchWishes" />
+      </template>
       <div v-else-if="filteredWishes.length" class="wish-grid anim-fade-in-up stagger-3">
         <div
           v-for="(wish, idx) in filteredWishes"
@@ -69,14 +72,18 @@
           </div>
         </div>
       </div>
-      <EmptyState
-        v-else
-        icon="✨"
-        :title="activeTab === 'done' ? '还没有达成的心愿' : '还没有许愿'"
-        :message="activeTab === 'done' ? '完成的心愿会出现在这里' : '写下第一个心愿，开始你们的愿望清单吧'"
-      >
-        <button v-if="activeTab !== 'done'" class="btn-vintage btn-vintage--red" @click="openCreate">许第一个愿</button>
-      </EmptyState>
+      <template v-else>
+        <div class="wish-illustration" aria-hidden="true"></div>
+        <EmptyState
+          icon="✨"
+          :title="activeTab === 'done' ? '还没有达成的心愿' : '还没有许愿'"
+          :message="activeTab === 'done' ? '完成的心愿会出现在这里' : '写下第一个心愿，开始你们的愿望清单吧'"
+        >
+          <button v-if="activeTab !== 'done'" class="btn-vintage btn-vintage--red" @click="openCreate">
+            许第一个愿
+          </button>
+        </EmptyState>
+      </template>
     </div>
 
     <BaseModal
@@ -305,7 +312,7 @@ onMounted(fetchWishes)
 .wish-header__subtitle {
   font-family: var(--font-display);
   font-size: 15px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 2px;
 }
 
@@ -318,6 +325,14 @@ onMounted(fetchWishes)
   color: var(--mustard);
   margin: 0 8px;
   animation: twinkle 2s ease-in-out infinite;
+}
+
+/* 空状态/加载失败时的手绘插画 */
+.wish-illustration {
+  max-width: 480px;
+  height: 150px;
+  margin: 0 auto 16px;
+  background: url('@/assets/illustrations/wish-journey.svg') center / contain no-repeat;
 }
 .s1 {
   font-size: 16px;

@@ -5,6 +5,7 @@
       <header class="album-header anim-fade-in-up">
         <h1 class="album-header__title">相册墙</h1>
         <p class="album-header__subtitle">那些被定格的瞬间，散落在时光里</p>
+        <div class="album-header__deco" aria-hidden="true"></div>
       </header>
 
       <!-- 操作栏 -->
@@ -197,8 +198,16 @@ onMounted(() => {
 .album-header__subtitle {
   font-family: var(--font-display);
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 1px;
+}
+
+.album-header__deco {
+  max-width: 420px;
+  height: 110px;
+  margin: 12px auto 0;
+  background: url('@/assets/illustrations/wish-journey.svg') center / contain no-repeat;
+  opacity: 0.9;
 }
 
 .album-toolbar {

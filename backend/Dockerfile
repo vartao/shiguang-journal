@@ -14,5 +14,5 @@ RUN mkdir -p /app/uploads
 COPY --from=builder /app/target/qinglv-note.jar app.jar
 
 EXPOSE 8080
-ENV JAVA_OPTS="-Xms256m -Xmx512m -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-Xms256m -Xmx512m -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

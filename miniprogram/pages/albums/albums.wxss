@@ -1,0 +1,97 @@
+/* 相册墙 */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 36rpx;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28rpx;
+}
+
+.sk-card {
+  width: calc(50% - 14rpx);
+  height: 400rpx;
+}
+
+/* 拍立得卡片 */
+.polaroid {
+  width: calc(50% - 14rpx);
+  padding: 20rpx 20rpx 24rpx;
+  background: #fdfaf3;
+  border: 1rpx solid var(--line-soft);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-card);
+}
+
+.polaroid--l {
+  transform: rotate(-2deg);
+}
+
+.polaroid--r {
+  transform: rotate(2deg);
+}
+
+.polaroid.pressed {
+  transform: rotate(0deg) scale(0.97);
+}
+
+.polaroid__photo {
+  width: 100%;
+  height: 280rpx;
+  border-radius: 4rpx;
+  overflow: hidden;
+  background: linear-gradient(150deg, var(--kraft-light), var(--cream-dark));
+}
+
+.polaroid__img {
+  width: 100%;
+  height: 100%;
+}
+
+.polaroid__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 64rpx;
+  opacity: 0.5;
+}
+
+.polaroid__name {
+  margin-top: 18rpx;
+  font-family: 'ZCOOL XiaoWei', 'KaiTi', serif;
+  font-size: 30rpx;
+  color: var(--brown-deep);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.polaroid__count {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+/* 封面选择 */
+.cover-row {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.cover-preview {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: var(--radius-s);
+  border: 1rpx solid var(--line);
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 8rpx;
+}

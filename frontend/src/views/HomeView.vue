@@ -55,6 +55,24 @@
         </button>
       </div>
 
+      <!-- 那年今天 -->
+      <div v-if="!isSearchMode && onThisDayItems.length" class="on-this-day anim-fade-in-up stagger-2">
+        <h2 class="on-this-day__title">📮 那年今天</h2>
+        <div
+          v-for="item in onThisDayItems"
+          :key="item.type + '-' + item.id"
+          class="on-this-day__item"
+          :class="{ clickable: onThisDayRoute(item) }"
+          @click="goOnThisDay(item)"
+        >
+          <span class="on-this-day__year">{{ item.year }}</span>
+          <span class="on-this-day__type">{{ onThisDayMeta[item.type]?.icon }}</span>
+          <span class="on-this-day__text">
+            {{ item.title }}<span v-if="item.extra" class="on-this-day__extra"> · {{ item.extra }}</span>
+          </span>
+        </div>
+      </div>
+
       <!-- 加载状态 -->
       <div v-if="loading" class="loading-reel">
         <div class="loading-reel__icon"></div>
@@ -114,6 +132,9 @@
             </div>
 
             <div class="note-card__content">
+              <p class="note-card__dateline">
+                {{ formatDateline(note.noteDate || note.createdAt || note.createTime) }}
+              </p>
               <h3 class="note-card__title">{{ note.title }}</h3>
               <p class="note-card__text">{{ note.content }}</p>
 
@@ -178,11 +199,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { requestConfirm } from '@/composables/confirmService'
 import { useRouter } from 'vue-router'
 import { getNotes, likeNote, deleteNote, searchNotes } from '@/api/note'
+import { getOnThisDay } from '@/api/stats'
 import { useUserStore } from '@/stores/user'
+import { useFeatureStore } from '@/stores/feature'
 import FilmStrip from '@/components/FilmStrip.vue'
 import LightBox from '@/components/LightBox.vue'
 import NoteCommentDrawer from '@/components/NoteCommentDrawer.vue'
@@ -191,6 +214,7 @@ import { getThumbUrl } from '@/utils/image'
 
 const router = useRouter()
 const userStore = useUserStore()
+const featureStore = useFeatureStore()
 
 const notes = ref([])
 const loading = ref(true)
@@ -245,6 +269,36 @@ function clearSearch() {
 const lightboxVisible = ref(false)
 const lightboxImages = ref([])
 const lightboxIndex = ref(0)
+
+// 那年今天
+const onThisDay = ref([])
+const onThisDayMeta = {
+  note: { icon: '📝', feature: 'notes', route: null },
+  travel: { icon: '🗺️', feature: 'travels', route: '/travels' },
+  log: { icon: '📖', feature: 'logs', route: '/logs' }
+}
+// 功能被关闭的类型不展示
+const onThisDayItems = computed(() =>
+  onThisDay.value.filter((item) => featureStore.isOn(onThisDayMeta[item.type]?.feature))
+)
+
+function onThisDayRoute(item) {
+  return onThisDayMeta[item.type]?.route || null
+}
+
+function goOnThisDay(item) {
+  const target = onThisDayRoute(item)
+  if (target) router.push(target)
+}
+
+async function fetchOnThisDay() {
+  try {
+    const res = await getOnThisDay()
+    onThisDay.value = res.data || []
+  } catch {
+    onThisDay.value = []
+  }
+}
 
 const moods = {
   happy: { emoji: '😊', label: '开心' },
@@ -336,6 +390,14 @@ function formatMonth(dateStr) {
   if (Number.isNaN(d.getTime())) return ''
   const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
   return months[d.getMonth()]
+}
+
+function formatDateline(dateStr) {
+  if (!dateStr) return ''
+  const d = parseLocalDate(dateStr)
+  if (Number.isNaN(d.getTime())) return ''
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 · 星期${weekdays[d.getDay()]}`
 }
 
 function openLightbox(images, index) {
@@ -430,6 +492,7 @@ async function handleLike(note) {
 
 onMounted(() => {
   fetchNotes()
+  fetchOnThisDay()
 })
 </script>
 
@@ -464,7 +527,7 @@ onMounted(() => {
 .home-header__subtitle {
   font-family: var(--font-display);
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 1px;
 }
 
@@ -636,6 +699,69 @@ onMounted(() => {
   padding: 20px 0;
 }
 
+/* 那年今天 */
+.on-this-day {
+  max-width: 640px;
+  margin: 0 auto 36px;
+  padding: 18px 22px;
+  background: var(--gradient-paper);
+  border: var(--border-vintage);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.on-this-day__title {
+  font-family: var(--font-handwrite);
+  font-size: 20px;
+  color: var(--brown-deep);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.on-this-day__item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 4px;
+  border-top: 1px dashed rgba(var(--brown-rgb), 0.12);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.on-this-day__item.clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.on-this-day__item.clickable:hover {
+  background: rgba(var(--kraft-rgb), 0.1);
+}
+
+.on-this-day__year {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--faded-red);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.on-this-day__type {
+  flex-shrink: 0;
+}
+
+.on-this-day__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.on-this-day__extra {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
 .timeline__axis {
   position: absolute;
   top: 0;
@@ -683,7 +809,11 @@ onMounted(() => {
 }
 
 .note-card {
-  background: var(--photo-paper);
+  /* 毛玻璃：半透纸面 + 背景虚化，浅色/暗色主题随 --cream-rgb 自动适配 */
+  background: rgba(var(--cream-rgb), 0.38);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(var(--white-rgb), 0.45);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-polaroid);
   overflow: hidden;
@@ -691,6 +821,11 @@ onMounted(() => {
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+}
+
+[data-theme='dark'] .note-card {
+  background: rgba(var(--cream-rgb), 0.45);
+  border-color: rgba(var(--brown-rgb), 0.25);
 }
 
 .note-card--top {
@@ -768,6 +903,18 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* 图片底部渐隐过渡，融入下方毛玻璃，避免生硬的纯白截断 */
+.note-card__image-main::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42px;
+  background: linear-gradient(to bottom, transparent, rgba(var(--cream-rgb), 0.45));
+  pointer-events: none;
+}
+
 .note-card__image-main img {
   width: 100%;
   height: 200px;
@@ -792,6 +939,14 @@ onMounted(() => {
 
 .note-card__content {
   padding: 18px 20px 12px;
+}
+
+.note-card__dateline {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--faded-red);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
 }
 
 .note-card__title {

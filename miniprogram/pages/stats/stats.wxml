@@ -1,0 +1,68 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">恋爱数据报告</view>
+    <view class="mast__sub">把日子过成数字，也是一种浪漫</view>
+  </view>
+
+  <!-- 在一起天数 -->
+  <view class="card big-card rise d1">
+    <view class="big-card__num display">{{togetherDays != null ? togetherDays : '—'}}</view>
+    <view class="big-card__label">我们在一起的天数</view>
+  </view>
+
+  <!-- 数据格 -->
+  <view class="grid rise d2">
+    <view wx:for="{{cells}}" wx:key="label" class="card grid__cell">
+      <view class="grid__num display">{{item.num}}</view>
+      <view class="grid__label">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 有趣的数据 -->
+  <view class="sec-title">有趣的数据</view>
+  <view class="card fun-card rise d3">
+    <view class="fun-row">
+      <view class="fun-row__head">
+        <text>近 30 天活跃</text>
+        <text class="fun-row__val">{{activeDays30}} / 30 天</text>
+      </view>
+      <view class="bar"><view class="bar__fill bar__fill--olive" style="width: {{activePct}}%"></view></view>
+    </view>
+    <view class="fun-row">
+      <view class="fun-row__head">
+        <text>最长连续写作</text>
+        <text class="fun-row__val">{{longestStreak}} 天</text>
+      </view>
+      <view class="bar"><view class="bar__fill bar__fill--red" style="width: {{streakPct}}%"></view></view>
+    </view>
+  </view>
+
+  <!-- 心情分布 -->
+  <view wx:if="{{moods.length > 0}}" class="card mood-card rise d4">
+    <view class="mood-card__title">心情分布</view>
+    <view wx:for="{{moods}}" wx:key="key" class="mood-row">
+      <text class="mood-row__emoji">{{item.emoji}}</text>
+      <text class="mood-row__label">{{item.label}}</text>
+      <view class="bar mood-row__bar">
+        <view class="bar__fill bar__fill--kraft" style="width: {{item.pct}}%"></view>
+      </view>
+      <text class="mood-row__count">{{item.count}}</text>
+    </view>
+  </view>
+
+  <!-- 那年今天 -->
+  <view wx:if="{{onThisDay.length > 0}}" class="rise d5">
+    <view class="sec-title">那年今天</view>
+    <view class="card otd-card">
+      <view wx:for="{{onThisDay}}" wx:key="id" class="otd-row">
+        <text class="otd-row__emoji">{{item.emoji}}</text>
+        <view class="otd-row__body">
+          <text class="otd-row__title">{{item.title}}</text>
+          <text class="otd-row__meta">{{item.year}} 年 · {{item.typeLabel}}<text wx:if="{{item.extra}}"> · {{item.extra}}</text></text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-text">加载中…</view>
+</view>

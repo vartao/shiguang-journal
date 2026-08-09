@@ -1,0 +1,116 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">出发前的计划</view>
+    <view class="mast__sub">把每一次出发，都安排成期待</view>
+  </view>
+
+  <view class="add-row rise d1">
+    <button class="btn btn-solid" bindtap="openCreate">＋ 新建行程</button>
+  </view>
+
+  <!-- 骨架 -->
+  <view wx:if="{{loading}}">
+    <view class="sk sk-card"></view>
+    <view class="sk sk-card"></view>
+  </view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{list.length === 0}}" class="empty rise d1">
+    <view class="empty__icon">🧳</view>
+    <view class="empty__title">还没有行程计划</view>
+    <view class="empty__desc">下一次出发，从这里开始安排</view>
+  </view>
+
+  <!-- 行程卡 -->
+  <view
+    wx:for="{{list}}"
+    wx:key="id"
+    class="card plan-card pressable rise d{{index % 5 + 1}}"
+    hover-class="pressed"
+    data-id="{{item.id}}"
+    bindtap="goDetail"
+  >
+    <image wx:if="{{item.coverUrl}}" class="plan-card__cover" src="{{item.coverUrl}}" mode="aspectFill" lazy-load></image>
+    <view wx:else class="plan-card__cover plan-card__cover--ph">✈️</view>
+    <view class="plan-card__body">
+      <view class="plan-card__head">
+        <text class="plan-card__title">{{item.title}}</text>
+        <text class="st {{item.statusCls}}">{{item.statusLabel}}</text>
+      </view>
+      <view wx:if="{{item.destination}}" class="plan-card__meta">📍 {{item.destination}}</view>
+      <view class="plan-card__meta">🗓 {{item.dateRange}}</view>
+      <view class="plan-card__foot">
+        <text wx:if="{{item.budget != null}}" class="plan-card__budget">预算 ¥{{item.budget}}</text>
+        <view class="plan-card__ops">
+          <text class="op" catchtap="openEdit" data-id="{{item.id}}">编辑</text>
+          <text class="op op--danger" catchtap="deletePlan" data-id="{{item.id}}">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 新建 / 编辑弹层 -->
+<view wx:if="{{showEditor}}" class="mask" bindtap="closeEditor"></view>
+<view wx:if="{{showEditor}}" class="sheet" catchtouchmove="noop">
+  <view class="sheet__title">{{editingId ? '编辑行程' : '新建行程'}}</view>
+
+  <view class="field">
+    <text class="field__label">标题 *</text>
+    <input class="input" value="{{form.title}}" data-key="title" bindinput="onFormInput" placeholder="给这次出发起个名字" placeholder-class="placeholder" maxlength="200" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">目的地</text>
+    <input class="input" value="{{form.destination}}" data-key="destination" bindinput="onFormInput" placeholder="如：云南 · 大理" placeholder-class="placeholder" maxlength="200" />
+  </view>
+
+  <view class="field-row">
+    <view class="field field--half">
+      <text class="field__label">开始日期</text>
+      <picker mode="date" value="{{form.startDate}}" data-key="startDate" bindchange="onDateChange">
+        <view class="input picker-view {{form.startDate ? '' : 'placeholder'}}">{{form.startDate || '选择'}}</view>
+      </picker>
+    </view>
+    <view class="field field--half">
+      <text class="field__label">结束日期</text>
+      <picker mode="date" value="{{form.endDate}}" data-key="endDate" bindchange="onDateChange">
+        <view class="input picker-view {{form.endDate ? '' : 'placeholder'}}">{{form.endDate || '选择'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="field__label">预算（元）</text>
+    <input class="input" type="digit" value="{{form.budget}}" data-key="budget" bindinput="onFormInput" placeholder="如：3000" placeholder-class="placeholder" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">状态</text>
+    <view class="chips">
+      <view
+        wx:for="{{statusMeta}}"
+        wx:key="label"
+        class="chip {{form.status === index ? 'chip--on' : ''}} pressable"
+        hover-class="pressed"
+        data-status="{{index}}"
+        bindtap="onStatusPick"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="field__label">备注</text>
+    <textarea class="textarea" value="{{form.note}}" data-key="note" bindinput="onFormInput" placeholder="证件、清单、想吃的店…" placeholder-class="placeholder" maxlength="1000" />
+  </view>
+
+  <view class="field">
+    <text class="field__label">封面</text>
+    <view class="cover-pick pressable" hover-class="pressed" bindtap="chooseCover">
+      <image wx:if="{{form.coverUrl}}" class="cover-pick__img" src="{{form.coverUrl}}" mode="aspectFill"></image>
+      <view wx:else class="cover-pick__ph">📷 选择封面</view>
+    </view>
+  </view>
+
+  <button class="btn btn-solid" disabled="{{saving}}" loading="{{saving}}" bindtap="submitForm">{{editingId ? '保存修改' : '创建行程'}}</button>
+</view>

@@ -1,0 +1,155 @@
+<view class="page-wrap">
+  <!-- 页头 -->
+  <view class="mast">
+    <view class="mast__title">今天吃什么</view>
+    <view class="mast__sub">把每一餐，都过成小日子</view>
+  </view>
+
+  <!-- 随机选菜 hero -->
+  <view class="card hero rise d1">
+    <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="hero__chips-wrap">
+      <view class="chips-row">
+        <view
+          wx:for="{{randomCats}}"
+          wx:key="key"
+          class="chip {{rcat === item.key ? 'chip--on' : ''}}"
+          bindtap="onRcatTap"
+          data-key="{{item.key}}"
+        >{{item.emoji}} {{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <view class="hero__stage">
+      <block wx:if="{{rolling}}">
+        <text class="hero__name hero__name--roll">{{rollingText}}</text>
+      </block>
+      <block wx:elif="{{result}}">
+        <view class="hero__name">{{result.name}}</view>
+        <view wx:if="{{result.note}}" class="hero__note">{{result.note}}</view>
+        <view class="hero__meals">
+          <view
+            wx:for="{{pickMeals}}"
+            wx:key="key"
+            class="chip {{mealPick === item.key ? 'chip--on' : ''}}"
+            bindtap="onPickMeal"
+            data-key="{{item.key}}"
+          >{{item.emoji}} {{item.label}}</view>
+        </view>
+        <view class="hero__actions">
+          <button class="btn btn-red btn-sm {{saving ? 'btn-busy' : ''}}" bindtap="onAddResult">加入今日菜单</button>
+          <button class="btn btn-ghost btn-sm" bindtap="onRandom">再抽一次</button>
+        </view>
+      </block>
+      <block wx:else>
+        <text class="hero__hint">纠结吃什么？让命运来翻牌</text>
+      </block>
+    </view>
+
+    <button class="btn btn-solid hero__btn {{rolling ? 'btn-busy' : ''}}" bindtap="onRandom" disabled="{{rolling}}">帮我决定 🎲</button>
+  </view>
+
+  <!-- 今日菜单 -->
+  <view class="sec-title">今日菜单</view>
+  <view class="card menu-card rise d2">
+    <view class="menu-card__date">
+      <text class="nav-arrow {{dateOffset === 0 ? 'nav-arrow--off' : ''}}" bindtap="onDatePrev">◀</text>
+      <text class="menu-card__day">{{dateLabel}} · {{menuDate}}</text>
+      <text class="nav-arrow {{dateOffset === 1 ? 'nav-arrow--off' : ''}}" bindtap="onDateNext">▶</text>
+    </view>
+
+    <view wx:for="{{mealList}}" wx:key="key" class="meal">
+      <view class="meal__head">
+        <text class="meal__label">{{item.emoji}} {{item.label}}</text>
+        <text class="meal__add" bindtap="onOpenMealSheet" data-type="{{item.key}}">+ 加一道</text>
+      </view>
+      <view wx:if="{{item.items.length}}" class="meal__items">
+        <view wx:for="{{item.items}}" wx:for-item="dish" wx:key="id" class="meal-item">
+          <text class="meal-item__name">{{dish.dishName}}</text>
+          <text class="meal-item__del" catchtap="onDelMeal" data-id="{{dish.id}}">×</text>
+        </view>
+      </view>
+      <view wx:else class="meal__empty">还没点，加一道吧</view>
+    </view>
+  </view>
+
+  <!-- 菜品池 -->
+  <view class="sec-title">菜品池</view>
+  <view class="card pool rise d3">
+    <block wx:if="{{poolGroups.length}}">
+      <view wx:for="{{poolGroups}}" wx:key="key" class="pgroup">
+        <view class="pgroup__head">{{item.emoji}} {{item.label}}</view>
+        <view wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" class="dish">
+          <view class="dish__info">
+            <text class="dish__name">{{dish.name}}</text>
+            <text wx:if="{{dish.note}}" class="dish__note">{{dish.note}}</text>
+          </view>
+          <text class="dish__del" catchtap="onDelDish" data-id="{{dish.id}}" data-name="{{dish.name}}">删除</text>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="empty empty--small">
+      <view class="empty__icon">🥢</view>
+      <view class="empty__title">菜品池空空如也</view>
+      <view class="empty__desc">先添几道常吃的菜吧</view>
+    </view>
+    <button class="btn btn-ghost pool__add" bindtap="onOpenDishSheet">＋ 添道菜</button>
+  </view>
+</view>
+
+<!-- 加一道弹层 -->
+<view wx:if="{{mealSheet.show}}" class="mask" bindtap="onCloseMealSheet"></view>
+<view wx:if="{{mealSheet.show}}" class="sheet">
+  <view class="sheet__title">加一道 · {{mealSheet.label}}</view>
+
+  <view class="field">
+    <label class="field__label">手填菜名</label>
+    <input class="input" value="{{mealSheet.manual}}" bindinput="onMealManual" maxlength="100" placeholder="想吃啥写啥" placeholder-class="placeholder" />
+  </view>
+  <button class="btn btn-solid {{saving ? 'btn-busy' : ''}}" bindtap="onMealManualAdd">加入菜单</button>
+
+  <view class="field__label pick-title">或从菜品池挑一道</view>
+  <scroll-view scroll-y class="pick-list">
+    <view
+      wx:for="{{mealSheet.pool}}"
+      wx:key="id"
+      class="pick-item"
+      bindtap="onPickDish"
+      data-name="{{item.name}}"
+    >
+      <text class="pick-item__name">{{item.name}}</text>
+      <text class="tag">{{item.catLabel}}</text>
+    </view>
+    <view wx:if="{{!mealSheet.pool.length}}" class="pick-empty">菜品池空空如也，先去添道菜</view>
+  </scroll-view>
+</view>
+
+<!-- 添道菜弹层 -->
+<view wx:if="{{dishSheet.show}}" class="mask" bindtap="onCloseDishSheet"></view>
+<view wx:if="{{dishSheet.show}}" class="sheet">
+  <view class="sheet__title">添道菜</view>
+
+  <view class="field">
+    <label class="field__label">菜名（必填）</label>
+    <input class="input" value="{{dishSheet.name}}" bindinput="onDishName" maxlength="100" placeholder="比如：番茄牛腩" placeholder-class="placeholder" />
+  </view>
+
+  <view class="field">
+    <label class="field__label">分类</label>
+    <view class="sheet-chips">
+      <view
+        wx:for="{{dishCats}}"
+        wx:key="key"
+        class="chip {{dishSheet.category === item.key ? 'chip--on' : ''}}"
+        bindtap="onDishCat"
+        data-key="{{item.key}}"
+      >{{item.emoji}} {{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <label class="field__label">备注</label>
+    <input class="input" value="{{dishSheet.note}}" bindinput="onDishNote" maxlength="200" placeholder="口味、哪家店、谁爱吃…" placeholder-class="placeholder" />
+  </view>
+
+  <button class="btn btn-solid {{saving ? 'btn-busy' : ''}}" bindtap="onSaveDish">{{saving ? '保存中…' : '加入菜品池'}}</button>
+</view>

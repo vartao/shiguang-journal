@@ -93,13 +93,13 @@ const startDate = computed(() => coupleStore.startDate || '')
 
 const moodMap = {
   happy: { emoji: '😊', label: '开心' },
+  love: { emoji: '🥰', label: '甜蜜' },
+  excited: { emoji: '🤩', label: '兴奋' },
+  calm: { emoji: '😌', label: '平静' },
+  miss: { emoji: '🥺', label: '想念' },
+  funny: { emoji: '🤣', label: '搞笑' },
   sad: { emoji: '😢', label: '难过' },
-  angry: { emoji: '😠', label: '生气' },
-  surprised: { emoji: '😲', label: '惊喜' },
-  tired: { emoji: '😫', label: '疲惫' },
-  loved: { emoji: '🥰', label: '被爱' },
-  anxious: { emoji: '😰', label: '焦虑' },
-  peaceful: { emoji: '😌', label: '平静' }
+  angry: { emoji: '😤', label: '生气' }
 }
 
 const topMood = computed(() => {

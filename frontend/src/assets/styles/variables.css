@@ -38,7 +38,7 @@
   --olive-rgb: 125, 140, 92;
   --blue-rgb: 122, 155, 181;
   --mustard-rgb: 201, 162, 39;
-  --muted-rgb: 150, 130, 111;
+  --muted-rgb: 111, 92, 70;
 
   /* 语义化表面 */
   --gradient-card: linear-gradient(170deg, #fdf8ec, #f5ead3);
@@ -57,7 +57,7 @@
   /* 文字色 */
   --text-primary: #3d2b1f;
   --text-secondary: #6b5344;
-  --text-muted: #96826f;
+  --text-muted: #6f5c46;
   --text-on-dark: #f0e6d3;
   --text-handwrite: #4a3226;
 
@@ -128,15 +128,15 @@
   --cream-rgb: 37, 32, 24;
   --olive-rgb: 143, 160, 106;
   --blue-rgb: 112, 144, 168;
-  --muted-rgb: 136, 120, 104;
+  --muted-rgb: 196, 179, 155;
 
   --gradient-card: linear-gradient(170deg, #252018, #1e1a16);
   --gradient-paper: linear-gradient(175deg, #252018, #1e1a16);
   --gradient-nav: linear-gradient(180deg, #2a241e 0%, #252018 100%);
 
   --text-primary: #e0d5c0;
-  --text-secondary: #b8a890;
-  --text-muted: #887868;
+  --text-secondary: #c8b8a0;
+  --text-muted: #c4b39b;
   --text-on-dark: #e0d5c0;
   --text-handwrite: #d4c4a0;
 

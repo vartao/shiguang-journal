@@ -1,0 +1,4 @@
+{
+  "desc": "拾光手账小程序页面索引",
+  "rules": [{ "action": "allow", "page": "*" }]
+}
