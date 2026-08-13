@@ -24,7 +24,7 @@ qinglv/
 │   ├── app.js/app.wxss  # 全局态（token/features）+ 设计变量与全局工具类
 │   ├── utils/           # api.js（wx.request 封装 + 上传）、util.js、chinaMapData.js
 │   ├── custom-tab-bar/  # 自定义底部导航（时间线/足迹/写笔记/留言板/我的）
-│   └── pages/           # 15 个页面，与网页端功能一一对应（无纪念日/惊喜盒/导出）
+│   └── pages/           # 17 个页面，与网页端核心功能一一对应（无导出）
 ├── frontend/          # Vue 前端（Vite，开发端口 5173）
 │   └── src/
 │       ├── api/           # Axios 封装（request.js，baseURL=/api，自动带 token）+ 各模块 API

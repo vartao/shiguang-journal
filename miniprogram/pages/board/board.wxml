@@ -61,6 +61,6 @@
       placeholder="说点悄悄话…"
       placeholder-class="placeholder"
     />
-    <button class="btn btn-red ibar__send {{!draft.trim() || sending ? 'btn-busy' : ''}}" bindtap="onSend">➤</button>
+    <button class="btn btn-red ibar__send {{!canSend || sending ? 'btn-busy' : ''}}" disabled="{{!canSend || sending}}" bindtap="onSend">➤</button>
   </view>
 </view>

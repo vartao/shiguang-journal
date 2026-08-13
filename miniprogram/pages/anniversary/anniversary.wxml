@@ -1,0 +1,123 @@
+<view class="page-wrap page-wrap--no-tab anniversary-page">
+  <view class="mast rise d1">
+    <view class="mast__title">我们的纪念日</view>
+    <view class="mast__sub">把值得反复庆祝的日子，都好好记住</view>
+  </view>
+
+  <view class="hero card rise d2">
+    <view class="hero__stamp">DATE</view>
+    <view class="hero__eyebrow">下一次心动提醒</view>
+    <block wx:if="{{items.length}}">
+      <view class="hero__icon">{{items[0].iconShow}}</view>
+      <view class="hero__title">{{items[0].title}}</view>
+      <view class="hero__count hero__count--{{items[0].countTone}}">
+        <text class="hero__num">{{items[0].countValue}}</text>
+        <text class="hero__unit">{{items[0].countUnit}}</text>
+      </view>
+      <view class="hero__date">{{items[0].dateCN}} · {{items[0].repeatText}}</view>
+    </block>
+    <block wx:else>
+      <view class="hero__icon hero__icon--empty">♡</view>
+      <view class="hero__title">等你写下第一个特别日子</view>
+      <view class="hero__date">初见、牵手、生日，或只属于你们的暗号</view>
+    </block>
+  </view>
+
+  <view class="toolbar rise d3">
+    <view>
+      <view class="toolbar__title">时光清单</view>
+      <view class="toolbar__sub">{{items.length}} 个被珍藏的日子</view>
+    </view>
+    <button class="btn btn-red btn-sm" bindtap="openCreate">＋ 记一个</button>
+  </view>
+
+  <view wx:if="{{loading}}">
+    <view wx:for="{{3}}" wx:key="index" class="sk anniversary-sk"></view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{items}}"
+      wx:key="id"
+      class="anniv card rise {{item.countTone ? 'anniv--' + item.countTone : ''}}"
+    >
+      <view class="anniv__date-tab">
+        <view class="anniv__icon">{{item.iconShow}}</view>
+        <view class="anniv__date">{{item.date}}</view>
+      </view>
+      <view class="anniv__body">
+        <view class="anniv__head">
+          <view class="anniv__title">{{item.title}}</view>
+          <view class="tag">{{item.repeatText}}</view>
+        </view>
+        <view wx:if="{{item.remark}}" class="anniv__remark">{{item.remark}}</view>
+        <view class="anniv__meta">
+          <text wx:if="{{item.yearsText}}">{{item.yearsText}} · </text>
+          <text>{{item.dateCN}}</text>
+        </view>
+        <view class="anniv__ops">
+          <view class="anniv__op pressable" data-id="{{item.id}}" bindtap="openEdit">编辑</view>
+          <view class="anniv__op anniv__op--delete pressable" data-id="{{item.id}}" bindtap="remove">{{deletingId == item.id ? '删除中…' : '删除'}}</view>
+        </view>
+      </view>
+      <view class="anniv__count anniv__count--{{item.countTone}}">
+        <view class="anniv__num">{{item.countValue}}</view>
+        <view class="anniv__unit">{{item.countUnit}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!items.length}}" class="empty">
+      <view class="empty__icon">📅</view>
+      <view class="empty__title">日历还留着空白</view>
+      <view class="empty__desc">记下一个值得每年庆祝的日子吧</view>
+      <button class="btn btn-solid btn-sm" bindtap="openCreate">写下第一个纪念日</button>
+    </view>
+  </block>
+
+  <view wx:if="{{showEdit}}" class="mask" bindtap="closeEdit"></view>
+  <view wx:if="{{showEdit}}" class="sheet anniversary-sheet">
+    <view class="sheet__title">{{editingId ? '修改这个日子' : '收藏一个特别日子'}}</view>
+    <view class="field">
+      <text class="field__label">纪念日名称</text>
+      <input class="input" value="{{form.title}}" maxlength="50" placeholder="例如：第一次见面" placeholder-class="placeholder" bindinput="onTitleInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">日期</text>
+      <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+        <view class="input picker-box">{{form.date || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field__label">纪念方式</text>
+      <view class="repeat-grid">
+        <view
+          wx:for="{{repeatOptions}}"
+          wx:key="value"
+          class="repeat-card pressable {{form.repeatYearly == item.value ? 'repeat-card--on' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="selectRepeat"
+        >
+          <view class="repeat-card__title">{{item.label}}</view>
+          <view class="repeat-card__desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field__label">选一枚小印章</text>
+      <view class="icon-row">
+        <view
+          wx:for="{{icons}}"
+          wx:key="*this"
+          class="icon-choice pressable {{form.icon == item ? 'icon-choice--on' : ''}}"
+          data-icon="{{item}}"
+          bindtap="selectIcon"
+        >{{item}}</view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field__label">留一句话（可选）</text>
+      <textarea class="textarea remark-input" value="{{form.remark}}" maxlength="200" placeholder="那天发生了什么？" placeholder-class="placeholder" bindinput="onRemarkInput" />
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving || !canSave}}" bindtap="submit">{{saving ? '保存中…' : '保存这个日子'}}</button>
+  </view>
+</view>

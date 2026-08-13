@@ -62,17 +62,13 @@ Page({
     detail: null
   },
 
-  onLoad() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
-    this.loadAll()
-  },
+  onLoad() {},
 
-  onShow() {
+  async onShow() {
     const tb = typeof this.getTabBar === 'function' && this.getTabBar()
     if (tb) tb.setData({ selected: 1 })
+    if (!(await getApp().guardPage('travels', { preferHome: true }))) return
+    this.loadAll()
   },
 
   onReady() {

@@ -1,0 +1,165 @@
+<view class="page-wrap page-wrap--no-tab surprise-page">
+  <view class="mast rise d1">
+    <view class="mast__title">惊喜盒</view>
+    <view class="mast__sub">把想说的话先藏起来，留给某个心动时刻</view>
+  </view>
+
+  <view class="surprise-hero rise d2">
+    <view class="surprise-hero__spark surprise-hero__spark--a">✦</view>
+    <view class="surprise-hero__spark surprise-hero__spark--b">✧</view>
+    <view class="surprise-hero__box">
+      <view class="surprise-hero__lid"></view>
+      <view class="surprise-hero__ribbon"></view>
+      <view class="surprise-hero__heart">♥</view>
+    </view>
+    <view class="surprise-hero__copy">
+      <view class="surprise-hero__title">给 TA 藏一个彩蛋</view>
+      <view class="surprise-hero__desc">日期、口令或轻轻一点，三种方式等待惊喜出现</view>
+      <button class="btn btn-red btn-sm surprise-hero__btn" bindtap="openCreate">＋ 藏一份惊喜</button>
+    </view>
+  </view>
+
+  <view class="sec-title">盒子里的秘密</view>
+  <view wx:if="{{loading}}" class="surprise-grid">
+    <view wx:for="{{4}}" wx:key="index" class="sk surprise-sk"></view>
+  </view>
+
+  <view wx:else class="surprise-grid">
+    <view
+      wx:for="{{items}}"
+      wx:key="id"
+      class="gift card rise pressable {{item.unlocked ? 'gift--open' : ''}} {{openingId == item.id ? 'gift--busy' : ''}}"
+      hover-class="pressed"
+      data-id="{{item.id}}"
+      bindtap="openDetail"
+    >
+      <view class="gift__visual">
+        <image wx:if="{{item.coverFull}}" class="gift__cover" src="{{item.coverFull}}" mode="aspectFill" lazy-load="{{true}}" />
+        <view wx:else class="gift__paper">
+          <view class="gift__fold"></view>
+          <view class="gift__seal">{{item.unlocked ? '💌' : '♥'}}</view>
+        </view>
+        <view class="gift__status {{item.unlocked ? 'gift__status--open' : ''}}">{{item.statusText}}</view>
+      </view>
+      <view class="gift__body">
+        <view class="gift__title">{{item.title}}</view>
+        <view class="gift__hint">{{item.displayHint}}</view>
+        <view class="gift__meta">
+          <text>{{item.conditionIcon}} {{item.conditionLabel}}</text>
+          <text>来自 {{item.creatorName}}</text>
+        </view>
+        <view wx:if="{{item.canDelete}}" class="gift__delete pressable" data-id="{{item.id}}" catchtap="remove">{{deletingId == item.id ? '撤回中…' : '撤回'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!loading && !items.length}}" class="empty">
+    <view class="empty__icon">🎁</view>
+    <view class="empty__title">盒子还是空的</view>
+    <view class="empty__desc">藏下一句话，让 TA 在未来某刻发现</view>
+    <button class="btn btn-solid btn-sm" bindtap="openCreate">放入第一个惊喜</button>
+  </view>
+
+  <view wx:if="{{showCreate}}" class="mask" bindtap="closeCreate"></view>
+  <view wx:if="{{showCreate}}" class="sheet surprise-sheet">
+    <view class="sheet__title">藏一份惊喜</view>
+    <view class="field">
+      <text class="field__label">惊喜标题</text>
+      <input class="input" value="{{form.title}}" maxlength="100" placeholder="给这份秘密起个名字" placeholder-class="placeholder" bindinput="onTitleInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">解锁方式</text>
+      <view class="condition-grid">
+        <view
+          wx:for="{{conditions}}"
+          wx:key="key"
+          class="condition pressable {{form.unlockCondition == item.key ? 'condition--on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="selectCondition"
+        >
+          <view class="condition__icon">{{item.icon}}</view>
+          <view class="condition__label">{{item.label}}</view>
+          <view class="condition__desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{form.unlockCondition == 'date'}}" class="field">
+      <text class="field__label">哪天可以打开</text>
+      <picker mode="date" value="{{form.unlockDate}}" start="{{minDate}}" bindchange="onUnlockDateChange">
+        <view class="input picker-box">{{form.unlockDate || '选择解锁日期'}}</view>
+      </picker>
+    </view>
+    <view wx:if="{{form.unlockCondition == 'password'}}" class="field">
+      <text class="field__label">秘密口令</text>
+      <input class="input" password value="{{form.unlockPassword}}" maxlength="50" placeholder="设置一个只有 TA 猜得到的口令" placeholder-class="placeholder" bindinput="onPasswordInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">未解锁时的提示（可选）</text>
+      <input class="input" value="{{form.hint}}" maxlength="200" placeholder="给 TA 一点小线索" placeholder-class="placeholder" bindinput="onHintInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">封面照片（可选）</text>
+      <view wx:if="{{coverFull}}" class="cover-preview">
+        <image class="cover-preview__img" src="{{coverFull}}" mode="aspectFill" />
+        <view class="cover-preview__remove" bindtap="removeCover">×</view>
+      </view>
+      <view wx:else class="cover-add pressable" bindtap="chooseCover">＋ 贴一张封面照片</view>
+    </view>
+    <view class="field">
+      <text class="field__label">惊喜内容</text>
+      <textarea class="textarea surprise-content" value="{{form.content}}" maxlength="5000" placeholder="写下真正的惊喜，解锁前后端不会把它告诉 TA…" placeholder-class="placeholder" bindinput="onContentInput" />
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving || !canSave}}" bindtap="submit">{{saving ? '正在藏好…' : '把惊喜放进盒子'}}</button>
+  </view>
+
+  <view wx:if="{{detail}}" class="mask" bindtap="closeDetail"></view>
+  <view wx:if="{{detail}}" class="detail-sheet" bindtap="closeDetail">
+    <view class="detail-card {{detail.unlocked ? 'detail-card--open' : ''}}" catchtap="stopEvent">
+      <view wx:if="{{detail.coverFull}}" class="detail-cover" bindtap="previewCover">
+        <image class="detail-cover__img" src="{{detail.coverFull}}" mode="aspectFill" />
+      </view>
+      <view wx:else class="detail-envelope">
+        <view class="detail-envelope__flap"></view>
+        <view class="detail-envelope__seal">{{detail.unlocked ? '💌' : '♥'}}</view>
+      </view>
+
+      <view class="detail-kicker">{{detail.unlocked ? 'SURPRISE REVEALED' : 'A SECRET FOR YOU'}}</view>
+      <view class="detail-title">{{detail.title}}</view>
+      <view class="detail-from">来自 {{detail.creatorName}} · {{detail.createdAtCN}}</view>
+
+      <block wx:if="{{detail.unlocked}}">
+        <view class="detail-letter">{{detail.content}}</view>
+        <view wx:if="{{detail.unlockDateCN}}" class="detail-foot">约定于 {{detail.unlockDateCN}} 开启</view>
+        <button wx:if="{{detail.canDelete}}" class="btn btn-ghost detail-delete" disabled="{{deletingId == detail.id}}" data-id="{{detail.id}}" bindtap="remove">{{deletingId == detail.id ? '撤回中…' : '撤回这个惊喜'}}</button>
+        <button class="btn btn-solid detail-close" bindtap="closeDetail">收好这份惊喜</button>
+      </block>
+
+      <block wx:else>
+        <view class="locked-hint">{{detail.hint || '这里藏着一句只给你的话'}}</view>
+        <view class="locked-rule">
+          <view class="locked-rule__icon">{{detail.conditionIcon}}</view>
+          <view>
+            <view class="locked-rule__title">{{detail.statusText}}</view>
+            <view wx:if="{{detail.unlockCondition == 'date'}}" class="locked-rule__desc">约定在 {{detail.unlockDateCN}} 打开</view>
+            <view wx:elif="{{detail.unlockCondition == 'password'}}" class="locked-rule__desc">输入你们之间的秘密口令</view>
+            <view wx:else class="locked-rule__desc">准备好就轻轻拆开它</view>
+          </view>
+        </view>
+        <input
+          wx:if="{{detail.unlockCondition == 'password'}}"
+          class="input unlock-input"
+          password
+          value="{{password}}"
+          maxlength="50"
+          placeholder="输入秘密口令"
+          placeholder-class="placeholder"
+          bindinput="onUnlockPasswordInput"
+        />
+        <button class="btn btn-red unlock-btn" disabled="{{unlocking || !detail.canUnlock || (detail.unlockCondition == 'password' && !password)}}" bindtap="unlock">
+          {{unlocking ? '正在拆开…' : (detail.canUnlock ? '拆开惊喜 ✨' : '还没到约定的日子')}}
+        </button>
+        <button wx:if="{{detail.canDelete}}" class="btn btn-ghost detail-delete" disabled="{{deletingId == detail.id}}" data-id="{{detail.id}}" bindtap="remove">{{deletingId == detail.id ? '撤回中…' : '撤回这个惊喜'}}</button>
+      </block>
+    </view>
+  </view>
+</view>

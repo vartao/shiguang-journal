@@ -39,11 +39,8 @@ Page({
     saving: false
   },
 
-  onShow() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+  async onShow() {
+    if (!(await getApp().guardPage('wishes'))) return
     this.load()
   },
 

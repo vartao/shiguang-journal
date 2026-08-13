@@ -1,20 +1,19 @@
 <view class="tabbar" style="padding-bottom: env(safe-area-inset-bottom);">
   <view
-    wx:for="{{ tabs }}"
+    wx:for="{{tabs}}"
     wx:key="path"
-    class="tab {{ selected === index ? 'on' : '' }}"
+    class="tab {{selected === item.tabIndex ? 'on' : ''}}"
     hover-class="pressed"
     hover-stay-time="60"
-    data-index="{{ index }}"
+    data-index="{{item.tabIndex}}"
     bindtap="onTap"
   >
-    <text class="tab__ico">{{ item.icon }}</text>
-    <text class="tab__label">{{ item.label }}</text>
-    <view wx:if="{{ selected === index }}" class="tab__dot"></view>
+    <text class="tab__ico">{{item.icon}}</text>
+    <text class="tab__label">{{item.label}}</text>
+    <view wx:if="{{selected === item.tabIndex}}" class="tab__dot"></view>
   </view>
 
-  <!-- 中心写笔记按钮 -->
-  <view class="tab tab--write" hover-class="pressed" hover-stay-time="60" bindtap="onWrite">
+  <view wx:if="{{showWrite}}" class="tab tab--write" hover-class="pressed" hover-stay-time="60" bindtap="onWrite">
     <view class="write-btn">
       <text class="write-btn__ico">✏️</text>
     </view>
@@ -22,16 +21,16 @@
   </view>
 
   <view
-    wx:for="{{ tabsRight }}"
+    wx:for="{{tabsRight}}"
     wx:key="path"
-    class="tab {{ selected === item.tabIndex ? 'on' : '' }}"
+    class="tab {{selected === item.tabIndex ? 'on' : ''}}"
     hover-class="pressed"
     hover-stay-time="60"
-    data-index="{{ item.tabIndex }}"
+    data-index="{{item.tabIndex}}"
     bindtap="onTap"
   >
-    <text class="tab__ico">{{ item.icon }}</text>
-    <text class="tab__label">{{ item.label }}</text>
-    <view wx:if="{{ selected === item.tabIndex }}" class="tab__dot"></view>
+    <text class="tab__ico">{{item.icon}}</text>
+    <text class="tab__label">{{item.label}}</text>
+    <view wx:if="{{selected === item.tabIndex}}" class="tab__dot"></view>
   </view>
 </view>

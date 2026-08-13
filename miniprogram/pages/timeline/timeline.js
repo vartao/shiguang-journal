@@ -77,16 +77,13 @@ Page({
     this._searchTimer = null
   },
 
-  onShow() {
+  async onShow() {
     const tb = typeof this.getTabBar === 'function' && this.getTabBar()
     if (tb) tb.setData({ selected: 0 })
 
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!(await getApp().guardPage('notes', { preferHome: true }))) return
     const user = getApp().globalData.userInfo || {}
-    this.setData({ myUserId: user.id || null })
+    this.setData({ myUserId: user.id || user.userId || null })
     this.refresh()
     this.loadOnThisDay()
   },

@@ -27,11 +27,8 @@ Page({
     this.setData({ minDate: t, 'form.openDate': t })
   },
 
-  onShow() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+  async onShow() {
+    if (!(await getApp().guardPage('capsule'))) return
     this.load()
   },
 

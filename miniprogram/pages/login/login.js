@@ -27,11 +27,12 @@ Page({
     this.jumpIfLoggedIn()
   },
 
-  /** 已登录直接进入时间线 */
+  /** 已登录进入首个可用 tab；时间线关闭时回到小窝。 */
   jumpIfLoggedIn() {
-    if (getApp().isLoggedIn()) {
-      wx.switchTab({ url: '/pages/timeline/timeline' })
-    }
+    const app = getApp()
+    if (!app.isLoggedIn()) return
+    const url = app.isFeatureOn('notes') ? '/pages/timeline/timeline' : '/pages/mine/mine'
+    wx.switchTab({ url })
   },
 
   switchMode(e) {
@@ -116,7 +117,9 @@ Page({
       } catch (_e) {
         // 静默
       }
-      wx.switchTab({ url: '/pages/timeline/timeline' })
+      const app = getApp()
+      const target = app.isFeatureOn('notes') ? '/pages/timeline/timeline' : '/pages/mine/mine'
+      wx.switchTab({ url: target })
     } catch (_e) {
       // 错误信息已由 request 统一 toast
     } finally {

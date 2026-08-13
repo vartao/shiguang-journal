@@ -33,16 +33,12 @@ Page({
     form: { title: '', destination: '', startDate: '', endDate: '', budget: '', note: '', cover: '', status: 0 }
   },
 
-  onLoad() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
-    this.load()
-  },
+  onLoad() {},
 
-  onShow() {
-    if (this._needRefresh) {
+  async onShow() {
+    if (!(await getApp().guardPage('plans'))) return
+    if (!this._loaded || this._needRefresh) {
+      this._loaded = true
       this._needRefresh = false
       this.load()
     }

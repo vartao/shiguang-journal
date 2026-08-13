@@ -2,7 +2,7 @@
 // 小程序静态校验：JS 语法（node --check 等价）、JSON 合法、WXML 标签配对
 // 用法：node scripts/check-miniprogram.mjs [目录，默认 miniprogram]
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, extname } from 'node:path'
 
 const root = process.argv[2] || 'miniprogram'
@@ -17,6 +17,45 @@ function walk(dir, out = []) {
     else out.push(p)
   }
   return out
+}
+
+function checkPageRegistry() {
+  const appPath = join(root, 'app.json')
+  if (!existsSync(appPath)) return
+  let app
+  try {
+    app = JSON.parse(readFileSync(appPath, 'utf8'))
+  } catch (_e) {
+    return // JSON 合法性由主循环统一报告
+  }
+
+  const pages = Array.isArray(app.pages) ? app.pages : []
+  const registered = new Set(pages)
+  if (registered.size !== pages.length) {
+    console.error(`✗ ${appPath} pages 存在重复注册`)
+    errors++
+  }
+
+  for (const page of pages) {
+    for (const ext of ['.js', '.json', '.wxml', '.wxss']) {
+      const file = join(root, page + ext)
+      if (!existsSync(file)) {
+        console.error(`✗ ${appPath} 注册了 ${page}，但缺少 ${ext} 文件`)
+        errors++
+      }
+    }
+  }
+
+  const pagesDir = join(root, 'pages')
+  if (!existsSync(pagesDir)) return
+  for (const file of walk(pagesDir, [])) {
+    if (extname(file) !== '.js') continue
+    const normalized = file.replace(/\\/g, '/').replace(root.replace(/\\/g, '/') + '/', '').replace(/\.js$/, '')
+    if (!registered.has(normalized)) {
+      console.error(`✗ ${file} 对应页面未在 app.json pages 中注册`)
+      errors++
+    }
+  }
 }
 
 // WXML 里总是以 /> 自闭合的标签（其余一律要求显式闭合）
@@ -53,6 +92,8 @@ function checkWxml(path) {
     errors++
   }
 }
+
+checkPageRegistry()
 
 for (const file of walk(root)) {
   const ext = extname(file)

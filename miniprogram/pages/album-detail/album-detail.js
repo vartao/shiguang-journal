@@ -17,11 +17,8 @@ Page({
     this.setData({ id: Number(options.id) || 0 })
   },
 
-  onShow() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+  async onShow() {
+    if (!(await getApp().guardPage('albums'))) return
     this.load()
   },
 

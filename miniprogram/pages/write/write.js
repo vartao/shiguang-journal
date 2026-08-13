@@ -27,7 +27,8 @@ Page({
     submitting: false
   },
 
-  onLoad(options) {
+  async onLoad(options) {
+    if (!(await getApp().guardPage('notes'))) return
     const today = util.formatDate(new Date())
     this.setData({
       moods: mapList(util.MOODS),

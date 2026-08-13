@@ -55,8 +55,8 @@ Page({
     saving: false
   },
 
-  onShow() {
-    if (!getApp().isLoggedIn()) return
+  async onShow() {
+    if (!(await getApp().guardPage('menu'))) return
     this.refreshAll()
   },
 

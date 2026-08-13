@@ -44,12 +44,9 @@ Page({
     form: { title: '', destination: '', startDate: '', endDate: '', budget: '', note: '', cover: '', status: 0 }
   },
 
-  onLoad(options) {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+  async onLoad(options) {
     this._id = options.id
+    if (!(await getApp().guardPage('plans'))) return
     this.load()
   },
 

@@ -34,16 +34,17 @@ Page({
     items: [],
     loading: true,
     draft: '',
+    canSend: false,
     scrollTo: '',
     sending: false
   },
 
   raw: [],
 
-  onShow() {
+  async onShow() {
     const tb = typeof this.getTabBar === 'function' && this.getTabBar()
     if (tb) tb.setData({ selected: 2 })
-    if (!getApp().isLoggedIn()) return
+    if (!(await getApp().guardPage('board', { preferHome: true }))) return
     this.load()
   },
 
@@ -73,7 +74,8 @@ Page({
   },
 
   onInput(e) {
-    this.setData({ draft: e.detail.value })
+    const draft = e.detail.value
+    this.setData({ draft, canSend: !!draft.trim() })
   },
 
   async onSend() {
@@ -83,7 +85,7 @@ Page({
     try {
       const msg = await api.request({ path: '/messages', method: 'POST', data: { content }, loading: false })
       if (msg) this.raw.push(msg)
-      this.setData({ draft: '' })
+      this.setData({ draft: '', canSend: false })
       this.rebuild()
     } catch (_e) {
       // 错误提示已由 request 统一处理

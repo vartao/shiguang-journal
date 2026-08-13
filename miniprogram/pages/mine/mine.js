@@ -1,21 +1,7 @@
 // 我的 / 小窝总览
 const api = require('../../utils/api')
 
-// 功能入口清单（anniversary / surprise 暂无小程序页面，只参与开关管理，不进宫格）
-const FEATURES = [
-  { key: 'notes', label: '时间线', icon: '🎞️', path: '/pages/timeline/timeline', tab: true },
-  { key: 'albums', label: '相册墙', icon: '📸', path: '/pages/albums/albums' },
-  { key: 'anniversary', label: '纪念日', icon: '💑', path: '', noPage: true },
-  { key: 'surprise', label: '惊喜盒', icon: '🎁', path: '', noPage: true },
-  { key: 'wishes', label: '心愿池', icon: '✨', path: '/pages/wishes/wishes' },
-  { key: 'stats', label: '数据', icon: '📊', path: '/pages/stats/stats' },
-  { key: 'travels', label: '足迹', icon: '🗺️', path: '/pages/travels/travels', tab: true },
-  { key: 'plans', label: '行程', icon: '🧳', path: '/pages/plans/plans' },
-  { key: 'menu', label: '吃什么', icon: '🍚', path: '/pages/menu/menu' },
-  { key: 'capsule', label: '胶囊', icon: '⏳', path: '/pages/capsule/capsule' },
-  { key: 'logs', label: '小事记', icon: '📖', path: '/pages/logs/logs' },
-  { key: 'board', label: '留言板', icon: '💬', path: '/pages/board/board', tab: true }
-]
+const { FEATURES } = require('../../utils/features')
 
 function firstChar(name) {
   const s = String(name || '').trim()
@@ -41,13 +27,10 @@ Page({
     savingProfile: false
   },
 
-  onShow() {
+  async onShow() {
     const tb = typeof this.getTabBar === 'function' && this.getTabBar()
     if (tb) tb.setData({ selected: 3 })
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!(await getApp().guardPage('', { silent: true }))) return
     this.applyCachedCouple()
     this.refreshCouple()
     this.buildGrid()
@@ -56,6 +39,8 @@ Page({
   /** 供 app.refreshFeatures 回调：开关变化后刷新宫格 */
   onFeaturesChange() {
     this.buildGrid()
+    const tb = typeof this.getTabBar === 'function' && this.getTabBar()
+    if (tb && typeof tb.syncFeatures === 'function') tb.syncFeatures()
   },
 
   /** 先用缓存渲染，避免空白 */
@@ -106,7 +91,7 @@ Page({
   /** 按功能开关过滤出宫格入口 */
   buildGrid() {
     const app = getApp()
-    const grid = FEATURES.filter((f) => !f.noPage && app.isFeatureOn(f.key))
+    const grid = FEATURES.filter((f) => app.isFeatureOn(f.key))
     const featureList = FEATURES.map((f) => ({
       key: f.key,
       label: f.label,
@@ -194,7 +179,9 @@ Page({
       })
       const app = getApp()
       app.globalData.features = map || {}
-      wx.setStorageSync('ql_features', app.globalData.features)
+      app.globalData.featuresLoaded = true
+      wx.setStorageSync(app.featureCacheKey(), app.globalData.features)
+      wx.removeStorageSync('ql_features')
     } catch (_e) {
       // 失败时 buildGrid 会把开关拨回原状
     }

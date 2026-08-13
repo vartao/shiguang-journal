@@ -21,11 +21,8 @@ Page({
     onThisDay: []
   },
 
-  onLoad() {
-    if (!getApp().isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+  async onLoad() {
+    if (!(await getApp().guardPage('stats'))) return
     this.load()
   },
 
