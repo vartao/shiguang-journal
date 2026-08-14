@@ -50,7 +50,7 @@ body::before {
 /* 选中文本样式 */
 ::selection {
   background: rgba(var(--red-rgb), 0.25);
-  color: var(--brown-deep);
+  color: var(--text-primary);
 }
 
 /* 滚动条 - 复古风 */
@@ -102,6 +102,13 @@ textarea,
 select {
   font-family: inherit;
   font-size: inherit;
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 /* 键盘焦点可见性（无障碍） */
@@ -447,6 +454,24 @@ button:focus-visible,
 
 [data-theme='dark'] body::before {
   opacity: 0.05;
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  color: var(--text-primary);
+  background-color: var(--cream-warm);
+  border-color: rgba(var(--brown-rgb), 0.38);
+  color-scheme: dark;
+}
+
+[data-theme='dark'] option {
+  color: var(--text-primary);
+  background: var(--cream-warm);
+}
+
+[data-theme='dark'] .btn-vintage--outline {
+  color: var(--text-primary);
 }
 
 /* ============ 骨架屏 ============ */

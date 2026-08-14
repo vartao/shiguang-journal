@@ -35,6 +35,8 @@
   --cream-rgb: 250, 243, 224;
   --cream-static-rgb: 250, 243, 224; /* 固定浅色：深色底上的文字/描边，不随主题变化 */
   --white-rgb: 255, 255, 255;
+  --surface-raised-rgb: 255, 255, 255;
+  --tooltip-bg-rgb: 20, 17, 14;
   --olive-rgb: 125, 140, 92;
   --blue-rgb: 122, 155, 181;
   --mustard-rgb: 201, 162, 39;
@@ -100,10 +102,11 @@
 [data-theme='dark'] {
   --kraft-paper: #8b6b4a;
   --kraft-light: #6b5238;
-  --kraft-dark: #5a4530;
-  --brown-deep: #d4c4a8;
-  --brown-medium: #b8a68a;
-  --brown-light: #a09078;
+  --kraft-dark: #d8bd91;
+  /* Keep legacy brown semantic tokens readable on dark surfaces. */
+  --brown-deep: #f1e7d5;
+  --brown-medium: #e0d2bd;
+  --brown-light: #cdbda5;
   --cream: #1e1a16;
   --cream-warm: #252018;
   --cream-dark: #2a241e;
@@ -126,6 +129,7 @@
   --red-rgb: 212, 131, 138;
   --red-dark-rgb: 192, 107, 114;
   --cream-rgb: 37, 32, 24;
+  --surface-raised-rgb: 48, 41, 32;
   --olive-rgb: 143, 160, 106;
   --blue-rgb: 112, 144, 168;
   --muted-rgb: 196, 179, 155;
@@ -133,6 +137,15 @@
   --gradient-card: linear-gradient(170deg, #252018, #1e1a16);
   --gradient-paper: linear-gradient(175deg, #252018, #1e1a16);
   --gradient-nav: linear-gradient(180deg, #2a241e 0%, #252018 100%);
+  --photo-paper: #2b251e;
+  --letter-paper: #302920;
+  --letter-paper-rgb: 48, 41, 32;
+  --envelope-body: #332a21;
+  --envelope-side: #2e261e;
+  --envelope-bottom: #382f25;
+  --envelope-flap: #403529;
+  --envelope-back: linear-gradient(160deg, #3a3025, #2e261e);
+  --envelope-seal: radial-gradient(circle at 40% 35%, #d4838a, #8f444b);
 
   --text-primary: #e0d5c0;
   --text-secondary: #c8b8a0;

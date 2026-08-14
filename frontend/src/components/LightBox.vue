@@ -160,7 +160,7 @@ onUnmounted(() => {
 
 .lightbox__close:hover {
   background: rgba(var(--cream-static-rgb), 0.15);
-  color: var(--cream);
+  color: var(--text-on-dark);
   transform: rotate(90deg);
 }
 
@@ -184,7 +184,7 @@ onUnmounted(() => {
 
 .lightbox__nav:hover {
   background: rgba(var(--cream-static-rgb), 0.14);
-  color: var(--cream);
+  color: var(--text-on-dark);
 }
 
 .lightbox__nav--prev {

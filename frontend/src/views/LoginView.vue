@@ -797,7 +797,7 @@ async function handleSubmit() {
   padding: 12px 14px;
   font-size: 14px;
   color: var(--text-primary);
-  background: rgba(var(--white-rgb), 0.55);
+  background: rgba(var(--surface-raised-rgb), 0.72);
   border: 1.5px solid rgba(var(--brown-rgb), 0.16);
   border-radius: 8px;
   outline: none;
@@ -817,7 +817,7 @@ async function handleSubmit() {
 
 .input-field:focus {
   border-color: var(--faded-red);
-  background: rgba(var(--white-rgb), 0.85);
+  background: rgba(var(--surface-raised-rgb), 0.9);
   box-shadow: 0 0 0 3px rgba(var(--red-rgb), 0.12);
 }
 
@@ -864,7 +864,7 @@ async function handleSubmit() {
   font-family: var(--font-display);
   font-size: 14px;
   color: var(--text-secondary);
-  background: rgba(var(--white-rgb), 0.45);
+  background: rgba(var(--surface-raised-rgb), 0.68);
   border: 1.5px solid rgba(var(--brown-rgb), 0.16);
   border-radius: 8px;
   transition: all 0.2s ease;

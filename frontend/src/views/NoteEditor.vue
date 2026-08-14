@@ -497,7 +497,7 @@ onMounted(() => {
   font-size: 15px;
   line-height: 2;
   color: var(--text-primary);
-  background: rgba(var(--white-rgb), 0.5);
+  background: rgba(var(--surface-raised-rgb), 0.7);
   border: 1.5px solid rgba(var(--brown-rgb), 0.15);
   border-radius: var(--radius-md);
   resize: vertical;

@@ -605,7 +605,7 @@ onMounted(() => {
 
 .invite-box {
   padding: 16px;
-  background: rgba(var(--white-rgb), 0.45);
+  background: rgba(var(--surface-raised-rgb), 0.68);
   border-radius: var(--radius-md);
   border: 1px dashed rgba(var(--brown-rgb), 0.2);
   margin-bottom: 16px;

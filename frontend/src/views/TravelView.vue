@@ -282,7 +282,20 @@ const form = ref(createEmptyForm())
 const mapSummary = computed(() => {
   const map = {}
   for (const item of mapList.value) {
-    map[item.province] = { visited: item.visited, planned: item.planned }
+    map[item.province] = {
+      visited: item.visited,
+      planned: item.planned,
+      cities: []
+    }
+  }
+  for (const travel of travels.value) {
+    if (!travel.province || !travel.city?.trim()) continue
+    if (!map[travel.province]) {
+      map[travel.province] = { visited: 0, planned: 0, cities: [] }
+    }
+    if (!map[travel.province].cities.includes(travel.city.trim())) {
+      map[travel.province].cities.push(travel.city.trim())
+    }
   }
   return map
 })

@@ -149,7 +149,7 @@ const formattedDate = computed(() => {
   padding: 3px 8px;
   font-family: var(--font-display);
   font-size: 11px;
-  color: var(--cream);
+  color: var(--text-on-dark);
   background: rgba(26, 26, 26, 0.65);
   border-radius: 2px;
   letter-spacing: 0.5px;

@@ -551,7 +551,7 @@ onMounted(() => {
   font-family: var(--font-display);
   font-size: 12px;
   color: var(--text-secondary);
-  background: rgba(var(--white-rgb), 0.55);
+  background: rgba(var(--surface-raised-rgb), 0.72);
   border: 1.5px solid rgba(var(--brown-rgb), 0.15);
   border-radius: 999px;
   transition: all var(--transition-fast);
@@ -882,7 +882,7 @@ onMounted(() => {
   font-family: var(--font-serif);
   font-size: 20px;
   font-weight: 700;
-  color: var(--cream);
+  color: var(--text-on-dark);
   line-height: 1.1;
 }
 
@@ -932,7 +932,7 @@ onMounted(() => {
   right: 8px;
   padding: 3px 8px;
   font-size: 12px;
-  color: var(--cream);
+  color: var(--text-on-dark);
   background: rgba(26, 26, 26, 0.6);
   border-radius: 10px;
 }
