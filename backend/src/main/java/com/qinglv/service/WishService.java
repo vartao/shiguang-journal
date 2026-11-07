@@ -12,8 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +46,7 @@ public class WishService {
                .orderByDesc(Wish::getCreateTime);
 
         List<Wish> wishes = wishMapper.selectList(wrapper);
-        return wishes.stream().map(this::convertToVO).collect(Collectors.toList());
+        return convertToVOs(wishes);
     }
 
     /**
@@ -128,7 +132,29 @@ public class WishService {
         wishMapper.deleteById(wishId);
     }
 
+    /**
+     * 批量装配心愿展示数据，避免每条心愿分别查询创建者/达成者造成 N+1
+     */
+    private List<WishVO> convertToVOs(List<Wish> wishes) {
+        Set<Long> userIds = new HashSet<>();
+        for (Wish wish : wishes) {
+            if (wish.getUserId() != null) userIds.add(wish.getUserId());
+            if (wish.getCompletedBy() != null) userIds.add(wish.getCompletedBy());
+        }
+        Map<Long, User> usersById = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            for (User user : userMapper.selectBatchIds(userIds)) {
+                usersById.put(user.getId(), user);
+            }
+        }
+        return wishes.stream().map(wish -> convertToVO(wish, usersById)).collect(Collectors.toList());
+    }
+
     private WishVO convertToVO(Wish wish) {
+        return convertToVO(wish, null);
+    }
+
+    private WishVO convertToVO(Wish wish, Map<Long, User> usersById) {
         WishVO vo = new WishVO();
         vo.setId(wish.getId());
         vo.setCoupleId(wish.getCoupleId());
@@ -144,13 +170,17 @@ public class WishService {
         vo.setCreateTime(wish.getCreateTime());
         vo.setUpdateTime(wish.getUpdateTime());
 
-        User creator = userMapper.selectById(wish.getUserId());
+        User creator = usersById != null
+                ? (wish.getUserId() == null ? null : usersById.get(wish.getUserId()))
+                : userMapper.selectById(wish.getUserId());
         if (creator != null) {
             vo.setCreatorNickname(creator.getNickname());
             vo.setCreatorAvatar(creator.getAvatar());
         }
         if (wish.getCompletedBy() != null) {
-            User completer = userMapper.selectById(wish.getCompletedBy());
+            User completer = usersById != null
+                    ? usersById.get(wish.getCompletedBy())
+                    : userMapper.selectById(wish.getCompletedBy());
             if (completer != null) {
                 vo.setCompleterNickname(completer.getNickname());
             }

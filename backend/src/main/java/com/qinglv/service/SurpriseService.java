@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.SurpriseDTO;
 import com.qinglv.dto.SurpriseVO;
 import com.qinglv.entity.Surprise;
@@ -17,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +49,7 @@ public class SurpriseService {
                         .orderByDesc(Surprise::getCreateTime)
         );
 
-        return list.stream().map(this::convertToVO).collect(Collectors.toList());
+        return convertToVOs(list);
     }
 
     /**
@@ -82,7 +87,7 @@ public class SurpriseService {
         surprise.setTitle(dto.getTitle());
         surprise.setContent(dto.getContent());
         surprise.setHint(dto.getHint());
-        surprise.setCoverImage(dto.getCoverImage());
+        surprise.setCoverImage(UploadUrls.toStoredPath(dto.getCoverImage()));
         surprise.setUnlockCondition(dto.getUnlockCondition());
         surprise.setUnlocked(0);
 
@@ -217,9 +222,30 @@ public class SurpriseService {
     }
 
     /**
+     * 批量装配惊喜展示数据，避免每条惊喜分别查询创建者造成 N+1
+     */
+    private List<SurpriseVO> convertToVOs(List<Surprise> list) {
+        Set<Long> userIds = new HashSet<>();
+        for (Surprise surprise : list) {
+            if (surprise.getUserId() != null) userIds.add(surprise.getUserId());
+        }
+        Map<Long, User> usersById = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            for (User user : userMapper.selectBatchIds(userIds)) {
+                usersById.put(user.getId(), user);
+            }
+        }
+        return list.stream().map(surprise -> convertToVO(surprise, usersById)).collect(Collectors.toList());
+    }
+
+    /**
      * 将Surprise实体转换为SurpriseVO
      */
     private SurpriseVO convertToVO(Surprise surprise) {
+        return convertToVO(surprise, null);
+    }
+
+    private SurpriseVO convertToVO(Surprise surprise, Map<Long, User> usersById) {
         SurpriseVO vo = new SurpriseVO();
         vo.setId(surprise.getId());
         vo.setCoupleId(surprise.getCoupleId());
@@ -240,7 +266,9 @@ public class SurpriseService {
         }
 
         // 查询创建者信息
-        User creator = userMapper.selectById(surprise.getUserId());
+        User creator = usersById != null
+                ? (surprise.getUserId() == null ? null : usersById.get(surprise.getUserId()))
+                : userMapper.selectById(surprise.getUserId());
         if (creator != null) {
             vo.setCreatorNickname(creator.getNickname());
             vo.setFromName(creator.getNickname());

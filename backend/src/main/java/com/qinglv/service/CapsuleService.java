@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.CapsuleDTO;
 import com.qinglv.dto.CapsuleVO;
 import com.qinglv.entity.Capsule;
@@ -17,8 +18,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,8 +50,7 @@ public class CapsuleService {
                .orderByAsc(Capsule::getId);
 
         List<Capsule> capsules = capsuleMapper.selectList(wrapper);
-        LocalDate today = LocalDate.now();
-        return capsules.stream().map(capsule -> convertToVO(capsule, today)).collect(Collectors.toList());
+        return convertToVOs(capsules, LocalDate.now());
     }
 
     /**
@@ -115,7 +119,29 @@ public class CapsuleService {
         capsuleMapper.deleteById(capsuleId);
     }
 
+    /**
+     * 批量装配胶囊展示数据，避免每条胶囊分别查询创建者/拆开人造成 N+1
+     */
+    private List<CapsuleVO> convertToVOs(List<Capsule> capsules, LocalDate today) {
+        Set<Long> userIds = new HashSet<>();
+        for (Capsule capsule : capsules) {
+            if (capsule.getUserId() != null) userIds.add(capsule.getUserId());
+            if (capsule.getOpenedBy() != null) userIds.add(capsule.getOpenedBy());
+        }
+        Map<Long, User> usersById = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            for (User user : userMapper.selectBatchIds(userIds)) {
+                usersById.put(user.getId(), user);
+            }
+        }
+        return capsules.stream().map(capsule -> convertToVO(capsule, today, usersById)).collect(Collectors.toList());
+    }
+
     private CapsuleVO convertToVO(Capsule capsule, LocalDate today) {
+        return convertToVO(capsule, today, null);
+    }
+
+    private CapsuleVO convertToVO(Capsule capsule, LocalDate today, Map<Long, User> usersById) {
         CapsuleVO vo = new CapsuleVO();
         vo.setId(capsule.getId());
         vo.setCoupleId(capsule.getCoupleId());
@@ -138,13 +164,17 @@ public class CapsuleService {
             vo.setPhotoUrls(deserializePhotoUrls(capsule.getPhotoUrls()));
         }
 
-        User creator = userMapper.selectById(capsule.getUserId());
+        User creator = usersById != null
+                ? (capsule.getUserId() == null ? null : usersById.get(capsule.getUserId()))
+                : userMapper.selectById(capsule.getUserId());
         if (creator != null) {
             vo.setCreatorNickname(creator.getNickname());
             vo.setCreatorAvatar(creator.getAvatar());
         }
         if (capsule.getOpenedBy() != null) {
-            User opener = userMapper.selectById(capsule.getOpenedBy());
+            User opener = usersById != null
+                    ? usersById.get(capsule.getOpenedBy())
+                    : userMapper.selectById(capsule.getOpenedBy());
             if (opener != null) {
                 vo.setOpenerNickname(opener.getNickname());
             }
@@ -157,7 +187,8 @@ public class CapsuleService {
             return null;
         }
         try {
-            return OBJECT_MAPPER.writeValueAsString(photoUrls);
+            return OBJECT_MAPPER.writeValueAsString(
+                    photoUrls.stream().map(UploadUrls::toStoredPath).toList());
         } catch (Exception e) {
             throw new BusinessException("照片格式不正确");
         }
