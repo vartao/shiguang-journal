@@ -16,6 +16,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class FileServiceTest {
+    /** 1x1 透明 PNG，通过魔数与解码校验的最小合法图片 */
+    private static final byte[] TINY_PNG = Base64.getDecoder().decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+
     @TempDir Path tempDir;
     QlFileMapper mapper;
     OssStorageService ossStorageService;
@@ -35,14 +39,21 @@ class FileServiceTest {
     }
     @Test void databaseFailureRemovesWrittenFile() throws Exception {
         when(mapper.insert(any())).thenThrow(new RuntimeException("db down"));
-        assertThrows(RuntimeException.class, () -> service.uploadFile(new MockMultipartFile("file", "x.jpg", "image/jpeg", new byte[]{1,2}), 1L));
+        assertThrows(RuntimeException.class, () -> service.uploadFile(new MockMultipartFile("file", "x.png", "image/png", TINY_PNG), 1L));
         try (var files = Files.walk(tempDir)) { assertEquals(0, files.filter(Files::isRegularFile).count()); }
     }
     @Test void writesInsideNormalizedRootAndReturnsUrl() throws Exception {
         when(mapper.insert(any())).thenReturn(1);
-        String url = service.uploadFile(new MockMultipartFile("file", "x.PNG", "image/png", new byte[]{1}), 1L);
+        String url = service.uploadFile(new MockMultipartFile("file", "x.PNG", "image/png", TINY_PNG), 1L);
         assertTrue(url.startsWith("/uploads/"));
-        try (var files = Files.walk(tempDir)) { assertEquals(1, files.filter(Files::isRegularFile).count()); }
+        // 合法 PNG 会同时写出原图与 _thumb.jpg 缩略图
+        try (var files = Files.walk(tempDir)) { assertEquals(2, files.filter(Files::isRegularFile).count()); }
+    }
+
+    @Test void rejectsForgedImageContent() {
+        // 扩展名与 MIME 都合法，但文件头不是 JPEG（伪造内容必须被拒绝）
+        assertThrows(BusinessException.class, () -> service.uploadFile(
+                new MockMultipartFile("file", "x.jpg", "image/jpeg", "hello fake jpg".getBytes()), 1L));
     }
 
     @Test void generatesJpegThumbnailForValidImage() throws Exception {

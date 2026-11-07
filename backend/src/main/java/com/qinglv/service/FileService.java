@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.qinglv.common.BusinessException;
 import com.qinglv.entity.QlFile;
 import com.qinglv.mapper.QlFileMapper;
+import com.qinglv.service.support.FileSignatureValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -183,6 +185,12 @@ public class FileService {
         if (!allowedList.contains(ext)) throw new BusinessException("不支持的文件类型: " + extension);
         String contentType = file.getContentType();
         if (StrUtil.isBlank(contentType) || !isAllowedContentType(ext, contentType)) throw new BusinessException("文件内容类型与扩展名不匹配，或类型不被允许");
+        try (InputStream in = file.getInputStream()) {
+            if (!FileSignatureValidator.matches(ext, in)) throw new BusinessException("文件内容与扩展名不匹配");
+        } catch (IOException e) {
+            log.error("文件读取失败", e);
+            throw new BusinessException("文件读取失败");
+        }
     }
 
     private boolean isAllowedContentType(String ext, String contentType) {
