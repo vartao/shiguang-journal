@@ -1,9 +1,8 @@
 package com.qinglv.controller;
 
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.GlobalExceptionHandler;
 import com.qinglv.dto.LoginVO;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.AnniversaryService;
 import com.qinglv.service.AuthService;
 import com.qinglv.service.FileService;
@@ -36,7 +35,7 @@ class ControllerContractTest {
     @Test
     void authLoginRejectsBlankCredentialsWithStandardEnvelope() throws Exception {
         AuthService service = mock(AuthService.class);
-        mvc(new AuthController(service)).perform(post("/api/auth/login")
+        mvc(new AuthController(service, mock(CurrentUserContext.class))).perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"\",\"password\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -47,7 +46,7 @@ class ControllerContractTest {
     @Test
     void malformedJsonIsReportedAsBadRequestInsteadOfServerError() throws Exception {
         AuthService service = mock(AuthService.class);
-        mvc(new AuthController(service)).perform(post("/api/auth/login")
+        mvc(new AuthController(service, mock(CurrentUserContext.class))).perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"qing\","))
                 .andExpect(status().isBadRequest())
@@ -61,7 +60,7 @@ class ControllerContractTest {
         LoginVO login = new LoginVO();
         login.setToken("token");
         when(service.login(any())).thenReturn(login);
-        mvc(new AuthController(service)).perform(post("/api/auth/login")
+        mvc(new AuthController(service, mock(CurrentUserContext.class))).perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"qing\",\"password\":\"secret\"}"))
                 .andExpect(status().isOk())
@@ -73,8 +72,8 @@ class ControllerContractTest {
     @Test
     void anniversaryRejectsMissingDate() throws Exception {
         AnniversaryService service = mock(AnniversaryService.class);
-        UserMapper mapper = mock(UserMapper.class);
-        mvc(new AnniversaryController(service, mapper)).perform(post("/api/anniversaries")
+        CurrentUserContext currentUser = mock(CurrentUserContext.class);
+        mvc(new AnniversaryController(service, currentUser)).perform(post("/api/anniversaries")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"相识纪念日\"}"))
                 .andExpect(status().isBadRequest())
@@ -84,12 +83,11 @@ class ControllerContractTest {
     @Test
     void wishCreateReturnsStandardEnvelope() throws Exception {
         WishService service = mock(WishService.class);
-        UserMapper mapper = mock(UserMapper.class);
-        User user = new User();
-        user.setCoupleId(9L);
-        when(mapper.selectById(any())).thenReturn(user);
+        CurrentUserContext currentUser = mock(CurrentUserContext.class);
+        when(currentUser.getUserId()).thenReturn(1L);
+        when(currentUser.getCoupleId()).thenReturn(9L);
         when(service.createWish(any(), anyLong(), any())).thenReturn(null);
-        mvc(new WishController(service, mapper)).perform(post("/api/wishes")
+        mvc(new WishController(service, currentUser)).perform(post("/api/wishes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"一起看海\"}"))
                 .andExpect(status().isOk())
@@ -100,9 +98,11 @@ class ControllerContractTest {
     @Test
     void uploadRequiresMultipartFileAndWrapsSuccess() throws Exception {
         FileService service = mock(FileService.class);
+        CurrentUserContext currentUser = mock(CurrentUserContext.class);
+        when(currentUser.getUserId()).thenReturn(1L);
         when(service.uploadFile(any(), any())).thenReturn("/uploads/demo.jpg");
         MockMultipartFile file = new MockMultipartFile("file", "demo.jpg", "image/jpeg", new byte[]{1});
-        mvc(new FileController(service)).perform(multipart("/api/upload").file(file))
+        mvc(new FileController(service, currentUser)).perform(multipart("/api/upload").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").value("/uploads/demo.jpg"));

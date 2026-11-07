@@ -28,7 +28,6 @@ class JwtUtilTest {
         assertTrue(jwtUtil.validateToken(token));
         assertEquals(1L, jwtUtil.getUserIdFromToken(token));
         assertEquals("alice", jwtUtil.getUsernameFromToken(token));
-        assertFalse(jwtUtil.isTokenExpired(token));
     }
 
     @Test
@@ -44,7 +43,6 @@ class JwtUtilTest {
         String token = jwtUtil.generateToken(2L, "bob");
         Thread.sleep(20);
         assertFalse(jwtUtil.validateToken(token));
-        assertTrue(jwtUtil.isTokenExpired(token));
     }
 
     private static void setField(Object target, String name, Object value) throws Exception {

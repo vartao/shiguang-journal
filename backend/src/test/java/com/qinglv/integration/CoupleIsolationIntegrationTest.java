@@ -4,6 +4,8 @@ import com.qinglv.common.BusinessException;
 import com.qinglv.dto.LoginVO;
 import com.qinglv.dto.NoteDTO;
 import com.qinglv.dto.RegisterDTO;
+import com.qinglv.entity.User;
+import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.AuthService;
 import com.qinglv.service.CoupleService;
 import com.qinglv.service.NoteService;
@@ -28,6 +30,8 @@ class CoupleIsolationIntegrationTest extends AbstractIntegrationTest {
     private CoupleService coupleService;
     @Autowired
     private NoteService noteService;
+    @Autowired
+    private UserMapper userMapper;
 
     @Test
     @DisplayName("用户绑定空间后可以创建并查看笔记，其他用户越权访问返回 403")
@@ -36,7 +40,8 @@ class CoupleIsolationIntegrationTest extends AbstractIntegrationTest {
         LoginVO userA = register("alice", "Alice");
         Long coupleId = userA.getUser().getCoupleId();
         assertNotNull(coupleId, "注册成功后应在小窝中");
-        String inviteCode = coupleService.getCoupleInfo(userA.getUserId()).getInviteCode();
+        User userAEntity = userMapper.selectById(userA.getUserId());
+        String inviteCode = coupleService.getCoupleInfo(userAEntity).getInviteCode();
 
         // Given：用户 B 通过邀请码加入 A 的小窝
         LoginVO userB = registerWithInvite("bob", "Bob", inviteCode);
@@ -58,7 +63,7 @@ class CoupleIsolationIntegrationTest extends AbstractIntegrationTest {
 
         // Given：用户 C 在另一个独立空间
         LoginVO userC = register("carol", "Carol");
-        Long carolCoupleId = coupleService.createCouple(userC.getUserId(), null).getId();
+        Long carolCoupleId = coupleService.createCouple(userMapper.selectById(userC.getUserId()), null).getId();
 
         // Then & Expect：C 无权访问 A 的笔记
         BusinessException exception = assertThrows(

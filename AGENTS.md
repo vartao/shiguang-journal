@@ -40,7 +40,7 @@ qinglv/
 │       ├── service/       # 业务规则、事务、couple 权限（含 support/ 工具类）
 │       ├── mapper/        # MyBatis-Plus
 │       ├── entity/ dto/   # 表实体 / 入参 DTO / 出参 VO
-│       └── common/        # JwtUtil、JwtInterceptor、RateLimiter、全局异常、统一 Result、WebConfig
+│       └── common/        # JWT、CurrentUserContext、限流、全局异常、统一 Result、WebConfig
 ├── sql/               # schema.sql（以这份为准）+ 旧环境手动迁移脚本（migration_*.sql）
 ├── deploy/            # nginx.conf、deploy.sh / deploy-windows.ps1、validate-env.sh、docker-compose.e2e.yml、ssl/
 ├── scripts/           # 验收脚本（acceptance.sh / .ps1 / acceptance-full.mjs）、check-env.sh、verify.sh、build-china-map.mjs（生成中国地图 SVG 数据）
@@ -115,7 +115,7 @@ mvn test              # 需要 JDK 17+
 
 - 分层固定：`controller → service → mapper`，controller 只做参数解析与 `Result` 包装，业务规则和 couple 权限判断放 service。
 - 统一响应体：`{ code: 200, message, data }`（`common/Result.java`）；业务错误抛 `BusinessException`，由 `GlobalExceptionHandler` 统一处理。
-- 鉴权：`JwtInterceptor` 校验 `Authorization: Bearer`，`userId` 存 ThreadLocal；登录/注册有按 IP 的内存限流（10 次/分钟，`common/RateLimiter.java`）。
+- 鉴权：`JwtInterceptor` 校验 `Authorization: Bearer` 并将 `userId` 写入请求属性；Controller 通过请求级 `CurrentUserContext` 获取 `userId/coupleId`，用户记录每请求最多查询一次。登录/注册有按 IP 的内存限流（10 次/分钟，`common/RateLimiter.java`）。
 - 几乎所有业务资源带 **`couple_id` 隔离**，跨空间访问返回 403——新增资源时必须沿用此模式。
 - 表前缀 `ql_`；逻辑删除字段 `deleted`（MyBatis-Plus 全局配置，删除值 1/未删 0）；实体/字段用驼峰，DB 用下划线（已开启 map-underscore-to-camel-case）；主键自增。
 - 使用 Lombok（打包时已 exclude）。依赖版本集中在 `backend/pom.xml` 的 `<properties>`。

@@ -1,17 +1,22 @@
 package com.qinglv.common;
 
 import cn.hutool.core.util.StrUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
 
 /**
- * JWT拦截器 - 验证请求中的token
+ * JWT 拦截器
+ * - 统一处理所有请求的 JWT 验证
+ * - 通过 CurrentUserContext 注入当前用户上下文
+ * - 记录关键安全事件（登录、过期、非法访问）
  */
 @Slf4j
 @Component
@@ -19,21 +24,18 @@ import java.io.IOException;
 public class JwtInterceptor implements HandlerInterceptor {
 
     private final JwtUtil jwtUtil;
-
-    /**
-     * 存放当前用户ID的ThreadLocal
-     */
-    private static final ThreadLocal<Long> CURRENT_USER = new ThreadLocal<>();
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        // OPTIONS预检请求直接放行
+        // OPTIONS 预检请求直接放行
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
         String token = request.getHeader("Authorization");
         if (StrUtil.isBlank(token)) {
+            log.debug("未提供 Authorization 头 - 可能为匿名请求");
             writeUnauthorized(response, "未登录，请先登录");
             return false;
         }
@@ -43,36 +45,27 @@ public class JwtInterceptor implements HandlerInterceptor {
             token = token.substring(7);
         }
 
-        if (StrUtil.isBlank(token) || !jwtUtil.validateToken(token)) {
+        // 一次解析即拿到用户 ID（含过期校验），避免重复签名校验
+        Long userId = StrUtil.isBlank(token) ? null : jwtUtil.getValidUserId(token);
+        if (userId == null) {
+            log.warn("无效或过期的 JWT - token 长度: {}, 验证失败", StrUtil.length(token));
             writeUnauthorized(response, "登录已过期，请重新登录");
             return false;
         }
 
-        // 将用户ID存入ThreadLocal
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        CURRENT_USER.set(userId);
+        // 将用户ID放入当前请求，由 CurrentUserContext 统一解析用户信息
+        request.setAttribute(CurrentUserContext.USER_ID_ATTRIBUTE, userId);
+
+        log.debug("JWT 验证成功 - 用户ID: {}", userId);
         return true;
     }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        // 请求结束后清除ThreadLocal，防止内存泄漏
-        CURRENT_USER.remove();
-    }
-
     /**
-     * 获取当前登录用户ID
-     */
-    public static Long getCurrentUserId() {
-        return CURRENT_USER.get();
-    }
-
-    /**
-     * 写入401响应
+     * 写入 401 响应（复用统一 Result 结构）
      */
     private void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"code\":401,\"message\":\"" + message + "\",\"data\":null}");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
+        objectMapper.writeValue(response.getWriter(), Result.unauthorized(message));
     }
 }

@@ -1,13 +1,11 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
 import com.qinglv.dto.AlbumDTO;
 import com.qinglv.dto.PhotoDTO;
 import com.qinglv.entity.Album;
 import com.qinglv.entity.Photo;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.AlbumService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +25,7 @@ import java.util.Map;
 public class AlbumController {
 
     private final AlbumService albumService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     /**
      * 获取所有相册
@@ -35,7 +33,7 @@ public class AlbumController {
      */
     @GetMapping("/albums")
     public Result<List<Album>> getAlbums() {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         List<Album> albums = albumService.getAlbums(coupleId);
         return Result.success(albums);
     }
@@ -46,8 +44,8 @@ public class AlbumController {
      */
     @PostMapping("/albums")
     public Result<Album> createAlbum(@Valid @RequestBody AlbumDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        Long coupleId = currentCoupleId();
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
         Album album = albumService.createAlbum(userId, coupleId, dto);
         return Result.success("创建成功", album);
     }
@@ -58,7 +56,7 @@ public class AlbumController {
      */
     @PutMapping("/albums/{id}")
     public Result<Album> updateAlbum(@PathVariable Long id, @RequestBody AlbumDTO dto) {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         Album album = albumService.updateAlbum(id, coupleId, dto);
         return Result.success("更新成功", album);
     }
@@ -69,7 +67,7 @@ public class AlbumController {
      */
     @GetMapping("/albums/{id}")
     public Result<Map<String, Object>> getAlbumDetail(@PathVariable Long id) {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         Album album = albumService.getAlbum(id, coupleId);
         List<Photo> photos = albumService.getPhotos(id, coupleId);
 
@@ -92,7 +90,7 @@ public class AlbumController {
      */
     @GetMapping("/albums/{id}/photos")
     public Result<List<Photo>> getPhotos(@PathVariable Long id) {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         List<Photo> photos = albumService.getPhotos(id, coupleId);
         return Result.success(photos);
     }
@@ -106,8 +104,8 @@ public class AlbumController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("albumId") Long albumId,
             @RequestParam(value = "description", required = false) String description) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        Long coupleId = currentCoupleId();
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         PhotoDTO photoDTO = new PhotoDTO();
         photoDTO.setAlbumId(albumId);
@@ -123,8 +121,8 @@ public class AlbumController {
      */
     @PostMapping("/albums/{id}/photos")
     public Result<Photo> addPhotoByUrl(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        Long coupleId = currentCoupleId();
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
         String url = body != null ? body.getOrDefault("url", body.get("photoUrl")) : null;
         String description = body != null ? body.getOrDefault("description", body.get("caption")) : null;
         Photo photo = albumService.addPhotoByUrl(userId, coupleId, id, url, description);
@@ -138,7 +136,7 @@ public class AlbumController {
      */
     @DeleteMapping({"/photos/{id}", "/albums/{albumId}/photos/{id}"})
     public Result<Void> deletePhoto(@PathVariable Long id, @PathVariable(required = false) Long albumId) {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         albumService.deletePhoto(id, coupleId);
         return Result.success("删除成功", null);
     }
@@ -149,14 +147,8 @@ public class AlbumController {
      */
     @DeleteMapping("/albums/{id}")
     public Result<Void> deleteAlbum(@PathVariable Long id) {
-        Long coupleId = currentCoupleId();
+        Long coupleId = currentUser.getCoupleId();
         albumService.deleteAlbum(id, coupleId);
         return Result.success("删除成功", null);
-    }
-
-    private Long currentCoupleId() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        return user != null ? user.getCoupleId() : null;
     }
 }

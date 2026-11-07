@@ -1,9 +1,7 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.FeatureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,7 @@ import java.util.Map;
 public class FeatureController {
 
     private final FeatureService featureService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     /**
      * 获取当前空间的功能开关
@@ -27,7 +25,7 @@ public class FeatureController {
      */
     @GetMapping
     public Result<Map<String, Boolean>> getFeatures() {
-        return Result.success(featureService.getFeatures(currentCoupleId()));
+        return Result.success(featureService.getFeatures(currentUser.getCoupleId()));
     }
 
     /**
@@ -37,12 +35,6 @@ public class FeatureController {
     @PutMapping("/{key}")
     public Result<Map<String, Boolean>> updateFeature(@PathVariable String key, @RequestBody Map<String, Boolean> body) {
         boolean enabled = body == null || !Boolean.FALSE.equals(body.get("enabled"));
-        return Result.success("已更新", featureService.updateFeature(currentCoupleId(), key, enabled));
-    }
-
-    private Long currentCoupleId() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        return user != null ? user.getCoupleId() : null;
+        return Result.success("已更新", featureService.updateFeature(currentUser.getCoupleId(), key, enabled));
     }
 }

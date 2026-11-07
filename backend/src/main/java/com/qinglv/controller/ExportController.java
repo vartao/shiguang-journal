@@ -1,8 +1,6 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.service.PdfExportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ContentDisposition;
@@ -25,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 public class ExportController {
 
     private final PdfExportService pdfExportService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     /**
      * 导出恋爱手账 PDF
@@ -33,9 +31,8 @@ public class ExportController {
      */
     @GetMapping("/pdf")
     public ResponseEntity<byte[]> exportPdf(@RequestParam(required = false, defaultValue = "all") String range) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         byte[] pdf = pdfExportService.exportJournal(userId, coupleId, range);
 

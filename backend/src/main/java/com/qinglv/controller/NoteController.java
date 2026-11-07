@@ -1,14 +1,12 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.PageResult;
 import com.qinglv.common.Result;
 import com.qinglv.dto.NoteCommentDTO;
 import com.qinglv.dto.NoteCommentVO;
 import com.qinglv.dto.NoteDTO;
 import com.qinglv.dto.NoteVO;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.NoteCommentService;
 import com.qinglv.service.NoteService;
 import jakarta.validation.Valid;
@@ -28,7 +26,7 @@ public class NoteController {
 
     private final NoteService noteService;
     private final NoteCommentService noteCommentService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     /**
      * 分页查询笔记时间线
@@ -42,9 +40,8 @@ public class NoteController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String mood) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         int pn = firstNonNull(pageNum, page, 1);
         int ps = firstNonNull(pageSize, size, 10);
@@ -62,9 +59,8 @@ public class NoteController {
             @RequestParam String keyword,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         PageResult<NoteVO> pageResult = noteService.searchNotes(userId, coupleId, keyword, page, size);
         return Result.success(pageResult);
@@ -76,9 +72,8 @@ public class NoteController {
      */
     @PostMapping
     public Result<NoteVO> createNote(@Valid @RequestBody NoteDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         NoteVO noteVO = noteService.createNote(userId, coupleId, dto);
         return Result.success("发布成功", noteVO);
@@ -90,9 +85,8 @@ public class NoteController {
      */
     @GetMapping("/{id}")
     public Result<NoteVO> getNoteDetail(@PathVariable Long id) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         NoteVO noteVO = noteService.getNoteDetail(id, userId, coupleId);
         return Result.success(noteVO);
@@ -104,9 +98,8 @@ public class NoteController {
      */
     @PutMapping("/{id}")
     public Result<NoteVO> updateNote(@PathVariable Long id, @Valid @RequestBody NoteDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         NoteVO noteVO = noteService.updateNote(id, userId, coupleId, dto);
         return Result.success("更新成功", noteVO);
@@ -118,9 +111,8 @@ public class NoteController {
      */
     @DeleteMapping("/{id}")
     public Result<Void> deleteNote(@PathVariable Long id) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         noteService.deleteNote(id, userId, coupleId);
         return Result.success("删除成功", null);
@@ -132,9 +124,8 @@ public class NoteController {
      */
     @PostMapping("/{id}/like")
     public Result<Map<String, Object>> likeNote(@PathVariable Long id) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         Map<String, Object> result = noteService.likeNote(id, userId, coupleId);
         String message = Boolean.TRUE.equals(result.get("liked")) ? "点赞成功" : "已取消点赞";
@@ -147,9 +138,8 @@ public class NoteController {
      */
     @GetMapping("/{id}/comments")
     public Result<List<NoteCommentVO>> listComments(@PathVariable Long id) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         List<NoteCommentVO> comments = noteCommentService.listByNote(id, userId, coupleId);
         return Result.success(comments);
@@ -161,9 +151,8 @@ public class NoteController {
      */
     @PostMapping("/{id}/comments")
     public Result<NoteCommentVO> addComment(@PathVariable Long id, @Valid @RequestBody NoteCommentDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         NoteCommentVO commentVO = noteCommentService.addComment(id, userId, coupleId, dto);
         return Result.success("评论成功", commentVO);
@@ -175,9 +164,8 @@ public class NoteController {
      */
     @DeleteMapping("/comments/{commentId}")
     public Result<Void> deleteComment(@PathVariable Long commentId) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         noteCommentService.deleteComment(commentId, userId, coupleId);
         return Result.success("删除成功", null);

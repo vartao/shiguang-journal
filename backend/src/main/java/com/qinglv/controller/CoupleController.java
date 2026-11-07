@@ -1,25 +1,31 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
 import com.qinglv.dto.CoupleUpdateDTO;
 import com.qinglv.dto.CoupleVO;
+import com.qinglv.entity.User;
 import com.qinglv.service.CoupleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 /**
  * 情侣空间控制器
+ * <p>
+ * 处理情侣关系的创建、绑定、更新等核心操作
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/couple")
 @RequiredArgsConstructor
 public class CoupleController {
 
     private final CoupleService coupleService;
+    private final CurrentUserContext currentUser;
 
     /**
      * 获取情侣空间信息
@@ -27,8 +33,9 @@ public class CoupleController {
      */
     @GetMapping("/info")
     public Result<CoupleVO> getCoupleInfo() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        CoupleVO coupleVO = coupleService.getCoupleInfo(userId);
+        User user = currentUser.requireUser();
+        log.debug("获取情侣信息 - userId: {}", user.getId());
+        CoupleVO coupleVO = coupleService.getCoupleInfo(user);
         return Result.success(coupleVO);
     }
 
@@ -38,8 +45,9 @@ public class CoupleController {
      */
     @PostMapping("/create")
     public Result<CoupleVO> createCouple(@RequestBody(required = false) Map<String, String> body) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        CoupleVO coupleVO = coupleService.createCouple(userId, body);
+        User user = currentUser.requireUser();
+        log.info("用户创建情侣空间 - userId: {}", user.getId());
+        CoupleVO coupleVO = coupleService.createCouple(user, body);
         return Result.success("创建成功", coupleVO);
     }
 
@@ -49,9 +57,10 @@ public class CoupleController {
      */
     @PostMapping("/bind")
     public Result<CoupleVO> bindPartner(@RequestBody Map<String, String> body) {
-        Long userId = JwtInterceptor.getCurrentUserId();
+        User user = currentUser.requireUser();
         String inviteCode = body != null ? body.get("inviteCode") : null;
-        CoupleVO coupleVO = coupleService.bindPartner(userId, inviteCode);
+        log.debug("用户尝试绑定伴侣 - userId: {}, inviteCode: {}", user.getId(), inviteCode);
+        CoupleVO coupleVO = coupleService.bindPartner(user, inviteCode);
         return Result.success("绑定成功", coupleVO);
     }
 
@@ -61,8 +70,9 @@ public class CoupleController {
      */
     @PutMapping("/update")
     public Result<CoupleVO> updateCoupleInfo(@Valid @RequestBody CoupleUpdateDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        CoupleVO coupleVO = coupleService.updateCoupleInfo(userId, dto);
+        User user = currentUser.requireUser();
+        log.info("用户更新情侣信息 - userId: {}", user.getId());
+        CoupleVO coupleVO = coupleService.updateCoupleInfo(user, dto);
         return Result.success("更新成功", coupleVO);
     }
 }

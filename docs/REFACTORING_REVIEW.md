@@ -19,10 +19,10 @@ deploy/nginx.conf
 | `frontend/src/components` | 通用视觉与交互组件 | 已有 Modal、上传器、空/错/加载态等良好抽象 |
 | `frontend/src/features` | 表单映射和兼容层 | 方向正确，可继续承接页面业务规则 |
 | `frontend/src/api` | Axios 与 API 映射 | 响应 envelope 和错误提示已集中处理 |
-| `backend/controller` | HTTP 参数和响应包装 | 与用户/空间解析存在较多重复查询 |
+| `backend/controller` | HTTP 参数和响应包装 | 当前用户与空间解析已集中到请求级上下文 |
 | `backend/service` | 权限、事务和业务规则 | 业务边界清晰，部分列表装配仍可继续批量化 |
 | `backend/mapper` | MyBatis-Plus 与原子 SQL | 点赞计数已使用原子更新；邀请码绑定已加入行锁 |
-| `sql` | 初始化 schema 与增量脚本 | 当前仍是手工迁移，缺少版本化迁移工具 |
+| `sql` | 初始化 schema 与 Flyway 增量脚本 | schema 与线上版本化迁移职责已分离 |
 | `deploy` | Compose、Nginx 与运维脚本 | 单机部署路径清晰，适合当前双人私密产品规模 |
 
 ## 2. 本轮已落地
@@ -39,6 +39,7 @@ deploy/nginx.conf
 - 限流计数定期清理；Nginx 覆盖客户端伪造的转发头。
 - 修复 Nginx `/uploads/` 被静态扩展名正则抢占的问题，并补安全响应头。
 - 两份 schema 纳入 `scripts/verify.sh` 一致性门禁；新增根目录 `.gitignore`。
+- 新增请求级 `CurrentUserContext`，统一 Controller 的用户与空间解析，并移除 JWT 静态 ThreadLocal 状态。
 
 ## 3. 后续审查项
 
@@ -46,15 +47,13 @@ deploy/nginx.conf
 
 1. **上传资源仍是公开 URL。** `/uploads/**` 绕过 JWT，由 Nginx 直接提供；知道 URL 的人无需登录即可访问。私密产品建议改成鉴权下载端点、短期签名 URL，或对象存储私有桶。
 2. **上传校验只验证扩展名与声明的 Content-Type。** 客户端可伪造 MIME；应增加文件签名（magic bytes）检测，并对图片做解码重编码。
-3. **缺少正式数据库迁移框架。** 建议引入 Flyway/Liquibase，为已部署实例按版本执行迁移，避免依赖手工脚本。
 
 ### 中优先级
 
 1. `WishService`、`SurpriseService` 的列表 VO 仍逐条查询用户，可沿用时间线的批量装配方式。
-2. Controller 重复执行“JWT 用户 ID -> 查询用户 -> 获取 coupleId”；可抽为请求级 `CurrentUserContext`，减少重复代码和查询。
-3. 限流仍为单进程内存状态，多实例部署时不共享；横向扩容后应迁移到 Redis/网关限流。
-4. 数据表主要依赖应用层维护关系，缺少外键或离线一致性检查；删除业务可能留下上传文件与历史孤儿记录。
-5. 多个页面文件超过 500 行，主要是页面专属 CSS。建议按功能拆出编辑表单、列表卡片和页面样式文件，而不是继续扩大路由组件。
+2. 限流仍为单进程内存状态，多实例部署时不共享；横向扩容后应迁移到 Redis/网关限流。
+3. 数据表主要依赖应用层维护关系，缺少外键或离线一致性检查；删除业务可能留下上传文件与历史孤儿记录。
+4. 多个页面文件超过 500 行，主要是页面专属 CSS。建议按功能拆出编辑表单、列表卡片和页面样式文件，而不是继续扩大路由组件。
 
 ### 兼容性决策
 

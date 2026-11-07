@@ -1,10 +1,8 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
 import com.qinglv.dto.AnniversaryDTO;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.AnniversaryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,7 @@ import java.util.Map;
 public class AnniversaryController {
 
     private final AnniversaryService anniversaryService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     /**
      * 获取所有纪念日（含倒计时）
@@ -30,9 +28,7 @@ public class AnniversaryController {
      */
     @GetMapping
     public Result<List<Map<String, Object>>> getAnniversaries() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long coupleId = currentUser.getCoupleId();
 
         List<Map<String, Object>> list = anniversaryService.getAnniversaries(coupleId);
         return Result.success(list);
@@ -44,9 +40,8 @@ public class AnniversaryController {
      */
     @PostMapping
     public Result<Map<String, Object>> createAnniversary(@Valid @RequestBody AnniversaryDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
 
         Map<String, Object> result = anniversaryService.createAnniversary(userId, coupleId, dto);
         return Result.success("创建成功", result);
@@ -58,9 +53,7 @@ public class AnniversaryController {
      */
     @PutMapping("/{id}")
     public Result<Map<String, Object>> updateAnniversary(@PathVariable Long id, @Valid @RequestBody AnniversaryDTO dto) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long coupleId = currentUser.getCoupleId();
 
         Map<String, Object> result = anniversaryService.updateAnniversary(id, coupleId, dto);
         return Result.success("更新成功", result);
@@ -72,9 +65,7 @@ public class AnniversaryController {
      */
     @DeleteMapping("/{id}")
     public Result<Void> deleteAnniversary(@PathVariable Long id) {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long coupleId = currentUser.getCoupleId();
 
         anniversaryService.deleteAnniversary(id, coupleId);
         return Result.success("删除成功", null);

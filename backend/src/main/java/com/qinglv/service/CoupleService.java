@@ -31,10 +31,11 @@ public class CoupleService {
 
     /**
      * 获取情侣空间信息（含在一起天数）
+     *
+     * @param user 当前登录用户（由请求级上下文提供，已查询并缓存）
      */
-    public CoupleVO getCoupleInfo(Long userId) {
-        User user = userMapper.selectById(userId);
-        if (user == null || user.getCoupleId() == null) {
+    public CoupleVO getCoupleInfo(User user) {
+        if (user.getCoupleId() == null) {
             throw new BusinessException("尚未加入情侣空间");
         }
 
@@ -43,18 +44,17 @@ public class CoupleService {
             throw new BusinessException("情侣空间不存在");
         }
 
-        return buildCoupleVO(couple, userId);
+        return buildCoupleVO(couple, user);
     }
 
     /**
      * 创建情侣空间（用户尚未加入任何空间时）
+     *
+     * @param user 当前登录用户（由请求级上下文提供，已查询并缓存）
      */
     @Transactional(rollbackFor = Exception.class)
-    public CoupleVO createCouple(Long userId, Map<String, String> body) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException("用户不存在");
-        }
+    public CoupleVO createCouple(User user, Map<String, String> body) {
+        Long userId = user.getId();
         if (user.getCoupleId() != null) {
             throw new BusinessException("你已在情侣空间中，无需重复创建");
         }
@@ -79,22 +79,22 @@ public class CoupleService {
         user.setRole("owner");
         userMapper.updateById(user);
 
-        return buildCoupleVO(couple, userId);
+        return buildCoupleVO(couple, user);
     }
 
     /**
      * 通过邀请码绑定伴侣
+     *
+     * @param user       当前登录用户（由请求级上下文提供，已查询并缓存）
+     * @param inviteCode 伴侣邀请码
      */
     @Transactional(rollbackFor = Exception.class)
-    public CoupleVO bindPartner(Long userId, String inviteCode) {
+    public CoupleVO bindPartner(User user, String inviteCode) {
+        Long userId = user.getId();
         if (StrUtil.isBlank(inviteCode)) {
             throw new BusinessException("请输入邀请码");
         }
 
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException("用户不存在");
-        }
         if (user.getCoupleId() != null) {
             throw new BusinessException("你已经有小窝了，不能再绑定另一个邀请码");
         }
@@ -121,15 +121,16 @@ public class CoupleService {
         user.setRole("member");
         userMapper.updateById(user);
 
-        return buildCoupleVO(couple, userId);
+        return buildCoupleVO(couple, user);
     }
 
     /**
      * 更新情侣空间信息
+     *
+     * @param user 当前登录用户（由请求级上下文提供，已查询并缓存）
      */
-    public CoupleVO updateCoupleInfo(Long userId, CoupleUpdateDTO dto) {
-        User user = userMapper.selectById(userId);
-        if (user == null || user.getCoupleId() == null) {
+    public CoupleVO updateCoupleInfo(User user, CoupleUpdateDTO dto) {
+        if (user.getCoupleId() == null) {
             throw new BusinessException("尚未加入情侣空间");
         }
 
@@ -152,7 +153,7 @@ public class CoupleService {
         }
 
         coupleMapper.updateById(couple);
-        return buildCoupleVO(couple, userId);
+        return buildCoupleVO(couple, user);
     }
 
     public Long calculateTogetherDays(LocalDate togetherDate) {
@@ -162,7 +163,8 @@ public class CoupleService {
         return ChronoUnit.DAYS.between(togetherDate, LocalDate.now());
     }
 
-    private CoupleVO buildCoupleVO(Couple couple, Long currentUserId) {
+    private CoupleVO buildCoupleVO(Couple couple, User currentUser) {
+        Long currentUserId = currentUser.getId();
         CoupleVO vo = new CoupleVO();
         vo.setId(couple.getId());
         vo.setName(couple.getName());
@@ -177,15 +179,18 @@ public class CoupleService {
         // 前端兼容字段
         vo.setStartDate(couple.getTogetherDate());
 
+        // 当前用户实体由请求上下文提供，直接复用；仅查询另一半
         if (couple.getUserId1() != null) {
-            User user1 = userMapper.selectById(couple.getUserId1());
+            User user1 = couple.getUserId1().equals(currentUserId)
+                    ? currentUser : userMapper.selectById(couple.getUserId1());
             if (user1 != null) {
                 vo.setUser1Nickname(user1.getNickname());
                 vo.setUser1Avatar(user1.getAvatar());
             }
         }
         if (couple.getUserId2() != null) {
-            User user2 = userMapper.selectById(couple.getUserId2());
+            User user2 = couple.getUserId2().equals(currentUserId)
+                    ? currentUser : userMapper.selectById(couple.getUserId2());
             if (user2 != null) {
                 vo.setUser2Nickname(user2.getNickname());
                 vo.setUser2Avatar(user2.getAvatar());
@@ -193,12 +198,10 @@ public class CoupleService {
         }
 
         // partnerName：相对当前用户的另一半昵称
-        if (currentUserId != null) {
-            if (currentUserId.equals(couple.getUserId1())) {
-                vo.setPartnerName(vo.getUser2Nickname());
-            } else if (currentUserId.equals(couple.getUserId2())) {
-                vo.setPartnerName(vo.getUser1Nickname());
-            }
+        if (currentUserId.equals(couple.getUserId1())) {
+            vo.setPartnerName(vo.getUser2Nickname());
+        } else if (currentUserId.equals(couple.getUserId2())) {
+            vo.setPartnerName(vo.getUser1Nickname());
         }
         if (vo.getPartnerName() == null) {
             vo.setPartnerName(vo.getUser2Nickname() != null ? vo.getUser2Nickname() : vo.getUser1Nickname());

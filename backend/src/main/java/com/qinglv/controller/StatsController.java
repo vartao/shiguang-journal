@@ -1,9 +1,7 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
-import com.qinglv.entity.User;
-import com.qinglv.mapper.UserMapper;
 import com.qinglv.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +15,12 @@ import java.util.Map;
 public class StatsController {
 
     private final StatsService statsService;
-    private final UserMapper userMapper;
+    private final CurrentUserContext currentUser;
 
     @GetMapping
     public Result<Map<String, Object>> getStats() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long userId = currentUser.getUserId();
+        Long coupleId = currentUser.getCoupleId();
         return Result.success(statsService.getCoupleStats(coupleId, userId));
     }
 
@@ -33,9 +30,7 @@ public class StatsController {
      */
     @GetMapping("/on-this-day")
     public Result<List<Map<String, Object>>> getOnThisDay() {
-        Long userId = JwtInterceptor.getCurrentUserId();
-        User user = userMapper.selectById(userId);
-        Long coupleId = user != null ? user.getCoupleId() : null;
+        Long coupleId = currentUser.getCoupleId();
         return Result.success(statsService.getOnThisDay(coupleId));
     }
 }

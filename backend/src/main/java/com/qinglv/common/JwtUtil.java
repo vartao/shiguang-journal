@@ -16,7 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * JWT工具类 - 生成/验证token
+ * JWT 工具类 - 生成、验证、解析 Token
+ * <p>
+ * 核心功能：
+ * - 生成带用户ID和用户名的JWT
+ * - Token 解析（userId / username）
+ * - 安全验证（防篡改、防过期）
+ * - 生产环境安全警告（默认密钥）
  */
 @Slf4j
 @Component
@@ -46,11 +52,11 @@ public class JwtUtil {
     }
 
     /**
-     * 生成token
+     * 生成 JWT Token
      *
      * @param userId   用户ID
      * @param username 用户名
-     * @return token字符串
+     * @return 生成的 JWT 字符串
      */
     public String generateToken(Long userId, String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -59,6 +65,8 @@ public class JwtUtil {
 
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + expiration);
+
+        log.debug("生成新 Token - 用户ID: {}", userId);
 
         return Jwts.builder()
                 .claims(claims)
@@ -70,10 +78,10 @@ public class JwtUtil {
     }
 
     /**
-     * 解析token，获取Claims
+     * 解析 Token 获取 Claims
      *
      * @param token JWT token
-     * @return Claims
+     * @return Claims 对象
      */
     public Claims parseToken(String token) {
         return Jwts.parser()
@@ -84,7 +92,7 @@ public class JwtUtil {
     }
 
     /**
-     * 从token中获取用户ID
+     * 从 Token 中获取用户ID
      *
      * @param token JWT token
      * @return 用户ID
@@ -99,7 +107,7 @@ public class JwtUtil {
     }
 
     /**
-     * 从token中获取用户名
+     * 从 Token 中获取用户名
      *
      * @param token JWT token
      * @return 用户名
@@ -110,7 +118,7 @@ public class JwtUtil {
     }
 
     /**
-     * 验证token是否有效
+     * 验证 Token 是否有效（含过期校验）
      *
      * @param token JWT token
      * @return 是否有效
@@ -118,26 +126,39 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             parseToken(token);
+            log.debug("Token 验证通过");
             return true;
         } catch (ExpiredJwtException e) {
+            log.warn("Token 已过期");
             return false;
         } catch (Exception e) {
+            log.warn("Token 验证失败: {}", e.getMessage());
             return false;
         }
     }
 
     /**
-     * 判断token是否过期
+     * 校验 Token 并一次性解析出用户 ID。
+     * <p>
+     * 供拦截器使用，避免 {@link #validateToken(String)} 与
+     * {@link #getUserIdFromToken(String)} 各解析一次造成重复签名校验。
      *
      * @param token JWT token
-     * @return 是否过期
+     * @return 用户 ID；Token 无效或已过期时返回 {@code null}
      */
-    public boolean isTokenExpired(String token) {
+    public Long getValidUserId(String token) {
         try {
-            Claims claims = parseToken(token);
-            return claims.getExpiration().before(new Date());
+            Object userId = parseToken(token).get("userId");
+            if (userId instanceof Number) {
+                return ((Number) userId).longValue();
+            }
+            return userId != null ? Long.parseLong(userId.toString()) : null;
         } catch (ExpiredJwtException e) {
-            return true;
+            log.warn("Token 已过期");
+            return null;
+        } catch (Exception e) {
+            log.warn("Token 验证失败: {}", e.getMessage());
+            return null;
         }
     }
 }

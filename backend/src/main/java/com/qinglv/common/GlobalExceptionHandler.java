@@ -18,22 +18,36 @@ import java.util.stream.Collectors;
 
 /**
  * 全局异常处理器
+ * <p>
+ * 统一处理所有未被 Controller 捕获的异常
+ * 返回统一格式的 Result 响应
+ * 记录详细日志（Warn / Error）
  */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * 业务异常
+     * 业务异常 - 由 Service 抛出的业务错误
      */
     @ExceptionHandler(BusinessException.class)
     public Result<Void> handleBusinessException(BusinessException e) {
-        log.warn("业务异常: {}", e.getMessage());
+        log.warn("业务异常: [{}] {}", e.getCode(), e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
     }
 
     /**
-     * 参数校验异常 - @RequestBody
+     * 认证异常 - 返回真实 HTTP 401，供前端触发重新登录
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result<Void> handleUnauthorizedException(UnauthorizedException e) {
+        log.warn("认证失败: {}", e.getMessage());
+        return Result.unauthorized(e.getMessage());
+    }
+
+    /**
+     * 参数校验异常 - @RequestBody + @Valid
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -46,7 +60,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 参数绑定异常
+     * 参数绑定异常 - @RequestParam / @PathVariable 等
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -59,7 +73,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 约束校验异常 - @RequestParam
+     * 约束校验异常 - @RequestParam + @Size / @Min 等
      */
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -69,7 +83,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * JSON 语法、路径参数类型和日期格式等客户端输入错误。
+     * JSON 解析、路径参数类型、日期格式等客户端输入错误
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -102,7 +116,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 其他未知异常
+     * 其他未知异常（兜底）
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

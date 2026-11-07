@@ -39,10 +39,9 @@ class CoupleServiceTest {
         User user = new User();
         user.setId(1L);
         user.setCoupleId(9L);
-        when(userMapper.selectById(1L)).thenReturn(user);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> coupleService.createCouple(1L, Map.of("name", "小窝")));
+                () -> coupleService.createCouple(user, Map.of("name", "小窝")));
         assertTrue(ex.getMessage().contains("情侣空间"));
     }
 
@@ -52,7 +51,6 @@ class CoupleServiceTest {
         user.setId(1L);
         user.setNickname("小明");
         user.setCoupleId(null);
-        when(userMapper.selectById(1L)).thenReturn(user);
         when(coupleMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
         when(coupleMapper.insert(any(Couple.class))).thenAnswer(invocation -> {
             Couple c = invocation.getArgument(0);
@@ -64,7 +62,7 @@ class CoupleServiceTest {
         body.put("name", "我们的小窝");
         body.put("togetherDate", "2024-05-20");
 
-        CoupleVO vo = coupleService.createCouple(1L, body);
+        CoupleVO vo = coupleService.createCouple(user, body);
         assertEquals(88L, vo.getId());
         assertEquals("我们的小窝", vo.getName());
         assertNotNull(vo.getInviteCode());
@@ -77,11 +75,10 @@ class CoupleServiceTest {
         User user = new User();
         user.setId(2L);
         user.setCoupleId(null);
-        when(userMapper.selectById(2L)).thenReturn(user);
         when(coupleMapper.selectByInviteCodeForUpdate("ABCDEF")).thenReturn(null);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> coupleService.bindPartner(2L, "ABCDEF"));
+                () -> coupleService.bindPartner(user, "ABCDEF"));
         assertTrue(ex.getMessage().contains("邀请码不正确"));
     }
 
@@ -90,7 +87,6 @@ class CoupleServiceTest {
         User user = new User();
         user.setId(3L);
         user.setCoupleId(null);
-        when(userMapper.selectById(3L)).thenReturn(user);
 
         Couple couple = new Couple();
         couple.setId(1L);
@@ -100,7 +96,7 @@ class CoupleServiceTest {
         when(coupleMapper.selectByInviteCodeForUpdate("ABCDEF")).thenReturn(couple);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> coupleService.bindPartner(3L, "abcdef"));
+                () -> coupleService.bindPartner(user, "abcdef"));
         assertTrue(ex.getMessage().contains("住满"));
     }
 
@@ -109,7 +105,6 @@ class CoupleServiceTest {
         User user = new User();
         user.setId(2L);
         user.setCoupleId(null);
-        when(userMapper.selectById(2L)).thenReturn(user);
 
         Couple couple = new Couple();
         couple.setId(10L);
@@ -124,7 +119,7 @@ class CoupleServiceTest {
         u1.setNickname("TA");
         when(userMapper.selectById(1L)).thenReturn(u1);
 
-        CoupleVO vo = coupleService.bindPartner(2L, "loveok");
+        CoupleVO vo = coupleService.bindPartner(user, "loveok");
         assertEquals(10L, vo.getId());
         assertEquals(2L, couple.getUserId2());
         verify(userMapper).updateById(argThat(u -> "member".equals(u.getRole()) && Long.valueOf(10L).equals(u.getCoupleId())));

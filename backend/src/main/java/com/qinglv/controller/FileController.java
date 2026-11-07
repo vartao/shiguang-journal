@@ -1,6 +1,6 @@
 package com.qinglv.controller;
 
-import com.qinglv.common.JwtInterceptor;
+import com.qinglv.common.CurrentUserContext;
 import com.qinglv.common.Result;
 import com.qinglv.service.FileService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,7 @@ import java.util.List;
 public class FileController {
 
     private final FileService fileService;
+    private final CurrentUserContext currentUser;
 
     /**
      * 单文件上传
@@ -28,7 +29,7 @@ public class FileController {
      */
     @PostMapping
     public Result<String> upload(@RequestParam("file") MultipartFile file) {
-        Long userId = JwtInterceptor.getCurrentUserId();
+        Long userId = currentUser.getUserId();
         String fileUrl = fileService.uploadFile(file, userId);
         return Result.success("上传成功", fileUrl);
     }
@@ -39,7 +40,7 @@ public class FileController {
      */
     @PostMapping("/batch")
     public Result<List<String>> uploadBatch(@RequestParam("files") MultipartFile[] files) {
-        Long userId = JwtInterceptor.getCurrentUserId();
+        Long userId = currentUser.getUserId();
         List<String> urls = fileService.uploadFiles(files, userId);
         return Result.success("上传成功", urls);
     }
