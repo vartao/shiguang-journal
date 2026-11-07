@@ -22,3 +22,6 @@ deploy/ssl/*
 logs/
 .DS_Store
 Thumbs.db
+
+# Browser automation artifacts
+.playwright-mcp/
