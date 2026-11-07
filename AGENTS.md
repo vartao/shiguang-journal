@@ -132,9 +132,9 @@ mvn test              # 需要 JDK 17+
 
 - 生产必须改 `.env` 中的 `MYSQL_ROOT_PASSWORD` 与 `JWT_SECRET`（≥32 字符）；`.env` 不入库，`.env.example` 仅占位。
 - CORS 通过环境变量 `CORS_ORIGINS` 配置（逗号分隔，本地默认允许 5173/8090）。
-- 上传限制：扩展名白名单（jpg/jpeg/png/gif/webp/bmp/mp4/mp3/pdf/txt）+ Content-Type 校验，单文件 20MB（请求 50MB）。存储二选一：默认本地磁盘经 `/uploads/**` 公开读取；配置 `ALIYUN_OSS_*` 后走阿里云 OSS（对象 key 前缀 `qinglv/`，返回 `public-base-url` 拼接的 URL，静态图片同时生成 `_thumb.jpg` 缩略图）。
+- 上传限制：扩展名白名单（jpg/jpeg/png/gif/webp/bmp/mp4/mp3/pdf/txt）+ Content-Type 校验 + 文件头魔数/图片解码校验（`FileSignatureValidator`），单文件 20MB（请求 50MB）。存储二选一：默认本地磁盘经 `/uploads/**` 签名 URL 访问——出参由 Jackson 全局序列化器（`UploadUrlSerializer`）统一附加 HMAC 签名与过期时间（`UploadUrlSigner`，密钥 `FILE_SIGN_KEY` 缺省复用 `JWT_SECRET`，有效期 `file.url-ttl-days`=30 天），`UploadsController` 校验签名后返回文件，nginx 只做代理；写路径入库前用 `UploadUrls.toStoredPath` 剥离查询参数。配置 `ALIYUN_OSS_*` 后走阿里云 OSS（对象 key 前缀 `qinglv/`，返回 `public-base-url` 拼接的 URL，静态图片同时生成 `_thumb.jpg` 缩略图，OSS 外链暂不走签名）。
 - Actuator 只暴露 `health`、`info`，health 不显示细节。
-- 已知局限（改动相关代码时注意）：固定两人模型（`user_id1/user_id2`）、限流为进程内存（多实例不共享）、上传默认存本地磁盘卷 `upload_data`（可通过 `ALIYUN_OSS_*` 切换到 OSS，本地与 OSS 的历史文件不互通）。
+- 已知局限（改动相关代码时注意）：固定两人模型（`user_id1/user_id2`）、限流为进程内存（多实例不共享）、上传默认存本地磁盘卷 `upload_data`（可通过 `ALIYUN_OSS_*` 切换到 OSS，本地与 OSS 的历史文件不互通；OSS 桶仍为公开读，签名保护仅覆盖本地存储模式）。
 
 ## 7. 常用参考
 

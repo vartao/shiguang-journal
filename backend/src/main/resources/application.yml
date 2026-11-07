@@ -59,6 +59,10 @@ file:
   access-prefix: /uploads/
   allowed-types: jpg,jpeg,png,gif,webp,bmp,mp4,mp3,pdf,txt
   max-size: 20971520  # 20MB
+  # 上传资源签名密钥（默认复用 JWT_SECRET，生产可独立配置 FILE_SIGN_KEY）
+  sign-key: ${FILE_SIGN_KEY:${jwt.secret}}
+  # 签名 URL 有效期（天）；浏览器侧配合 30 天 immutable 缓存
+  url-ttl-days: 30
 
 # API文档
 springdoc:

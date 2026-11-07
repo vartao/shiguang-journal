@@ -174,7 +174,8 @@ node scripts/acceptance-full.mjs \
    - 心愿单：`mysql -uroot -p qinglv_note < sql/migration_wish.sql`
    - 笔记记录日期：`mysql -uroot -p qinglv_note < sql/migration_note_date.sql`
 6. 本地开发请使用 **JDK 17+**（当前 pom 指定 Java 17）
-7. 生产 CORS 通过环境变量 `CORS_ORIGINS` 配置；上传会校验扩展名与 Content-Type
+7. 生产 CORS 通过环境变量 `CORS_ORIGINS` 配置；上传会校验扩展名、Content-Type 与文件头魔数
+8. 上传资源通过签名 URL 访问（默认 30 天有效，密钥复用 `JWT_SECRET`，可用 `FILE_SIGN_KEY` 独立配置）；旧版直链升级后需要重新进入页面获取新签名地址
 
 
 ## 质量检查

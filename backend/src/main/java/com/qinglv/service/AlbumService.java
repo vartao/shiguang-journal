@@ -2,6 +2,7 @@ package com.qinglv.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.AlbumDTO;
 import com.qinglv.dto.PhotoDTO;
 import com.qinglv.entity.Album;
@@ -74,6 +75,7 @@ public class AlbumService {
         if ((cover == null || cover.isEmpty()) && dto.getCover() != null) {
             cover = dto.getCover();
         }
+        cover = UploadUrls.toStoredPath(cover);
         album.setCoverImage(cover);
         album.setPhotoCount(0);
 
@@ -104,6 +106,7 @@ public class AlbumService {
         if ((cover == null || cover.isEmpty()) && dto.getCover() != null) {
             cover = dto.getCover();
         }
+        cover = UploadUrls.toStoredPath(cover);
         if (cover != null) {
             album.setCoverImage(cover.isEmpty() ? null : cover);
         }
@@ -218,8 +221,8 @@ public class AlbumService {
         photo.setAlbumId(albumId);
         photo.setCoupleId(coupleId);
         photo.setUserId(userId);
-        photo.setPhotoUrl(photoUrl);
-        photo.setThumbnailUrl(photoUrl);
+        photo.setPhotoUrl(UploadUrls.toStoredPath(photoUrl));
+        photo.setThumbnailUrl(UploadUrls.toStoredPath(photoUrl));
         photo.setDescription(description);
         photo.setFileSize(fileSize);
         photoMapper.insert(photo);

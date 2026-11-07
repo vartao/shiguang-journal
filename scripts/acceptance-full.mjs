@@ -46,6 +46,11 @@ function equal(actual, expected, message) {
   if (actual !== expected) throw new Error(`${message}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
 }
 
+/** 上传 URL 出参带签名查询参数且每次重新生成，比较时只看路径 */
+function pathOf(url) {
+  return (url || '').split('?')[0]
+}
+
 function mark(name) {
   passed.push(name)
   console.log(`[PASS] ${name}`)
@@ -377,7 +382,7 @@ await group('笔记创建、详情、分页、筛选、搜索、更新、点赞�
   )
   state.noteId = mainNote.id
   equal(mainNote.noteDate, '2024-05-20', 'created note date')
-  equal(mainNote.images?.[0], state.fileUrls[0], 'created note image')
+  equal(pathOf(mainNote.images?.[0]), pathOf(state.fileUrls[0]), 'created note image')
   mark('create note with selected date and image')
 
   const detail = expectSuccess(await api('GET', `/notes/${state.noteId}`, { token: state.tokenB }), 'note detail')
@@ -563,7 +568,7 @@ await group('相册、URL 照片、Multipart 照片、封面刷新与权限', as
     'album after cover deletion'
   )
   equal(afterCoverDelete.photoCount, 2, 'photo count after cover delete')
-  assert(afterCoverDelete.coverImage !== state.fileUrls[1], 'deleted cover URL was not replaced')
+  assert(pathOf(afterCoverDelete.coverImage) !== pathOf(state.fileUrls[1]), 'deleted cover URL was not replaced')
   mark('delete cover photo and refresh album cover')
 
   expectSuccess(await api('DELETE', `/photos/${multipartPhoto.id}`, { token: state.tokenA }), 'delete photo alias')
@@ -599,7 +604,7 @@ await group('相册、URL 照片、Multipart 照片、封面刷新与权限', as
     'cover album photos'
   )
   equal(coveredPhotos.length, 1, 'cover album photo list count')
-  equal(coveredPhotos[0].photoUrl, state.fileUrls[0], 'cover synced as first photo')
+  equal(pathOf(coveredPhotos[0].photoUrl), pathOf(state.fileUrls[0]), 'cover synced as first photo')
   expectSuccess(await api('DELETE', `/albums/${covered.id}`, { token: state.tokenA }), 'delete cover album')
   mark('create album with cover syncs first photo')
 })
@@ -930,7 +935,7 @@ await group('旅行足迹创建、封面同步、筛选、地图聚合、照片�
     'travel detail with cover photo'
   )
   equal(withCover.photoCount, 1, 'cover synced travel photo count')
-  equal(withCover.photos?.[0]?.photoUrl, state.fileUrls[0], 'cover synced as first travel photo')
+  equal(pathOf(withCover.photos?.[0]?.photoUrl), pathOf(state.fileUrls[0]), 'cover synced as first travel photo')
   mark('create travel with cover syncs first photo')
 
   const planned = expectSuccess(

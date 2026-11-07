@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qinglv.common.BusinessException;
 import com.qinglv.common.PageResult;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.NoteDTO;
 import com.qinglv.dto.NoteVO;
 import com.qinglv.entity.Note;
@@ -338,7 +339,7 @@ public class NoteService {
         for (int i = 0; i < imageUrls.size(); i++) {
             NoteImage image = new NoteImage();
             image.setNoteId(noteId);
-            image.setImageUrl(imageUrls.get(i));
+            image.setImageUrl(UploadUrls.toStoredPath(imageUrls.get(i)));
             image.setSortOrder(i + 1);
             noteImageMapper.insert(image);
         }

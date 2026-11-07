@@ -2,6 +2,7 @@ package com.qinglv.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.TravelDTO;
 import com.qinglv.dto.TravelMapSummaryVO;
 import com.qinglv.entity.Travel;
@@ -165,6 +166,7 @@ public class TravelService {
         if (photoUrl == null || photoUrl.isBlank()) {
             throw new BusinessException("照片地址不能为空");
         }
+        photoUrl = UploadUrls.toStoredPath(photoUrl);
 
         Travel travel = getTravel(travelId, coupleId);
 
@@ -230,7 +232,7 @@ public class TravelService {
         travel.setTravelDate(dto.getTravelDate());
         travel.setWeather(dto.getWeather());
         travel.setNote(dto.getNote());
-        travel.setCover(dto.getCover());
+        travel.setCover(UploadUrls.toStoredPath(dto.getCover()));
         // 季节未填写时根据出行月份推导，保证按季节分组稳定
         if (dto.getSeason() != null && !dto.getSeason().isBlank()) {
             travel.setSeason(dto.getSeason());

@@ -40,17 +40,19 @@ deploy/nginx.conf
 - 修复 Nginx `/uploads/` 被静态扩展名正则抢占的问题，并补安全响应头。
 - 两份 schema 纳入 `scripts/verify.sh` 一致性门禁；新增根目录 `.gitignore`。
 - 新增请求级 `CurrentUserContext`，统一 Controller 的用户与空间解析，并移除 JWT 静态 ThreadLocal 状态。
+- 上传资源改为签名 URL 访问：出参由 Jackson 全局序列化器（`UploadUrlSerializer`）统一附加 HMAC 签名与过期时间（`UploadUrlSigner`，密钥缺省复用 `JWT_SECRET`），`UploadsController` 校验后流式返回文件（无效签名一律 404，缓存头由后端下发）；nginx 从直接 alias 磁盘改为代理到后端，`/uploads/**` 不再绕过应用层；写路径入库前统一剥离查询参数（`UploadUrls.toStoredPath`），签名只存在于出参边界。
+- 上传校验增加文件头魔数比对与图片解码验证（`FileSignatureValidator`），伪造扩展名/Content-Type 的文件在落盘前被拒绝。
+- 心愿、惊喜、时间胶囊列表改为批量装配用户信息（`selectBatchIds`），消除逐条查询的 N+1。
 
 ## 3. 后续审查项
 
 ### 高优先级
 
-1. **上传资源仍是公开 URL。** `/uploads/**` 绕过 JWT，由 Nginx 直接提供；知道 URL 的人无需登录即可访问。私密产品建议改成鉴权下载端点、短期签名 URL，或对象存储私有桶。
-2. **上传校验只验证扩展名与声明的 Content-Type。** 客户端可伪造 MIME；应增加文件签名（magic bytes）检测，并对图片做解码重编码。
+1. **OSS 模式的文件仍为公开 URL。** 签名保护目前只覆盖本地磁盘存储；启用 `ALIYUN_OSS_*` 后建议切换私有桶并改用 SDK 预签名 URL 出参。
 
 ### 中优先级
 
-1. `WishService`、`SurpriseService` 的列表 VO 仍逐条查询用户，可沿用时间线的批量装配方式。
+1. 上传图片暂未做解码重编码：Java 图像编码不处理 EXIF 方向，直接重编码会让手机竖拍照片横倒；若要剥除元数据（如 GPS）需同步实现方向旋转后重编码。
 2. 限流仍为单进程内存状态，多实例部署时不共享；横向扩容后应迁移到 Redis/网关限流。
 3. 数据表主要依赖应用层维护关系，缺少外键或离线一致性检查；删除业务可能留下上传文件与历史孤儿记录。
 4. 多个页面文件超过 500 行，主要是页面专属 CSS。建议按功能拆出编辑表单、列表卡片和页面样式文件，而不是继续扩大路由组件。

@@ -1,17 +1,17 @@
 package com.qinglv.common;
 
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.File;
-
 /**
- * Web配置 - 拦截器、CORS、静态资源映射
+ * Web配置 - 拦截器、CORS、上传 URL 出参签名
  */
 @Configuration
 @RequiredArgsConstructor
@@ -19,9 +19,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
     private final RateLimiter rateLimiter;
-
-    @Value("${file.upload-path}")
-    private String uploadPath;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
@@ -36,7 +33,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/api/auth/login",
                         "/api/auth/register",
-                        "/uploads/**",
                         "/error",
                         "/api-docs/**",
                         "/swagger-ui/**",
@@ -63,16 +59,12 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * 静态资源映射 - 上传文件访问
+     * 出参统一签名：/uploads/ 相对路径追加 exp/sig，
+     * 由 UploadsController 校验后返回文件（签名无效一律 404）
      */
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 将 /uploads/** 映射到本地上传目录
-        String absolutePath = new File(uploadPath).getAbsolutePath();
-        if (!absolutePath.endsWith(File.separator)) {
-            absolutePath += File.separator;
-        }
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + absolutePath);
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer uploadUrlSignCustomizer(UploadUrlSigner uploadUrlSigner) {
+        return builder -> builder.modulesToInstall(new SimpleModule("uploadUrlSign")
+                .addSerializer(String.class, new UploadUrlSerializer(uploadUrlSigner)));
     }
 }

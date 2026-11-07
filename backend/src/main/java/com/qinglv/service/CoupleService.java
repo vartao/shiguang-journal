@@ -3,6 +3,7 @@ package com.qinglv.service;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.CoupleUpdateDTO;
 import com.qinglv.dto.CoupleVO;
 import com.qinglv.entity.Couple;
@@ -143,7 +144,7 @@ public class CoupleService {
             couple.setName(dto.getName());
         }
         if (dto.getAvatar() != null) {
-            couple.setAvatar(dto.getAvatar());
+            couple.setAvatar(UploadUrls.toStoredPath(dto.getAvatar()));
         }
         if (StrUtil.isNotBlank(dto.getTogetherDate())) {
             couple.setTogetherDate(LocalDate.parse(dto.getTogetherDate(), DateTimeFormatter.ISO_LOCAL_DATE));

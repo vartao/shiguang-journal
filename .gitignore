@@ -3,6 +3,7 @@
 .env.e2e
 !.env.example
 .claude/settings.local.json
+.zcode/
 
 # Generated dependencies and build output
 frontend/node_modules/

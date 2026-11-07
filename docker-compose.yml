@@ -36,6 +36,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       FILE_UPLOAD_PATH: /app/uploads
       JWT_SECRET: ${JWT_SECRET}
+      # 上传资源签名密钥（不配置时复用 JWT_SECRET）
+      FILE_SIGN_KEY: ${FILE_SIGN_KEY:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8090}
       # 阿里云 OSS（可选；不配置则上传保存在本地 upload_data 卷）
       ALIYUN_OSS_ENDPOINT: ${ALIYUN_OSS_ENDPOINT:-}
@@ -70,7 +72,6 @@ services:
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./deploy/ssl:/etc/nginx/ssl
-      - upload_data:/usr/share/nginx/uploads:ro
     depends_on:
       backend:
         condition: service_healthy

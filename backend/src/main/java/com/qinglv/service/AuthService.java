@@ -5,6 +5,7 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qinglv.common.BusinessException;
 import com.qinglv.common.JwtUtil;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.LoginDTO;
 import com.qinglv.dto.LoginVO;
 import com.qinglv.dto.RegisterDTO;
@@ -135,7 +136,7 @@ public class AuthService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        user.setAvatar(avatar);
+        user.setAvatar(UploadUrls.toStoredPath(avatar));
         userMapper.updateById(user);
         return toUserInfo(user);
     }
@@ -152,7 +153,7 @@ public class AuthService {
             user.setNickname(nickname.trim());
         }
         if (avatar != null) {
-            user.setAvatar(avatar.isBlank() ? null : avatar);
+            user.setAvatar(avatar.isBlank() ? null : UploadUrls.toStoredPath(avatar));
         }
         userMapper.updateById(user);
         return toUserInfo(user);

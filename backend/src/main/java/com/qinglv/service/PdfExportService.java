@@ -4,6 +4,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfWriter;
 import com.qinglv.common.BusinessException;
+import com.qinglv.common.UploadUrls;
 import com.qinglv.dto.NoteVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -173,7 +174,7 @@ public class PdfExportService {
             return null;
         }
         String prefix = accessPrefix.endsWith("/") ? accessPrefix : accessPrefix + "/";
-        String relative = imageUrl;
+        String relative = UploadUrls.toStoredPath(imageUrl);
         if (imageUrl.startsWith(prefix)) {
             relative = imageUrl.substring(prefix.length());
         } else if (imageUrl.startsWith("/")) {
