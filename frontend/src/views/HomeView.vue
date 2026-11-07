@@ -40,19 +40,40 @@
         <button class="search-result-hint__clear" @click="clearSearch">清除搜索</button>
       </div>
 
-      <!-- 心情筛选 -->
-      <div v-if="!isSearchMode" class="mood-filter anim-fade-in-up stagger-2">
-        <button class="mood-chip" :class="{ active: !activeMood }" @click="filterByMood('')">全部</button>
-        <button
-          v-for="(mood, key) in moods"
-          :key="key"
-          class="mood-chip"
-          :class="{ active: activeMood === key }"
-          @click="filterByMood(key)"
-        >
-          <span>{{ mood.emoji }}</span>
-          <span>{{ mood.label }}</span>
-        </button>
+      <!-- 心情筛选与视图切换工具栏 -->
+      <div v-if="!isSearchMode" class="timeline-toolbar anim-fade-in-up stagger-2">
+        <div class="mood-filter">
+          <button class="mood-chip" :class="{ active: !activeMood }" @click="filterByMood('')">全部</button>
+          <button
+            v-for="(mood, key) in moods"
+            :key="key"
+            class="mood-chip"
+            :class="{ active: activeMood === key }"
+            @click="filterByMood(key)"
+          >
+            <span>{{ mood.emoji }}</span>
+            <span>{{ mood.label }}</span>
+          </button>
+        </div>
+
+        <div class="layout-toggle no-print" role="radiogroup" aria-label="时间线排版视图">
+          <button
+            class="layout-toggle__btn"
+            :class="{ active: layoutMode === 'alternate' }"
+            title="双栏手账拼贴视图"
+            @click="setLayoutMode('alternate')"
+          >
+            <span>⚏</span> 双栏
+          </button>
+          <button
+            class="layout-toggle__btn"
+            :class="{ active: layoutMode === 'single' }"
+            title="单列线性故事流视图"
+            @click="setLayoutMode('single')"
+          >
+            <span>☰</span> 单列
+          </button>
+        </div>
       </div>
 
       <!-- 那年今天 -->
@@ -92,14 +113,14 @@
       </div>
 
       <!-- 时间线 -->
-      <div v-else class="timeline">
+      <div v-else class="timeline" :class="{ 'timeline--single': layoutMode === 'single' }">
         <div class="timeline__axis"></div>
 
         <article
           v-for="(note, index) in notes"
           :key="note.id"
           class="timeline__item"
-          :class="{ 'timeline__item--right': index % 2 === 1 }"
+          :class="{ 'timeline__item--right': layoutMode !== 'single' && index % 2 === 1 }"
         >
           <div class="timeline__dot">
             <span class="dot-inner">{{ getMoodEmoji(note.mood) }}</span>
@@ -108,10 +129,15 @@
           <div
             class="note-card anim-polaroid-drop"
             :class="{ 'note-card--top': note.isTop === 1 || note.isTop === true }"
-            :style="{ '--rotate-to': getRotation(index) + 'deg' }"
+            :style="{ '--rotate-to': (layoutMode === 'single' ? 0 : getRotation(index)) + 'deg' }"
           >
             <div v-if="index % 3 === 0 || note.isTop === 1 || note.isTop === true" class="note-card__tape"></div>
-            <div v-if="note.isTop === 1 || note.isTop === true" class="note-card__top-badge">置顶</div>
+            <div
+              v-if="note.isTop === 1 || note.isTop === true"
+              class="note-card__top-badge stamp-badge stamp-badge--top"
+            >
+              ★ 置顶珍藏
+            </div>
 
             <div class="note-card__date">
               <span class="date-day">{{ formatDay(note.noteDate || note.createdAt || note.createTime) }}</span>
@@ -128,6 +154,20 @@
                   @error="onThumbError($event, note.images[0])"
                 />
                 <div v-if="note.images.length > 1" class="image-count">+{{ note.images.length - 1 }}</div>
+              </div>
+
+              <!-- 多图微缩底片胶卷栏（2-4 张图） -->
+              <div v-if="note.images.length > 1" class="note-card__thumbs">
+                <button
+                  v-for="(img, imgIdx) in note.images.slice(0, 4)"
+                  :key="imgIdx"
+                  type="button"
+                  class="note-card__thumb-item"
+                  :class="{ active: imgIdx === 0 }"
+                  @click.stop="openLightbox(note.images, imgIdx)"
+                >
+                  <img :src="getThumbUrl(img)" :alt="note.title + ' ' + (imgIdx + 1)" loading="lazy" />
+                </button>
               </div>
             </div>
 
@@ -226,7 +266,19 @@ const searchKeyword = ref('')
 const isSearchMode = ref(false)
 const commentDrawerVisible = ref(false)
 const currentCommentNote = ref(null)
+const layoutMode = ref(
+  typeof localStorage !== 'undefined' ? localStorage.getItem('ql_home_layout') || 'alternate' : 'alternate'
+)
 let searchTimer = null
+
+function setLayoutMode(mode) {
+  layoutMode.value = mode
+  try {
+    localStorage.setItem('ql_home_layout', mode)
+  } catch {
+    // ignore
+  }
+}
 
 function openComments(note) {
   currentCommentNote.value = note
@@ -535,6 +587,54 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+.timeline-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.timeline-toolbar .mood-filter {
+  margin-bottom: 0;
+}
+
+.layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(var(--cream-rgb), 0.7);
+  border: 1px solid rgba(var(--brown-rgb), 0.18);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-inset);
+  gap: 2px;
+}
+
+.layout-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-muted);
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.layout-toggle__btn:hover {
+  color: var(--brown-deep);
+}
+
+.layout-toggle__btn.active {
+  color: var(--brown-deep);
+  background: rgba(var(--surface-raised-rgb), 0.95);
+  box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.1);
+  font-weight: 600;
+}
+
 .mood-filter {
   display: flex;
   flex-wrap: wrap;
@@ -772,6 +872,27 @@ onMounted(() => {
   transform: translateX(-50%);
 }
 
+/* 单列线性故事流模式 */
+.timeline--single {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.timeline--single .timeline__axis {
+  left: 20px;
+}
+
+.timeline--single .timeline__item {
+  width: 100%;
+  margin-left: 0;
+  padding: 0 0 36px 52px;
+}
+
+.timeline--single .timeline__dot {
+  left: 2px;
+  right: auto;
+}
+
 .timeline__item {
   position: relative;
   width: 50%;
@@ -842,14 +963,6 @@ onMounted(() => {
   top: 12px;
   right: 12px;
   z-index: 3;
-  padding: 3px 10px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--cream);
-  background: linear-gradient(145deg, var(--faded-red), var(--faded-red-dark));
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(var(--red-rgb), 0.35);
 }
 
 .note-card__tape {
@@ -935,6 +1048,41 @@ onMounted(() => {
   color: var(--text-on-dark);
   background: rgba(26, 26, 26, 0.6);
   border-radius: 10px;
+}
+
+/* 多图底片胶卷缩略条 */
+.note-card__thumbs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(var(--brown-rgb), 0.04);
+  border-top: 1px dashed rgba(var(--brown-rgb), 0.1);
+  overflow-x: auto;
+}
+
+.note-card__thumb-item {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.note-card__thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.2);
+}
+
+.note-card__thumb-item:hover,
+.note-card__thumb-item.active {
+  border-color: var(--faded-red);
+  transform: scale(1.05);
 }
 
 .note-card__content {
@@ -1083,6 +1231,14 @@ onMounted(() => {
   .search-result-hint {
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .timeline-toolbar {
+    margin-bottom: 20px;
+  }
+
+  .layout-toggle {
+    display: none;
   }
 
   .mood-filter {

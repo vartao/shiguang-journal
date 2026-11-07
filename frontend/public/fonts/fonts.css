@@ -6,12 +6,7 @@
   font-weight: 400;
   font-display: swap;
   src:
-    local('Ma Shan Zheng'),
-    local('马善政楷书'),
-    local('STXingkai'),
-    local('KaiTi'),
-    local('楷体'),
-    local('cursive');
+    local('Ma Shan Zheng'), local('马善政楷书'), local('STXingkai'), local('华文行楷'), local('KaiTi'), local('楷体');
 }
 
 @font-face {
@@ -20,14 +15,9 @@
   font-weight: 300;
   font-display: swap;
   src:
-    local('Noto Serif SC Light'),
-    local('NotoSerifSC-Light'),
-    local('Source Han Serif SC Light'),
-    local('SourceHanSerifSC-Light'),
-    local('Songti SC'),
-    local('SimSun'),
-    local('宋体'),
-    local('serif');
+    local('Noto Serif SC Light'), local('NotoSerifSC-Light'), local('Source Han Serif SC Light'),
+    local('SourceHanSerifSC-Light'), local('思源宋体 Light'), local('Songti SC'), local('STSong'), local('华文宋体'),
+    local('SimSun'), local('宋体');
 }
 
 @font-face {
@@ -36,14 +26,9 @@
   font-weight: 400;
   font-display: swap;
   src:
-    local('Noto Serif SC'),
-    local('NotoSerifSC-Regular'),
-    local('Source Han Serif SC'),
-    local('SourceHanSerifSC-Regular'),
-    local('Songti SC'),
-    local('SimSun'),
-    local('宋体'),
-    local('serif');
+    local('Noto Serif SC'), local('NotoSerifSC-Regular'), local('Source Han Serif SC'),
+    local('SourceHanSerifSC-Regular'), local('思源宋体 Regular'), local('思源宋体'), local('Songti SC'),
+    local('STSong'), local('华文宋体'), local('SimSun'), local('宋体');
 }
 
 @font-face {
@@ -52,14 +37,9 @@
   font-weight: 500;
   font-display: swap;
   src:
-    local('Noto Serif SC Medium'),
-    local('NotoSerifSC-Medium'),
-    local('Source Han Serif SC Medium'),
-    local('SourceHanSerifSC-Medium'),
-    local('Songti SC'),
-    local('SimSun'),
-    local('宋体'),
-    local('serif');
+    local('Noto Serif SC Medium'), local('NotoSerifSC-Medium'), local('Source Han Serif SC Medium'),
+    local('SourceHanSerifSC-Medium'), local('思源宋体 Medium'), local('Songti SC'), local('STSong'), local('华文宋体'),
+    local('SimSun'), local('宋体');
 }
 
 @font-face {
@@ -68,14 +48,9 @@
   font-weight: 600;
   font-display: swap;
   src:
-    local('Noto Serif SC SemiBold'),
-    local('NotoSerifSC-SemiBold'),
-    local('Source Han Serif SC SemiBold'),
-    local('SourceHanSerifSC-SemiBold'),
-    local('Songti SC'),
-    local('SimSun'),
-    local('宋体'),
-    local('serif');
+    local('Noto Serif SC SemiBold'), local('NotoSerifSC-SemiBold'), local('Source Han Serif SC SemiBold'),
+    local('SourceHanSerifSC-SemiBold'), local('思源宋体 SemiBold'), local('Songti SC'), local('STSong'),
+    local('华文宋体'), local('SimSun'), local('宋体');
 }
 
 @font-face {
@@ -84,14 +59,9 @@
   font-weight: 700;
   font-display: swap;
   src:
-    local('Noto Serif SC Bold'),
-    local('NotoSerifSC-Bold'),
-    local('Source Han Serif SC Bold'),
-    local('SourceHanSerifSC-Bold'),
-    local('Songti SC'),
-    local('SimSun'),
-    local('宋体'),
-    local('serif');
+    local('Noto Serif SC Bold'), local('NotoSerifSC-Bold'), local('Source Han Serif SC Bold'),
+    local('SourceHanSerifSC-Bold'), local('思源宋体 Bold'), local('Songti SC'), local('STSong'), local('华文宋体'),
+    local('SimSun'), local('宋体');
 }
 
 @font-face {
@@ -100,11 +70,6 @@
   font-weight: 400;
   font-display: swap;
   src:
-    local('ZCOOL XiaoWei'),
-    local('ZCOOLXiaoWei-Regular'),
-    local('站酷小薇体'),
-    local('STKaiti'),
-    local('KaiTi'),
-    local('楷体'),
-    local('serif');
+    local('ZCOOL XiaoWei'), local('ZCOOLXiaoWei-Regular'), local('站酷小薇体'), local('STKaiti'), local('华文楷体'),
+    local('KaiTi'), local('楷体');
 }

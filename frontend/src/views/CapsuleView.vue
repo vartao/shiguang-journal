@@ -38,6 +38,7 @@
                 :style="{ animationDelay: idx * 0.08 + 's' }"
                 @click="capsule.canOpen && handleOpen(capsule)"
               >
+                <span v-if="capsule.canOpen" class="capsule-card__stamp stamp-badge">可拆封</span>
                 <div class="capsule-card__icon">{{ capsule.canOpen ? '💌' : '✉️' }}</div>
                 <h3 class="capsule-card__title">{{ capsule.title }}</h3>
                 <p class="capsule-card__date">开启日期 {{ formatDate(capsule.openDate) }}</p>
@@ -69,6 +70,7 @@
                 :style="{ animationDelay: idx * 0.08 + 's' }"
                 @click="showLetter(capsule)"
               >
+                <span class="capsule-card__stamp stamp-badge stamp-badge--done">已拆封</span>
                 <div class="capsule-card__icon">📖</div>
                 <h3 class="capsule-card__title">{{ capsule.title }}</h3>
                 <p v-if="capsule.message" class="capsule-card__excerpt">{{ excerpt(capsule.message) }}</p>
@@ -439,6 +441,12 @@ onMounted(fetchCapsules)
 
 .capsule-card--opened {
   cursor: pointer;
+}
+
+.capsule-card__stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
 }
 
 .capsule-card__icon {

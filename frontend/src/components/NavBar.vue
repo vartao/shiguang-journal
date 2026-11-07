@@ -101,7 +101,7 @@
         </div>
 
         <!-- 移动端菜单按钮 -->
-        <button class="navbar__hamburger" @click="menuOpen = !menuOpen">
+        <button class="navbar__hamburger" aria-label="展开全部功能" @click="menuOpen = !menuOpen">
           <span :class="{ open: menuOpen }"></span>
         </button>
       </div>
@@ -109,6 +109,46 @@
 
     <!-- 底部装饰线 - 木质纹理 -->
     <div class="navbar__wood-border"></div>
+
+    <!-- 移动端底部快捷导航栏（对标小程序体验） -->
+    <div class="mobile-tabbar no-print" role="navigation" aria-label="快捷导航">
+      <router-link
+        v-for="tab in mobileLeftTabs"
+        :key="tab.path"
+        :to="tab.path"
+        class="mobile-tabbar__item"
+        :class="{ active: isActive(tab.path) }"
+        @click="menuOpen = false"
+      >
+        <span class="mobile-tabbar__icon">{{ tab.icon }}</span>
+        <span class="mobile-tabbar__label">{{ tab.label }}</span>
+        <span v-if="isActive(tab.path)" class="mobile-tabbar__dot"></span>
+      </router-link>
+
+      <router-link
+        v-if="featureStore.isOn('notes')"
+        to="/write"
+        class="mobile-tabbar__write"
+        aria-label="写笔记"
+        @click="menuOpen = false"
+      >
+        <span class="mobile-tabbar__write-btn">&#9998;</span>
+        <span class="mobile-tabbar__label">记录</span>
+      </router-link>
+
+      <router-link
+        v-for="tab in mobileRightTabs"
+        :key="tab.path"
+        :to="tab.path"
+        class="mobile-tabbar__item"
+        :class="{ active: isActive(tab.path) }"
+        @click="menuOpen = false"
+      >
+        <span class="mobile-tabbar__icon">{{ tab.icon }}</span>
+        <span class="mobile-tabbar__label">{{ tab.label }}</span>
+        <span v-if="isActive(tab.path)" class="mobile-tabbar__dot"></span>
+      </router-link>
+    </div>
   </nav>
 </template>
 
@@ -136,6 +176,29 @@ const primaryCount = 5
 /** 已启用功能的导航链接（含顺序） */
 const enabledLinks = computed(() => FEATURE_META.filter((f) => featureStore.isOn(f.key)))
 const moreLinks = computed(() => enabledLinks.value.slice(primaryCount))
+
+/** 移动端底部导航左侧 2 项 */
+const mobileLeftTabs = computed(() => {
+  const candidates = [
+    { key: 'notes', label: '时间线', icon: '🎞️', path: '/' },
+    { key: 'travels', label: '足迹', icon: '🗺️', path: '/travels' },
+    { key: 'albums', label: '相册', icon: '📸', path: '/albums' }
+  ]
+  return candidates.filter((c) => featureStore.isOn(c.key)).slice(0, 2)
+})
+
+/** 移动端底部导航右侧 2 项（留言板 + 小窝） */
+const mobileRightTabs = computed(() => {
+  const dynamicCandidates = [
+    { key: 'board', label: '留言板', icon: '💬', path: '/board' },
+    { key: 'anniversary', label: '纪念日', icon: '💑', path: '/anniversary' }
+  ].filter((c) => featureStore.isOn(c.key))
+  const firstRight = dynamicCandidates[0]
+  const tabs = []
+  if (firstRight) tabs.push(firstRight)
+  tabs.push({ key: '', label: '小窝', icon: '🏠', path: '/space' })
+  return tabs
+})
 
 function isActive(path) {
   if (path === '/') return route.path === '/'
@@ -576,6 +639,11 @@ onUnmounted(() => {
   }
 }
 
+/* 移动端底部导航默认在桌面端隐藏 */
+.mobile-tabbar {
+  display: none;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .navbar__links {
@@ -583,7 +651,9 @@ onUnmounted(() => {
     top: var(--nav-height);
     left: 0;
     right: 0;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     padding: 16px;
     background: var(--gradient-nav);
     border-bottom: 1px solid rgba(var(--brown-rgb), 0.15);
@@ -592,6 +662,8 @@ onUnmounted(() => {
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
+    max-height: calc(80vh - var(--nav-height));
+    overflow-y: auto;
   }
 
   .navbar__links.open {
@@ -601,9 +673,14 @@ onUnmounted(() => {
   }
 
   .navbar__link {
-    padding: 12px 16px;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 6px;
     width: 100%;
     justify-content: center;
+    background: rgba(var(--cream-rgb), 0.55);
+    border: 1px solid rgba(var(--brown-rgb), 0.1);
+    border-radius: var(--radius-md);
   }
 
   /* 移动端抽屉：全部入口平铺，不收「更多」 */
@@ -640,6 +717,88 @@ onUnmounted(() => {
 
   .navbar__write-btn {
     padding: 8px 12px;
+  }
+
+  /* 移动端底部固定 TabBar */
+  .mobile-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: calc(62px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--gradient-nav);
+    border-top: 1px solid rgba(var(--brown-rgb), 0.15);
+    box-shadow: 0 -4px 16px rgba(var(--shadow-rgb), 0.08);
+  }
+
+  .mobile-tabbar__item,
+  .mobile-tabbar__write {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 0;
+    text-decoration: none;
+    color: var(--text-secondary);
+    position: relative;
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-tabbar__icon {
+    font-size: 18px;
+    line-height: 1.2;
+    filter: sepia(0.2);
+    transition: transform var(--transition-fast);
+  }
+
+  .mobile-tabbar__label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-tabbar__item.active {
+    color: var(--brown-deep);
+    font-weight: 600;
+  }
+
+  .mobile-tabbar__item.active .mobile-tabbar__icon {
+    transform: translateY(-2px) scale(1.1);
+  }
+
+  .mobile-tabbar__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--faded-red);
+    margin-top: 1px;
+  }
+
+  .mobile-tabbar__write-btn {
+    width: 42px;
+    height: 42px;
+    margin-top: -18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--cream);
+    background: linear-gradient(145deg, var(--faded-red), var(--faded-red-dark));
+    border: 3px solid var(--cream);
+    box-shadow: 0 4px 12px rgba(var(--red-rgb), 0.35);
+    transition: transform var(--transition-fast);
+  }
+
+  .mobile-tabbar__write:active .mobile-tabbar__write-btn {
+    transform: scale(0.95);
   }
 }
 

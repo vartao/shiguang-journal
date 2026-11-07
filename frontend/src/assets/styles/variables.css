@@ -80,10 +80,14 @@
   --radius-lg: 12px;
 
   /* 字体 */
-  --font-handwrite: 'Ma Shan Zheng', 'STXingkai', 'KaiTi', '楷体', cursive;
-  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', '宋体', serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'WenQuanYi Micro Hei', sans-serif;
+  --font-handwrite: 'Ma Shan Zheng', 'STXingkai', '华文行楷', 'KaiTi', '楷体', cursive;
+  --font-serif:
+    'Noto Serif SC', 'Source Han Serif SC', '思源宋体', 'Songti SC', 'STSong', '华文宋体', 'SimSun', '宋体', serif;
   --font-display:
-    'ZCOOL XiaoWei', '站酷小薇体', 'STKaiti', 'KaiTi', '楷体', 'Noto Serif SC', 'Source Han Serif SC', serif;
+    'ZCOOL XiaoWei', '站酷小薇体', 'STKaiti', '华文楷体', 'KaiTi', '楷体', 'Noto Serif SC', 'Source Han Serif SC', serif;
 
   /* 间距 */
   --nav-height: 76px;

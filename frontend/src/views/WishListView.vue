@@ -451,25 +451,29 @@ onMounted(fetchWishes)
   color: var(--text-muted);
 }
 
-/* Badge */
+/* Badge - 做旧印章效果 */
 .wish-card__badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
   padding: 3px 10px;
   font-size: 11px;
+  font-weight: 600;
   font-family: var(--font-display);
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   color: var(--olive);
   background: rgba(var(--olive-rgb), 0.12);
-  border: 1px solid rgba(var(--olive-rgb), 0.3);
-  border-radius: 12px;
+  border: 1.5px dashed var(--olive);
+  border-radius: var(--radius-sm);
+  transform: rotate(4deg);
+  box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.08);
 }
 
 .wish-card__badge--urgent {
   color: var(--faded-red);
   background: rgba(var(--red-rgb), 0.1);
-  border-color: rgba(var(--red-rgb), 0.3);
+  border-color: var(--faded-red);
+  transform: rotate(-3deg);
 }
 
 /* Icon */

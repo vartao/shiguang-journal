@@ -15,7 +15,7 @@ html {
 }
 
 body {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   color: var(--text-primary);
   background-color: var(--cream);
   /* 牛皮纸纹理背景 */
@@ -34,6 +34,14 @@ body {
   min-height: 100vh;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-serif {
+  font-family: var(--font-serif);
 }
 
 /* 全局背景插画：黄昏海边小镇，低透明度叠加在纸面上，不影响可读性 */
@@ -305,6 +313,52 @@ button:focus-visible,
   background: rgba(var(--kraft-rgb), 0.15);
   border: 1px solid rgba(var(--kraft-rgb), 0.4);
   border-radius: 20px;
+}
+
+/* ============ 复古手账做旧印章（Vintage Stamp Badge） ============ */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--faded-red);
+  background: rgba(var(--red-rgb), 0.08);
+  border: 1.5px dashed var(--faded-red);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.08);
+  transform: rotate(-3deg);
+  user-select: none;
+  transition: transform var(--transition-fast);
+}
+
+.stamp-badge:hover {
+  transform: rotate(0deg) scale(1.05);
+}
+
+.stamp-badge--done {
+  color: var(--olive);
+  background: rgba(var(--olive-rgb), 0.1);
+  border-color: var(--olive);
+  transform: rotate(3deg);
+}
+
+.stamp-badge--blue {
+  color: var(--dusty-blue);
+  background: rgba(var(--blue-rgb), 0.1);
+  border-color: var(--dusty-blue);
+}
+
+.stamp-badge--top {
+  color: var(--faded-red);
+  background: rgba(var(--red-rgb), 0.12);
+  border: 2px solid var(--faded-red);
+  border-radius: 999px;
+  transform: rotate(-2deg);
 }
 
 /* 加载动画 - 胶片卷轴 */
