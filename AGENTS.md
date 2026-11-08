@@ -140,5 +140,6 @@ mvn test              # 需要 JDK 17+
 
 - 架构细节与核心流程：`docs/ARCHITECTURE.md`
 - 运维手册：`docs/OPERATIONS.md`
+- 交付文档（生命周期/部署/验收总纲）：`docs/DELIVERY.md`
 - API 一览与注册/绑定规则：`README.md`
 - 验收脚本用法与覆盖矩阵：`scripts/start-and-accept.md`
