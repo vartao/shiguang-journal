@@ -20,7 +20,7 @@ deploy/ssl/*
 .vscode/
 *.iml
 *.log
-logs/
+/logs/
 .DS_Store
 Thumbs.db
 

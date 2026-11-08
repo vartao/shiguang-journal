@@ -1,0 +1,127 @@
+<view class="page-wrap page-wrap--no-tab">
+  <view class="mast rise">
+    <view class="mast__title">小事记</view>
+    <view class="mast__sub">一起做过的小事，都值得五星好评</view>
+  </view>
+
+  <view class="actions rise d1">
+    <button class="btn btn-solid" bindtap="openCreate">＋ 记一件小事</button>
+  </view>
+
+  <!-- 分类筛选 -->
+  <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="chips rise d2">
+    <view
+      wx:for="{{chips}}"
+      wx:key="key"
+      class="chip {{activeKey === item.key ? 'chip--on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="tapChip"
+    >{{item.emoji}} {{item.label}}</view>
+  </scroll-view>
+
+  <!-- 年份筛选 -->
+  <view wx:if="{{yearOptions.length > 1}}" class="yearbar rise d2">
+    <picker mode="selector" range="{{yearOptions}}" value="{{yearIndex}}" bindchange="onYearChange">
+      <view class="yearpick pressable">📅 {{yearOptions[yearIndex]}} ▾</view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}">
+    <view wx:for="{{3}}" wx:key="index" class="sk log-sk"></view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{visible}}"
+      wx:key="id"
+      class="log card rise {{index < 5 ? 'd' + (index + 1) : ''}}"
+    >
+      <image wx:if="{{item.coverFull}}" class="log__cover" src="{{item.coverFull}}" mode="aspectFill" lazy-load="{{true}}" />
+      <view class="log__body">
+        <view class="log__row">
+          <view class="log__tag">{{item.categoryEmoji}} {{item.categoryLabel}}</view>
+          <view class="log__date">{{item.dateCN}}</view>
+        </view>
+        <view class="log__title">{{item.title}}</view>
+        <view wx:if="{{item.rating > 0}}" class="log__stars" aria-label="{{item.rating}} 星">
+          <text
+            wx:for="{{[1, 2, 3, 4, 5]}}"
+            wx:for-item="s"
+            wx:key="*this"
+            class="star {{s <= item.rating ? 'star--on' : ''}}"
+          >★</text>
+        </view>
+        <view wx:if="{{item.note}}" class="log__note">{{item.note}}</view>
+      </view>
+      <view class="log__ops">
+        <view class="log__op pressable" data-id="{{item.id}}" catchtap="openEdit">编辑</view>
+        <view class="log__op log__op--del pressable" data-id="{{item.id}}" catchtap="remove">删除</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!visible.length}}" class="empty">
+      <view class="empty__icon">📖</view>
+      <view wx:if="{{activeKey || activeYear}}" class="empty__title">这个筛选下还没有记录</view>
+      <view wx:else class="empty__title">还没有小事记</view>
+      <view class="empty__desc">一起看过的电影、吃过的饭，都记下来吧</view>
+    </view>
+  </block>
+
+  <!-- 记录弹层 -->
+  <view wx:if="{{showForm}}" class="mask" bindtap="closeForm"></view>
+  <view wx:if="{{showForm}}" class="sheet">
+    <view class="sheet__title">{{editing ? '编辑小事' : '记一件小事'}}</view>
+    <view class="field">
+      <text class="field__label">标题（必填）</text>
+      <input class="input" placeholder="这件小事叫什么" placeholder-class="placeholder" value="{{form.title}}" maxlength="200" bindinput="onTitleInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">发生日期</text>
+      <picker mode="date" value="{{form.logDate}}" bindchange="onDateChange">
+        <view class="input picker-box">{{form.logDate || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field__label">分类</text>
+      <view class="catgrid">
+        <block wx:for="{{chips}}" wx:key="key">
+          <view
+            wx:if="{{item.key}}"
+            class="chip {{form.category === item.key ? 'chip--on' : ''}}"
+            data-key="{{item.key}}"
+            bindtap="tapCategory"
+          >{{item.emoji}} {{item.label}}</view>
+        </block>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field__label">评分（再点一次取消）</text>
+      <view class="rating">
+        <text
+          wx:for="{{[1, 2, 3, 4, 5]}}"
+          wx:for-item="s"
+          wx:key="*this"
+          class="star star--pick {{s <= form.rating ? 'star--on' : ''}}"
+          data-value="{{s}}"
+          bindtap="tapRating"
+        >★</text>
+        <text class="rating__hint">{{form.rating > 0 ? form.rating + ' 星' : '不评分'}}</text>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field__label">一句话手记</text>
+      <textarea class="textarea" placeholder="当时的心情、细节…" placeholder-class="placeholder" value="{{form.note}}" maxlength="2000" bindinput="onNoteInput" />
+    </view>
+    <view class="field">
+      <text class="field__label">封面（1 张）</text>
+      <view class="photo-row">
+        <view wx:if="{{coverFull}}" class="photo-item">
+          <image class="photo-thumb" src="{{coverFull}}" mode="aspectFill" />
+          <view class="photo-remove" catchtap="removeCover">×</view>
+        </view>
+        <view wx:else class="photo-add pressable" bindtap="chooseCover">＋</view>
+      </view>
+    </view>
+    <button class="btn btn-solid submit-btn" disabled="{{saving}}" bindtap="submit">{{editing ? '保存' : '记录'}}</button>
+  </view>
+</view>
